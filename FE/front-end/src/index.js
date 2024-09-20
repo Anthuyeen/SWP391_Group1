@@ -3,13 +3,14 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import Home from "./pages/Home/index"
+import { BrowserRouter as Router } from 'react-router-dom'; // Sử dụng BrowserRouter
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    {/* <App /> */}
-    <Home></Home>
+    <Router>
+      <App />
+    </Router>
   </React.StrictMode>
 );
 

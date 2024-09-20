@@ -10,7 +10,7 @@ import cousrse2 from './../../assets/Images/courses/2.png'
 import cousrse3 from './../../assets/Images/courses/6.png'
 import cousrse4 from './../../assets/Images/courses/62f13d2424a47.png'
 import cousrse5 from './../../assets/Images/courses/66aa28194b52b.png'
-
+import Footer from './../../layouts/footer/index'
 const Home = () => {
     const items = [
         { backgroundImage: Carou1 },
@@ -58,6 +58,7 @@ const Home = () => {
             <Navbar />
             <CarouselSlider items={items} />
             <CourseList courses={courses} />
+            <Footer/>
         </div>
     );
 }
