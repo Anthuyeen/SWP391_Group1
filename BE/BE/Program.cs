@@ -45,6 +45,9 @@ builder.Services.AddAuthentication(options =>
 //cau hinh cac service
 builder.Services.AddScoped<IUserService, UserService>();
 
+//automapper
+builder.Services.AddAutoMapper(typeof(Program));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
