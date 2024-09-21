@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    AppBar, Toolbar, Typography, Button, TextField, InputAdornment,
-    ThemeProvider, createTheme, Box, Dialog, DialogTitle, DialogContent,
-    IconButton, Grid
-} from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, TextField, InputAdornment, ThemeProvider, createTheme, Box, Dialog, DialogTitle, DialogContent, IconButton, Grid } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -47,9 +43,7 @@ const Navbar = () => {
     const [password, setPassword] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
-
     const navigate = useNavigate();
-
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
@@ -89,21 +83,22 @@ const Navbar = () => {
                 const expirationTime = decodedToken.exp * 1000;
                 localStorage.setItem('expirationTime', expirationTime.toString());
 
+                // Điều hướng dựa vào role
                 if (role === 'Admin') {
                     navigate('/admin/home');
-                } else if (role === 'Student' || role === 'Teacher') {
+                } else if (role === 'Student') {
                     navigate('/user');
+                } else if (role === 'Teacher') {
+                    navigate('/expert/home');
                 }
 
                 handleClose();
 
+                // Tự động đăng xuất khi token hết hạn
                 setTimeout(() => {
                     handleLogout();
                 }, expirationTime - Date.now());
 
-                //     setTimeout(() => {
-                //     handleLogout();
-                // }, 1000000000000000);//set thời gian hết token
             } catch (error) {
                 console.error('Đăng nhập thất bại:', error);
             }
@@ -113,7 +108,7 @@ const Navbar = () => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('expirationTime');
-        navigate('/'); 
+        navigate('/');
     };
 
     useEffect(() => {
@@ -126,7 +121,7 @@ const Navbar = () => {
 
         checkTokenExpiration();
 
-        const intervalId = setInterval(checkTokenExpiration, 60000);
+        const intervalId = setInterval(checkTokenExpiration, 60000); // Kiểm tra mỗi 60 giây
         return () => clearInterval(intervalId);
     }, []);
 
