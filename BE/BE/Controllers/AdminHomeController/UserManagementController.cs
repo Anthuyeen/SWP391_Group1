@@ -58,8 +58,24 @@ namespace BE.Controllers.AdminHomeController
             {
                 return BadRequest(ex.Message);
             }
-
-
         }
+
+        [HttpPut]
+        public async Task<IActionResult> SetActiveExpert(int eid)
+        {
+            try
+            {
+                var e = await _context.Users.FirstOrDefaultAsync(x => x.Id == eid);
+                e.Status = "active";
+                _context.Users.Update(e);
+                await _context.SaveChangesAsync();
+                return Ok(e);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }
