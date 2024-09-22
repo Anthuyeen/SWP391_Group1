@@ -3,11 +3,11 @@ using BE.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace BE.Controllers.ExpertQuizController
+namespace BE.Controllers.Expert
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class QuizController : Controller
+    public class QuizController : ControllerBase
     {
         private readonly OnlineLearningSystemContext _context;
         private readonly List<string> validLevels = new() { "Easy", "Medium", "Hard" };

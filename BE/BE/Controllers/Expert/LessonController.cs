@@ -3,14 +3,14 @@ using BE.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace BE.Controllers.ExpertLessonController
+namespace BE.Controllers.Expert
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class LessonController : Controller
+    public class LessonController : ControllerBase
     {
         private readonly OnlineLearningSystemContext _context;
-        List<string> validStatuses = new() { "active", "inactive" };
+        List<string> validStatuses = new() { "Active", "Inactive", "Draft" };
 
         public LessonController(OnlineLearningSystemContext context)
         {
@@ -57,7 +57,7 @@ namespace BE.Controllers.ExpertLessonController
 
             if (!validStatuses.Contains(editLessonDto.Status))
             {
-                return BadRequest("Invalid status. Allowed values are 'active' and 'inactive'.");
+                return BadRequest("Invalid status. Allowed values are 'Active' , 'Inactive' and 'Draft'.");
             }
 
             lesson.SubjectId = editLessonDto.SubjectId;
