@@ -19,7 +19,7 @@ public partial class Quiz
 
     public string? Type { get; set; }
 
-    public virtual Subject? Subject { get; set; }
-
     public virtual ICollection<Question> Questions { get; } = new List<Question>();
+
+    public virtual Subject? Subject { get; set; }
 }
