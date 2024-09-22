@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchUsers, addUser } from '../../../service/employee-fetch'; // Đường dẫn tới hàm fetch
+import { fetchUsers, addUser, setActiveExpert } from '../../../service/employee-fetch'; // Import hàm toggleUserStatus
 import {
     Table,
     TableBody,
@@ -14,6 +14,10 @@ import {
     DialogContent,
     DialogTitle,
     TextField,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
 } from '@mui/material';
 
 const Employee = () => {
@@ -34,10 +38,10 @@ const Employee = () => {
 
     useEffect(() => {
         const loadUsers = async () => {
-            const data = await fetchUsers();
-            if (data) {
+            try {
+                const data = await fetchUsers();
                 setUsers(data);
-            } else {
+            } catch (e) {
                 setError('Unable to fetch users');
             }
             setLoading(false);
@@ -73,26 +77,29 @@ const Employee = () => {
         const result = await addUser(newUser);
         if (result) {
             setUsers((prev) => [...prev, result]); // Thêm người dùng mới vào danh sách
+            handleClose();
         }
-        handleClose();
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+    // Hàm đổi trạng thái người dùng
+    const handleToggleStatus = async (user) => {
+        const updatedStatus = user.status === 'Active' ? 'Inactive' : 'Active';
+        const result = await setActiveExpert(user.id, updatedStatus); // Gọi API cập nhật trạng thái
+        if (result) {
+            setUsers((prev) =>
+                prev.map((u) => (u.id === user.id ? { ...u, status: updatedStatus } : u))
+            );
+        }
+    };
 
-    if (error) {
-        return <div>{error}</div>;
-    }
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>{error}</div>;
 
     return (
         <div>
             <Button
                 variant="contained"
-                style={{
-                    backgroundColor: '#ff5722',
-                    marginBottom: '1rem',
-                }}
+                style={{ backgroundColor: '#ff5722', marginBottom: '1rem' }}
                 onClick={handleClickOpen}
             >
                 Thêm User
@@ -112,15 +119,23 @@ const Employee = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {users.map(user => (
+                        {users.map((user) => (
                             <TableRow key={user.id}>
                                 <TableCell>{user.id}</TableCell>
                                 <TableCell>{user.fullName}</TableCell>
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>{user.mobile}</TableCell>
-                                <TableCell>{user.gender}</TableCell>
+                                <TableCell>{user.gender === 'Male' ? 'Nam' : 'Nữ'}</TableCell>
                                 <TableCell>{user.role}</TableCell>
-                                <TableCell>{user.status}</TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="contained"
+                                        color={user.status === 'Active' ? 'success' : 'secondary'}
+                                        onClick={() => handleToggleStatus(user)}
+                                    >
+                                        {user.status === 'Active' ? 'Hoạt động' : 'Không hoạt động'}
+                                    </Button>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -139,6 +154,7 @@ const Employee = () => {
                         fullWidth
                         value={newUser.fullName}
                         onChange={handleInputChange}
+                        style={{ marginBottom: '1rem' }}
                     />
                     <TextField
                         margin="dense"
@@ -148,6 +164,7 @@ const Employee = () => {
                         fullWidth
                         value={newUser.email}
                         onChange={handleInputChange}
+                        style={{ marginBottom: '1rem' }}
                     />
                     <TextField
                         margin="dense"
@@ -157,6 +174,7 @@ const Employee = () => {
                         fullWidth
                         value={newUser.password}
                         onChange={handleInputChange}
+                        style={{ marginBottom: '1rem' }}
                     />
                     <TextField
                         margin="dense"
@@ -166,16 +184,21 @@ const Employee = () => {
                         fullWidth
                         value={newUser.mobile}
                         onChange={handleInputChange}
+                        style={{ marginBottom: '1rem' }}
                     />
-                    <TextField
-                        margin="dense"
-                        name="gender"
-                        label="Giới tính"
-                        type="text"
-                        fullWidth
-                        value={newUser.gender}
-                        onChange={handleInputChange}
-                    />
+                    <FormControl fullWidth margin="dense" style={{ marginBottom: '1rem' }}>
+                        <InputLabel id="gender-label">Giới tính</InputLabel>
+                        <Select
+                            labelId="gender-label"
+                            name="gender"
+                            value={newUser.gender}
+                            onChange={handleInputChange}
+                            displayEmpty
+                        >
+                            <MenuItem value="Male">Nam</MenuItem>
+                            <MenuItem value="Female">Nữ</MenuItem>
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">

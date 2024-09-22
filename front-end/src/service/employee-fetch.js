@@ -42,3 +42,27 @@ export const addUser = async (userData) => {
         return null; // Trả về null hoặc bạn có thể quyết định trả về một giá trị khác khi xảy ra lỗi
     }
 };
+//set activate
+export const setActiveExpert = async (eid) => {
+    const url = `https://localhost:7043/api/UserManagement/SetActiveExpert?eid=${eid}`;
+    
+    try {
+      const response = await fetch(url, {
+        method: 'PUT', 
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to set active expert:', error);
+      throw error;
+    }
+  };
+  
