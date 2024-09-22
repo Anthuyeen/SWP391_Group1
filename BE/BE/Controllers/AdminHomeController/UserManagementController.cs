@@ -66,7 +66,10 @@ namespace BE.Controllers.AdminHomeController
             try
             {
                 var e = await _context.Users.FirstOrDefaultAsync(x => x.Id == eid);
-                e.Status = "active";
+                if (e.Status == "Active")
+                    e.Status = "Inactive";
+                else
+                    e.Status = "Active";
                 _context.Users.Update(e);
                 await _context.SaveChangesAsync();
                 return Ok(e);
