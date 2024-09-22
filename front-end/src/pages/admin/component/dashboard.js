@@ -1,26 +1,23 @@
 import React, { useState } from 'react';
 import { Drawer, List, ListItem, ListItemText, Box, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import Employee from './employee_manage'; // Import màn hình Employee
 
 const sidebarOptions = [
-    { id: 1, label: 'Dashboard', content: 'This is the dashboard' },
-    { id: 2, label: 'Users Management', content: 'User management section' },
-    { id: 3, label: 'Settings', content: 'Settings panel' },
+    { id: 4, label: 'Expert Manager', content: <Employee /> }, // Thêm mục Expert Manager
 ];
 
 const AdminPage = () => {
     const [selectedContent, setSelectedContent] = useState('Select an option from the sidebar');
-    const navigate = useNavigate(); // Sử dụng hook điều hướng
+    const navigate = useNavigate();
 
     const handleListItemClick = (content) => {
         setSelectedContent(content);
     };
 
     const handleLogout = () => {
-        // Xóa token khỏi localStorage hoặc dữ liệu đăng nhập khác
         localStorage.removeItem('token');
-        localStorage.removeItem('expirationTime')
-        // Điều hướng về trang chủ
+        localStorage.removeItem('expirationTime');
         navigate('/');
     };
 
@@ -54,7 +51,7 @@ const AdminPage = () => {
                         padding: '10px 20px',
                         margin: '20px',
                         '&:hover': {
-                            backgroundColor: '#e69500', // Màu cam đậm hơn khi hover
+                            backgroundColor: '#e69500',
                         },
                     }}
                 >
@@ -64,11 +61,13 @@ const AdminPage = () => {
 
             {/* Main Content Area */}
             <Box sx={{ flexGrow: 1, p: 3 }}>
-                <h2>Content</h2>
-                <p>{selectedContent}</p>
+                {typeof selectedContent === 'string' ? <p>{selectedContent}</p> : selectedContent}
             </Box>
         </Box>
     );
 };
 
 export default AdminPage;
+
+
+

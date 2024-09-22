@@ -8,7 +8,7 @@ function AdminDash() {
         <div style={{ display: 'flex' }}>
             <Dashboard />
             <div style={{ width: '100%', padding: '20px' }}>
-                <Dashboard />
+                <Outlet />
             </div>
         </div>
     );
