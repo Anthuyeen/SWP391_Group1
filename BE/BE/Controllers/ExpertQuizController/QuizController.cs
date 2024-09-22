@@ -136,47 +136,38 @@ namespace BE.Controllers.ExpertQuizController
         [HttpDelete("DeleteQuiz/{id}")]
         public async Task<IActionResult> DeleteQuiz(int id)
         {
-            var quiz = await _context.Quizzes
-                .Include(q => q.Questions)
-                .FirstOrDefaultAsync(q => q.Id == id);
-
-            if (quiz == null)
-            {
-                return NotFound("Quiz not found.");
-            }
-
-            // Start a transaction
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                foreach (var question in quiz.Questions)
-                {
-                    // Remove associated answer options
-                    var answerOptions = await _context.AnswerOptions
-                        .Where(ao => ao.QuestionId == question.Id)
-                        .ToListAsync();
-                    _context.AnswerOptions.RemoveRange(answerOptions);
+                var quiz = await _context.Quizzes
+                    .Include(q => q.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
+                    .FirstOrDefaultAsync(q => q.Id == id);
 
-                    // Remove the question
-                    _context.Questions.Remove(question);
+                if (quiz == null)
+                {
+                    return NotFound("Quiz not found.");
                 }
 
-                // Remove the quiz
+                foreach (var question in quiz.Questions)
+                {
+                    _context.AnswerOptions.RemoveRange(question.AnswerOptions);
+                }
+
+                _context.Questions.RemoveRange(quiz.Questions);
+
                 _context.Quizzes.Remove(quiz);
 
                 await _context.SaveChangesAsync();
-
-                // Commit the transaction
                 await transaction.CommitAsync();
 
                 return NoContent();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // If there's an error, roll back the transaction
                 await transaction.RollbackAsync();
-                throw;
+                return StatusCode(500, $"An error occurred while deleting the quiz: {ex.Message}");
             }
         }
 
