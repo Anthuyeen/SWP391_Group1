@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
-import {
-    AppBar, Toolbar, Typography, Button, TextField, InputAdornment,
-    ThemeProvider, createTheme, Box, Dialog, DialogTitle, DialogContent,
-    IconButton, Grid, DialogActions
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { AppBar, Toolbar, Typography, Button, TextField, InputAdornment, ThemeProvider, createTheme, Box, Dialog, DialogTitle, DialogContent, IconButton, Grid } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import CloseIcon from '@mui/icons-material/Close';
+import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import { fetchLogin } from '../../service/authAPI';
 
-// Cấu hình theme
 const theme = createTheme({
     palette: {
         primary: {
@@ -45,27 +43,19 @@ const Navbar = () => {
     const [password, setPassword] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
-
-    // Hàm mở modal
+    const navigate = useNavigate();
     const handleOpen = () => setOpen(true);
-
-    // Hàm đóng modal
     const handleClose = () => setOpen(false);
-
-    // Hàm toggle hiển thị mật khẩu
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-    // Hàm kiểm tra định dạng email
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     };
 
-    // Hàm submit form
-    const handleLogin = () => {
+    const handleLogin = async () => {
         let isValid = true;
 
-        // Kiểm tra email
         if (!email) {
             setEmailError('Email không được để trống');
             isValid = false;
@@ -76,7 +66,6 @@ const Navbar = () => {
             setEmailError('');
         }
 
-        // Kiểm tra mật khẩu
         if (!password) {
             setPasswordError('Mật khẩu không được để trống');
             isValid = false;
@@ -85,11 +74,56 @@ const Navbar = () => {
         }
 
         if (isValid) {
-            // Gọi API hoặc xử lý đăng nhập
-            console.log('Đăng nhập thành công');
-            handleClose(); // Đóng modal sau khi đăng nhập thành công
+            try {
+                const token = await fetchLogin(email, password);
+                localStorage.setItem('token', token);
+
+                const decodedToken = jwtDecode(token);
+                const role = decodedToken.role;
+                const expirationTime = decodedToken.exp * 1000;
+                localStorage.setItem('expirationTime', expirationTime.toString());
+
+                // Điều hướng dựa vào role
+                if (role === 'Admin') {
+                    navigate('/admin/home');
+                } else if (role === 'Student') {
+                    navigate('/user');
+                } else if (role === 'Teacher') {
+                    navigate('/expert/home');
+                }
+
+                handleClose();
+
+                // Tự động đăng xuất khi token hết hạn
+                setTimeout(() => {
+                    handleLogout();
+                }, expirationTime - Date.now());
+
+            } catch (error) {
+                console.error('Đăng nhập thất bại:', error);
+            }
         }
     };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('expirationTime');
+        navigate('/');
+    };
+
+    useEffect(() => {
+        const checkTokenExpiration = () => {
+            const expirationTime = localStorage.getItem('expirationTime');
+            if (expirationTime && Date.now() > parseInt(expirationTime)) {
+                handleLogout();
+            }
+        };
+
+        checkTokenExpiration();
+
+        const intervalId = setInterval(checkTokenExpiration, 60000); // Kiểm tra mỗi 60 giây
+        return () => clearInterval(intervalId);
+    }, []);
 
     return (
         <ThemeProvider theme={theme}>
@@ -139,7 +173,7 @@ const Navbar = () => {
                     <Grid container spacing={2} direction="column">
                         <Grid item>
                             <TextField
-                                label="Email"
+                                label="Email, hoặc số điện thoại"
                                 type="email"
                                 fullWidth
                                 margin="dense"
