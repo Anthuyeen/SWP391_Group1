@@ -7,6 +7,8 @@ public partial class Question
 {
     public int Id { get; set; }
 
+    public int? QuizId { get; set; }
+
     public string Content { get; set; } = null!;
 
     public string? MediaUrl { get; set; }
@@ -19,5 +21,5 @@ public partial class Question
 
     public virtual ICollection<AnswerOption> AnswerOptions { get; } = new List<AnswerOption>();
 
-    public virtual ICollection<Quiz> Quizzes { get; } = new List<Quiz>();
+    public virtual Quiz? Quiz { get; set; }
 }

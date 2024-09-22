@@ -1,11 +1,16 @@
 USE master;
 GO
 
--- Create a new database
-IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'OnlineLearningSystem')
+-- Drop the existing database if it exists
+IF EXISTS (SELECT name FROM sys.databases WHERE name = 'OnlineLearningSystem')
 BEGIN
-    CREATE DATABASE OnlineLearningSystem;
+    ALTER DATABASE OnlineLearningSystem SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE OnlineLearningSystem;
 END
+GO
+
+-- Create a new database
+CREATE DATABASE OnlineLearningSystem;
 GO
 
 -- Use the new database
@@ -95,25 +100,6 @@ CREATE TABLE DIMENSION (
     FOREIGN KEY (subject_id) REFERENCES SUBJECT(id)
 );
 
--- Create the QUESTION table
-CREATE TABLE QUESTION (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    content NVARCHAR(MAX) NOT NULL,
-    media_url NVARCHAR(255),
-    level NVARCHAR(20) CHECK (level IN ('Easy', 'Medium', 'Hard')),
-    status NVARCHAR(20) CHECK (status IN ('Active', 'Inactive', 'Draft')),
-    explanation NVARCHAR(MAX)
-);
-
--- Create the ANSWER_OPTION table
-CREATE TABLE ANSWER_OPTION (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    question_id INT,
-    content NVARCHAR(MAX) NOT NULL,
-    is_correct BIT NOT NULL DEFAULT 0,
-    FOREIGN KEY (question_id) REFERENCES QUESTION(id)
-);
-
 -- Create the QUIZ table
 CREATE TABLE QUIZ (
     id INT PRIMARY KEY IDENTITY(1,1),
@@ -126,12 +112,24 @@ CREATE TABLE QUIZ (
     FOREIGN KEY (subject_id) REFERENCES SUBJECT(id)
 );
 
--- Create the QUIZ_QUESTION table (junction table for many-to-many relationship)
-CREATE TABLE QUIZ_QUESTION (
+-- Create the QUESTION table (now directly linked to QUIZ)
+CREATE TABLE QUESTION (
+    id INT PRIMARY KEY IDENTITY(1,1),
     quiz_id INT,
+    content NVARCHAR(MAX) NOT NULL,
+    media_url NVARCHAR(255),
+    level NVARCHAR(20) CHECK (level IN ('Easy', 'Medium', 'Hard')),
+    status NVARCHAR(20) CHECK (status IN ('Active', 'Inactive', 'Draft')),
+    explanation NVARCHAR(MAX),
+    FOREIGN KEY (quiz_id) REFERENCES QUIZ(id)
+);
+
+-- Create the ANSWER_OPTION table
+CREATE TABLE ANSWER_OPTION (
+    id INT PRIMARY KEY IDENTITY(1,1),
     question_id INT,
-    PRIMARY KEY (quiz_id, question_id),
-    FOREIGN KEY (quiz_id) REFERENCES QUIZ(id),
+    content NVARCHAR(MAX) NOT NULL,
+    is_correct BIT NOT NULL DEFAULT 0,
     FOREIGN KEY (question_id) REFERENCES QUESTION(id)
 );
 
@@ -148,6 +146,7 @@ CREATE TABLE POST (
     FOREIGN KEY (category_id) REFERENCES CATEGORY(id)
 );
 
+-- Insert sample data into USER table
 INSERT INTO [USER] (full_name, email, password, mobile, gender, role, status)
 VALUES 
 ('John Doe', 'john.doe@email.com', 'hashed_password_1', '1234567890', 'Male', 'Admin', 'Active'),
@@ -202,11 +201,17 @@ VALUES
 (3, 'Concurrency', 'Java concurrency and multithreading', 'Skill'),
 (4, 'Content Strategy', 'Developing effective social media content', 'Topic');
 
--- Insert sample data into QUESTION table
-INSERT INTO QUESTION (content, level, status, explanation)
+-- Insert sample data into QUIZ table
+INSERT INTO QUIZ (subject_id, name, level, duration_minutes, pass_rate, type)
 VALUES 
-('What is a variable in Python?', 'Easy', 'Active', 'A variable is a named location in memory used to store data'),
-('Explain the concept of SEO in digital marketing.', 'Medium', 'Active', 'SEO is the practice of optimizing a website to increase its visibility in search engine results');
+(1, 'Python Basics Quiz', 'Easy', 30, 70.00, 'Practice'),
+(2, 'Digital Marketing Concepts', 'Medium', 45, 75.00, 'Test');
+
+-- Insert sample data into QUESTION table
+INSERT INTO QUESTION (quiz_id, content, level, status, explanation)
+VALUES 
+(1, 'What is a variable in Python?', 'Easy', 'Active', 'A variable is a named location in memory used to store data'),
+(2, 'Explain the concept of SEO in digital marketing.', 'Medium', 'Active', 'SEO is the practice of optimizing a website to increase its visibility in search engine results');
 
 -- Insert sample data into ANSWER_OPTION table
 INSERT INTO ANSWER_OPTION (question_id, content, is_correct)
@@ -216,18 +221,6 @@ VALUES
 (1, 'A type of loop', 0),
 (2, 'A type of social media platform', 0),
 (2, 'Search Engine Optimization', 1);
-
--- Insert sample data into QUIZ table
-INSERT INTO QUIZ (subject_id, name, level, duration_minutes, pass_rate, type)
-VALUES 
-(1, 'Python Basics Quiz', 'Easy', 30, 70.00, 'Practice'),
-(2, 'Digital Marketing Concepts', 'Medium', 45, 75.00, 'Test');
-
--- Insert sample data into QUIZ_QUESTION table
-INSERT INTO QUIZ_QUESTION (quiz_id, question_id)
-VALUES 
-(1, 1),
-(2, 2);
 
 -- Insert sample data into POST table
 INSERT INTO POST (title, brief_info, content, category_id, is_featured, status)
