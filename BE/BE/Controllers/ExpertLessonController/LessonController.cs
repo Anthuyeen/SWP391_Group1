@@ -113,8 +113,26 @@ namespace BE.Controllers.ExpertLessonController
             _context.Lessons.Add(lesson);
             await _context.SaveChangesAsync();
 
-            return null;
+            return NoContent();
         }
+
+        [HttpDelete("DeleteLesson/{id}")]
+        public async Task<IActionResult> DeleteLesson(int id)
+        {
+            var lesson = await _context.Lessons.FindAsync(id);
+
+            if (lesson == null)
+            {
+                return NotFound("Lesson not found.");
+            }
+
+            _context.Lessons.Remove(lesson);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
 
 
         private bool LessonExists(int id)
