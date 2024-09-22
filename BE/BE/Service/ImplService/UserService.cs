@@ -49,6 +49,11 @@ namespace BE.Service.ImplService
 
         }
 
+        public bool CheckEmailExits(string email)
+        {
+            return _onlineLearningSystemContext.Users.Any(u => u.Email == email);
+        }
+
         // This method generates a JWT token for the authenticated user.
         public string GenerateJwtToken(User user)
         {
@@ -74,6 +79,12 @@ namespace BE.Service.ImplService
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<User> GetUserById(int id)
+        {
+            var u = await _onlineLearningSystemContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            return u;
         }
     }
 }

@@ -7,5 +7,7 @@ namespace BE.Service.IService
     {
         Task<string> Authenticate(UserLoginDto loginDto);
         string GenerateJwtToken(User user);
+        Task<User> GetUserById(int id);
+        bool CheckEmailExits(string email);
     }
 }

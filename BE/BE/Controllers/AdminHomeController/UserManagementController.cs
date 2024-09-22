@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BE.DTOs.UserDto;
 using BE.Models;
+using BE.Service.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,18 +14,20 @@ namespace BE.Controllers.AdminHomeController
     {
         private readonly OnlineLearningSystemContext _context;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public UserManagementController(OnlineLearningSystemContext context, IMapper mapper)
+        public UserManagementController(OnlineLearningSystemContext context, IMapper mapper, IUserService userService)
         {
             _context = context;
             _mapper = mapper;
+            _userService = userService;
         }
         [HttpGet]
         public async Task<IActionResult> ViewListUser()
         {
             try
             {
-                var list = await _context.Users.ToListAsync();
+                var list = await _context.Users.Where(x => x.Role.ToLower() == "teacher").ToListAsync();
                 var lists = _mapper.Map<List<UserAdminDto>>(list);
                 return Ok(list);
             }
@@ -35,10 +38,15 @@ namespace BE.Controllers.AdminHomeController
 
         }
         [HttpPost]
-        public async Task<IActionResult> AddExpert(User expert)
+        public async Task<IActionResult> AddExpert(ExpertAddDto expert)
         {
             try
             {
+                if(_userService.CheckEmailExits(expert.Email))
+                {
+                    return BadRequest("This email already exist");
+                }
+
                 var e = new User()
                 {
                     FullName = expert.FullName,
@@ -50,9 +58,10 @@ namespace BE.Controllers.AdminHomeController
                     Status = "Active",
                     Password = expert.Password,
                 };
-                await _context.Users.AddAsync(expert);
+                await _context.Users.AddAsync(e);
                 await _context.SaveChangesAsync();
-                return Ok(e);
+                var ex = _context.Users.FirstOrDefault(e => e.Email == expert.Email);
+                return Ok(ex);
             }
             catch (Exception ex)
             {
