@@ -13,7 +13,6 @@ GO
 CREATE DATABASE OnlineLearningSystem;
 GO
 
--- Use the new database
 USE OnlineLearningSystem;
 GO
 
@@ -112,7 +111,7 @@ CREATE TABLE QUIZ (
     FOREIGN KEY (subject_id) REFERENCES SUBJECT(id)
 );
 
--- Create the QUESTION table (now directly linked to QUIZ)
+-- Create the QUESTION table
 CREATE TABLE QUESTION (
     id INT PRIMARY KEY IDENTITY(1,1),
     quiz_id INT,
