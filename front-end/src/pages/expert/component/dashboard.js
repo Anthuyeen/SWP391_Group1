@@ -4,11 +4,9 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 
 
 const sidebarOptions = [
-    { id: 4, label: 'Expert Manager', path: '/admin/home/employee-profile' }, // Trỏ tới URL
+    { id: 4, label: 'Subject Manager', path: '/Expert/Home/subject-manage' }, // Trỏ tới URL
 ];
-const AdminPage = () => {
-    const [selectedContent, setSelectedContent] = useState('Select an option from the sidebar');
-    const location = useLocation();
+const ExpertPage = () => {
     const navigate = useNavigate();
 
     const handleListItemClick = (path) => {
@@ -62,6 +60,6 @@ const AdminPage = () => {
     );
 };
 
-export default AdminPage;
+export default ExpertPage;
 
 
