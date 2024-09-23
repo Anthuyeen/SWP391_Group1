@@ -35,3 +35,31 @@ export const deleteLesson = async (lessonId) => {
     // Không phân tích cú pháp JSON nếu không có nội dung
     return response.status === 204 ? null : await response.json();
 };
+//add lesson
+export const addLesson = async (lessonData) => {
+    try {
+        const response = await fetch('https://localhost:7043/api/Lesson/AddLesson/AddLesson', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(lessonData), // Chuyển đổi dữ liệu bài học thành chuỗi JSON
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error adding lesson: ${response.statusText}`);
+        }
+
+        // Kiểm tra nếu trạng thái không phải 204, mới phân tích cú pháp JSON
+        if (response.status !== 204) {
+            const data = await response.json();
+            return data; // Trả về dữ liệu từ phản hồi
+        }
+        // Nếu trạng thái là 204, không có dữ liệu để trả về
+        return null; // Hoặc có thể trả về một giá trị mặc định nào đó
+    } catch (error) {
+        console.error('Failed to add lesson:', error);
+        throw error;
+    }
+};
+
