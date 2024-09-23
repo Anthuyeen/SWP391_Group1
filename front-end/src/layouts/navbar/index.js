@@ -77,12 +77,13 @@ const Navbar = () => {
             try {
                 const token = await fetchLogin(email, password);
                 localStorage.setItem('token', token);
-
                 const decodedToken = jwtDecode(token);
+                const userId = decodedToken.Id;
                 const role = decodedToken.role;
                 const expirationTime = decodedToken.exp * 1000;
                 localStorage.setItem('expirationTime', expirationTime.toString());
-
+                localStorage.setItem('role', role); // Lưu role vào localStorage
+                localStorage.setItem('id', userId);
                 // Điều hướng dựa vào role
                 if (role === 'Admin') {
                     navigate('/admin/home');
@@ -108,6 +109,8 @@ const Navbar = () => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('expirationTime');
+        localStorage.removeItem('role');
+        localStorage.removeItem('id');
         navigate('/');
     };
 

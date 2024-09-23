@@ -196,5 +196,66 @@ namespace BE.Controllers.Expert
         {
             return _context.Subjects.Any(e => e.Id == id);
         }
+
+        [HttpGet("GetLessonsBySubjectId/{id}")]
+        public async Task<ActionResult<IEnumerable<LessonDto>>> GetLessonsBySubjectId(int id)
+        {
+            // Kiểm tra xem chủ đề có tồn tại không
+            var subject = await _context.Subjects.FindAsync(id);
+            if (subject == null)
+            {
+                return NotFound("Subject not found.");
+            }
+
+            // Lấy danh sách bài học theo subjectId
+            var lessons = await _context.Lessons
+                .Where(l => l.SubjectId == id)
+                .Select(l => new LessonDto
+                {
+                    Id = l.Id,
+                    Name = l.Name,
+                    Content = l.Content,
+                    Status = l.Status,
+                    SubjectId = l.SubjectId
+                    // Bạn có thể thêm các thuộc tính khác nếu cần
+                })
+                .ToListAsync();
+
+            return Ok(lessons);
+        }
+
+        [HttpGet("ViewSubjectsByOwner/{ownerId}")]
+        public async Task<ActionResult<IEnumerable<SubjectDto>>> ViewSubjectsByOwner(int ownerId)
+        {
+            // Kiểm tra xem Owner có tồn tại hay không
+            var ownerExists = await _context.Users.AnyAsync(u => u.Id == ownerId);
+            if (!ownerExists)
+            {
+                return NotFound("Owner not found.");
+            }
+
+            // Lấy danh sách các subject theo OwnerId
+            var subjects = await _context.Subjects
+                .Where(s => s.OwnerId == ownerId)
+                .Include(s => s.Category)
+                .Include(s => s.Owner)
+                .Select(s => new SubjectDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Thumbnail = s.Thumbnail,
+                    CategoryId = s.CategoryId,
+                    CategoryName = s.Category.Name,
+                    IsFeatured = s.IsFeatured,
+                    OwnerId = s.OwnerId,
+                    OwnerName = s.Owner.FullName,
+                    Status = s.Status,
+                    Description = s.Description
+                })
+                .ToListAsync();
+
+            return Ok(subjects);
+        }
+
     }
 }
