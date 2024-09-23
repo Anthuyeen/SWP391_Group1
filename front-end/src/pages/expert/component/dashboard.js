@@ -5,6 +5,8 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 
 const sidebarOptions = [
     { id: 4, label: 'Subject Manager', path: '/Expert/Home/subject-manage' }, // Trỏ tới URL
+    { label: 'Lesson Manager', path: '/Expert/Home/lesson-manage' },
+    { label: 'Quiz Manager', path: '/Expert/Home/quiz-manage' }
 ];
 const ExpertPage = () => {
     const navigate = useNavigate();

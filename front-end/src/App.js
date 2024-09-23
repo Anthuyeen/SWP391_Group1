@@ -7,6 +7,8 @@ import ProtectedRoute from './service/protected_route'
 import ExpertHome from './pages/expert/index'
 import Employee from '../src/pages/admin/component/employee_manage'
 import SubjectManage from './pages/expert/component/subject-manage'
+import LessonManage from './pages/expert/component/lesson-manage'
+import QuizManage from "./pages/expert/component/quiz-manage"
 function App() {
   return (
     <Routes>
@@ -19,6 +21,9 @@ function App() {
       {/**Expert */}
       <Route path="/Expert/Home" element={<ProtectedRoute requiredRole="Teacher"><ExpertHome /></ProtectedRoute>}>
         <Route path="subject-manage" element={<SubjectManage />} />
+        <Route path="lesson-manage" element={<LessonManage />} />
+        <Route path="quiz-manage" element={<QuizManage />} />
+
       </Route>
     </Routes>
 
