@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../../../assets/css/quiz-manage.css";
 
-const quizManage = () => {
+const QuizManage = () => {
   const [questions, setQuestions] = useState([
     {
       id: 1,
@@ -142,4 +142,4 @@ const quizManage = () => {
   );
 };
 
-export default quizManage;
+export default QuizManage;
