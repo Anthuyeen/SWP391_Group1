@@ -62,4 +62,26 @@ export const addLesson = async (lessonData) => {
         throw error;
     }
 };
-
+//edit lesson
+export const editLesson = async (lessonId, updatedLessonData) => {
+    try {
+      const response = await fetch(`https://localhost:7043/api/Lesson/EditLesson/EditLesson/${lessonId}`, {
+        method: 'PUT', // Use PUT method for updating data
+        headers: {
+          'Content-Type': 'application/json', // Specify that the data being sent is JSON
+        },
+        body: JSON.stringify(updatedLessonData), // Convert the lesson data to JSON
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to update the lesson');
+      }
+  
+      // Assuming the response may not include a JSON payload (as per previous API behavior)
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating lesson:', error);
+      return { success: false, error: error.message };
+    }
+  };
+  
