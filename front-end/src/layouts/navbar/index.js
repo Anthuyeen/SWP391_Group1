@@ -96,10 +96,12 @@ const Navbar = () => {
                 handleClose();
 
                 // Tự động đăng xuất khi token hết hạn
+                // setTimeout(() => {
+                //     handleLogout();
+                // }, expirationTime - Date.now());
                 setTimeout(() => {
                     handleLogout();
-                }, expirationTime - Date.now());
-
+                }, 36000000);
             } catch (error) {
                 console.error('Đăng nhập thất bại:', error);
             }
