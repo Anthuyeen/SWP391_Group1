@@ -1,72 +1,85 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../../../assets/css/quiz-manage.css";
+import { fetchQuizzes, addQuiz, editQuiz, deleteQuiz } from "../../../service/quiz";
 
 const QuizManage = () => {
-  const [questions, setQuestions] = useState([
-    {
-      id: 1,
-      name: "Introduction to Python",
-      description: "Learn the basics of Python programming",
-    },
-    {
-      id: 2,
-      name: "Digital Marketing Fundamentals",
-      description: "Understand core concepts of digital marketing",
-    },
-    {
-      id: 3,
-      name: "Advanced Java Programming",
-      description: "Deep dive into advanced Java concepts",
-    },
-  ]);
-
-  const [newQuestion, setNewQuestion] = useState({
+  const [quizzes, setQuizzes] = useState([]);
+  const [newQuiz, setNewQuiz] = useState({
     name: "",
-    description: "",
+    level: "",
+    durationMinutes: 0,
+    passRate: 0,
+    type: "",
+    subjectId: null
   });
-  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = (question = null) => {
-    if (question) {
-      setSelectedQuestion(question);
-      setNewQuestion({ name: question.name, description: question.description });
+  useEffect(() => {
+    loadQuizzes();
+  }, []);
+
+  const loadQuizzes = async () => {
+    try {
+      const data = await fetchQuizzes(); // Fetch quizzes from the API
+      setQuizzes(data);
+    } catch (error) {
+      console.error("Failed to load quizzes", error);
+    }
+  };
+
+  const openModal = (quiz = null) => {
+    if (quiz) {
+      setSelectedQuiz(quiz);
+      setNewQuiz({
+        name: quiz.name,
+        level: quiz.level,
+        durationMinutes: quiz.durationMinutes,
+        passRate: quiz.passRate,
+        type: quiz.type,
+        subjectId: quiz.subjectId
+      });
     } else {
-      setNewQuestion({ name: "", description: "" });
-      setSelectedQuestion(null);
+      setNewQuiz({ name: "", level: "", durationMinutes: 0, passRate: 0, type: "", subjectId: null });
+      setSelectedQuiz(null);
     }
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedQuestion(null);
-    setNewQuestion({ name: "", description: "" });
+    setSelectedQuiz(null);
+    setNewQuiz({ name: "", level: "", durationMinutes: 0, passRate: 0, type: "", subjectId: null });
   };
 
-  const handleAddOrEdit = () => {
-    if (newQuestion.name.trim() === "") return;
+  const handleAddOrEdit = async () => {
+    if (newQuiz.name.trim() === "") return;
 
-    if (selectedQuestion) {
-      // Edit 
-      setQuestions(
-        questions.map((q) =>
-          q.id === selectedQuestion.id ? { ...q, ...newQuestion } : q
-        )
-      );
-    } else {
-      // Add 
-      setQuestions([
-        ...questions,
-        { ...newQuestion, id: questions.length + 1 },
-      ]);
+    try {
+      if (selectedQuiz) {
+        // Edit quiz
+        await editQuiz(selectedQuiz.id, newQuiz); // Call editQuiz API
+      } else {
+        // Add new quiz using API
+        await addQuiz(newQuiz);
+      }
+      // Reload quizzes data
+      await loadQuizzes();
+    } catch (error) {
+      console.error("Failed to add or edit quiz", error);
     }
 
     closeModal();
   };
 
-  const handleDelete = (id) => {
-    setQuestions(questions.filter((q) => q.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await deleteQuiz(id); // Call deleteQuiz API
+      // Reload quizzes data after deletion
+      await loadQuizzes();
+    } catch (error) {
+      console.error("Failed to delete quiz", error.message); // In ra thông báo lỗi
+    }
   };
 
   return (
@@ -76,21 +89,29 @@ const QuizManage = () => {
         <button className="create-btn" onClick={() => openModal()}>
           + CREATE QUIZ
         </button>
-        <table className="question-table">
+        <table className="quiz-table">
           <thead>
             <tr>
               <th>ID</th>
               <th>Name</th>
-              <th>Description</th>
+              <th>Level</th>
+              <th>Duration (minutes)</th>
+              <th>Pass Rate (%)</th>
+              <th>Type</th>
+              <th>Subject</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {questions.map((q) => (
+            {quizzes.map((q) => (
               <tr key={q.id}>
                 <td>{q.id}</td>
                 <td>{q.name}</td>
-                <td>{q.description}</td>
+                <td>{q.level}</td>
+                <td>{q.durationMinutes}</td>
+                <td>{q.passRate}</td>
+                <td>{q.type}</td>
+                <td>{q.subjectName}</td>
                 <td>
                   <button className="edit-btn" onClick={() => openModal(q)}>
                     Edit
@@ -111,25 +132,67 @@ const QuizManage = () => {
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
-            <h2>{selectedQuestion ? "Edit Quiz" : "Create Quiz"}</h2>
+            <h2>{selectedQuiz ? "Edit Quiz" : "Create Quiz"}</h2>
             <label>Name:</label>
             <input
               type="text"
-              value={newQuestion.name}
+              value={newQuiz.name}
               onChange={(e) =>
-                setNewQuestion({ ...newQuestion, name: e.target.value })
+                setNewQuiz({ ...newQuiz, name: e.target.value })
               }
             />
-            <label>Description:</label>
-            <textarea
-              value={newQuestion.description}
+            <label>Level:</label>
+            <select
+              value={newQuiz.level}
               onChange={(e) =>
-                setNewQuestion({ ...newQuestion, description: e.target.value })
+                setNewQuiz({ ...newQuiz, level: e.target.value })
               }
-            ></textarea>
+              className="select-input"
+            >
+              <option value="">Select Level</option>
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+            <label>Duration (minutes):</label>
+            <input
+              type="number"
+              value={newQuiz.durationMinutes}
+              onChange={(e) =>
+                setNewQuiz({ ...newQuiz, durationMinutes: e.target.value })
+              }
+            />
+            <label>Pass Rate (%):</label>
+            <input
+              type="number"
+              value={newQuiz.passRate}
+              onChange={(e) =>
+                setNewQuiz({ ...newQuiz, passRate: e.target.value })
+              }
+            />
+            <label>Type:</label>
+            <select
+              value={newQuiz.type}
+              onChange={(e) =>
+                setNewQuiz({ ...newQuiz, type: e.target.value })
+              }
+              className="select-input"
+            >
+              <option value="">Select Type</option>
+              <option value="Test">Test</option>
+              <option value="Practice">Practice</option>
+            </select>
+            <label>Subject ID:</label>
+            <input
+              type="number"
+              value={newQuiz.subjectId}
+              onChange={(e) =>
+                setNewQuiz({ ...newQuiz, subjectId: e.target.value })
+              }
+            />
             <div className="modal-buttons">
               <button onClick={handleAddOrEdit}>
-                {selectedQuestion ? "Save Changes" : "Add Quiz"}
+                {selectedQuiz ? "Save Changes" : "Add Quiz"}
               </button>
               <button className="close-btn" onClick={closeModal}>
                 Cancel
@@ -143,3 +206,4 @@ const QuizManage = () => {
 };
 
 export default QuizManage;
+
