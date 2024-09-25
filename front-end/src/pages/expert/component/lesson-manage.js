@@ -1,42 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    Typography,
-    List,
-    ListItem,
-    ListItemText,
-    CircularProgress,
-    Box,
-    Chip,
-    IconButton,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField
-} from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Typography, List, ListItem, ListItemText, CircularProgress, Box, Chip, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions,
+    TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';  // Thêm icon edit
 import AddIcon from '@mui/icons-material/Add';
-import { fetchSubjectsByOwner } from '../../../service/subject'; // Thay đổi API gọi theo owner
-import { fetchLessonsBySubjectId, deleteLesson, addLesson } from '../../../service/lesson';
+import { fetchSubjectsByOwner } from '../../../service/subject';
+import { fetchLessonsBySubjectId, deleteLesson, addLesson, editLesson } from '../../../service/lesson'; // Thêm editLesson
 
 const LessonManager = () => {
     const [subjects, setSubjects] = useState([]);
     const [lessonsBySubject, setLessonsBySubject] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [openDialog, setOpenDialog] = useState(false);
+    const [openAddDialog, setOpenAddDialog] = useState(false);
+    const [openEditDialog, setOpenEditDialog] = useState(false);
     const [newLesson, setNewLesson] = useState({ subjectId: '', name: '', content: '', status: 'Active' });
+    const [editingLesson, setEditingLesson] = useState(null); // State để lưu lesson đang được chỉnh sửa
 
     useEffect(() => {
         const loadSubjects = async () => {
             try {
-                const ownerId = localStorage.getItem('id'); // Lấy ownerId từ localStorage
-                const data = await fetchSubjectsByOwner(ownerId); // Gọi API lấy subject theo ownerId
+                const ownerId = localStorage.getItem('id');
+                const data = await fetchSubjectsByOwner(ownerId);
                 setSubjects(data);
                 setLoading(false);
             } catch (err) {
@@ -62,8 +48,7 @@ const LessonManager = () => {
 
     const handleDeleteLesson = async (lessonId, subjectId) => {
         try {
-            await deleteLesson(lessonId); // Gọi API để xóa lesson
-            // Cập nhật state sau khi xóa
+            await deleteLesson(lessonId);
             setLessonsBySubject(prev => ({
                 ...prev,
                 [subjectId]: prev[subjectId].filter(lesson => lesson.id !== lessonId)
@@ -75,28 +60,56 @@ const LessonManager = () => {
 
     const handleAddLessonOpen = (subjectId) => {
         setNewLesson({ ...newLesson, subjectId });
-        setOpenDialog(true);
+        setOpenAddDialog(true);
     };
 
     const handleAddLessonClose = () => {
-        setOpenDialog(false);
-        setNewLesson({ subjectId: '', name: '', content: '', status: 'Active' }); // Reset form
+        setOpenAddDialog(false);
+        setNewLesson({ subjectId: '', name: '', content: '', status: 'Active' });
     };
 
     const handleAddLessonSubmit = async () => {
         try {
-            await addLesson(newLesson); // Không cần nhận giá trị trả về vì API trả về 204
-            // Cập nhật state để thêm bài học mới vào danh sách
+            await addLesson(newLesson);
             setLessonsBySubject(prev => ({
                 ...prev,
                 [newLesson.subjectId]: [
                     ...(prev[newLesson.subjectId] || []),
-                    { ...newLesson, id: Date.now() } // Thêm ID tạm thời cho bài học mới
+                    { ...newLesson, id: Date.now() }
                 ]
             }));
             handleAddLessonClose();
         } catch (err) {
             console.error('Failed to add lesson:', err);
+        }
+    };
+
+    // Mở dialog để chỉnh sửa bài học
+    const handleEditLessonOpen = (lesson) => {
+        setEditingLesson(lesson);
+        setOpenEditDialog(true);
+    };
+
+    const handleEditLessonClose = () => {
+        setOpenEditDialog(false);
+        setEditingLesson(null); // Reset form
+    };
+
+    const handleEditLessonSubmit = async () => {
+        try {
+            const updatedLesson = {
+                ...editingLesson,
+            };
+            await editLesson(editingLesson.id, updatedLesson);
+            setLessonsBySubject(prev => ({
+                ...prev,
+                [editingLesson.subjectId]: prev[editingLesson.subjectId].map(lesson =>
+                    lesson.id === editingLesson.id ? updatedLesson : lesson
+                )
+            }));
+            handleEditLessonClose();
+        } catch (err) {
+            console.error('Failed to update lesson:', err);
         }
     };
 
@@ -144,11 +157,27 @@ const LessonManager = () => {
                                 ) : lessonsBySubject[subject.id].length > 0 ? (
                                     <List>
                                         {lessonsBySubject[subject.id].map((lesson) => (
-                                            <ListItem key={lesson.id} secondaryAction={
-                                                <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteLesson(lesson.id, subject.id)}>
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            }>
+                                            <ListItem
+                                                key={lesson.id}
+                                                secondaryAction={
+                                                    <>
+                                                        <IconButton
+                                                            edge="end"
+                                                            aria-label="edit"
+                                                            onClick={() => handleEditLessonOpen(lesson)}
+                                                        >
+                                                            <EditIcon />
+                                                        </IconButton>
+                                                        <IconButton
+                                                            edge="end"
+                                                            aria-label="delete"
+                                                            onClick={() => handleDeleteLesson(lesson.id, subject.id)}
+                                                        >
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </>
+                                                }
+                                            >
                                                 <ListItemText
                                                     primary={lesson.name}
                                                     secondary={
@@ -175,7 +204,7 @@ const LessonManager = () => {
             )}
 
             {/* Dialog để thêm bài học */}
-            <Dialog open={openDialog} onClose={handleAddLessonClose}>
+            <Dialog open={openAddDialog} onClose={handleAddLessonClose}>
                 <DialogTitle>Add Lesson</DialogTitle>
                 <DialogContent>
                     <TextField
@@ -201,6 +230,46 @@ const LessonManager = () => {
                 <DialogActions>
                     <Button onClick={handleAddLessonClose} color="primary">Cancel</Button>
                     <Button onClick={handleAddLessonSubmit} color="primary">Add</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Dialog để chỉnh sửa bài học */}
+            <Dialog open={openEditDialog} onClose={handleEditLessonClose}>
+                <DialogTitle>Edit Lesson</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Lesson Name"
+                        type="text"
+                        fullWidth
+                        value={editingLesson?.name || ''}
+                        onChange={(e) => setEditingLesson({ ...editingLesson, name: e.target.value })}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Content"
+                        type="text"
+                        fullWidth
+                        multiline
+                        rows={4}
+                        value={editingLesson?.content || ''}
+                        onChange={(e) => setEditingLesson({ ...editingLesson, content: e.target.value })}
+                    />
+                    <FormControl fullWidth margin="dense">
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                            value={editingLesson?.status || ''}
+                            onChange={(e) => setEditingLesson({ ...editingLesson, status: e.target.value })}
+                        >
+                            <MenuItem value="Active">Active</MenuItem>
+                            <MenuItem value="Inactive">Inactive</MenuItem>
+                        </Select>
+                    </FormControl>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleEditLessonClose} color="primary">Cancel</Button>
+                    <Button onClick={handleEditLessonSubmit} color="primary">Save</Button>
                 </DialogActions>
             </Dialog>
         </Box>
