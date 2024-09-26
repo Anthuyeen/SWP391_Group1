@@ -7,8 +7,6 @@ public partial class User
 {
     public int Id { get; set; }
 
-    public string FullName { get; set; } = null!;
-
     public string Email { get; set; } = null!;
 
     public string Password { get; set; } = null!;
@@ -22,6 +20,12 @@ public partial class User
     public string? Role { get; set; }
 
     public string? Status { get; set; }
+
+    public string? FirstName { get; set; }
+
+    public string? MidName { get; set; }
+
+    public string? LastName { get; set; }
 
     public virtual ICollection<Registration> Registrations { get; } = new List<Registration>();
 

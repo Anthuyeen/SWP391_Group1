@@ -33,7 +33,7 @@ namespace BE.Controllers.Expert
                     CategoryName = s.Category.Name,
                     IsFeatured = s.IsFeatured,
                     OwnerId = s.OwnerId,
-                    OwnerName = s.Owner.FullName,
+                    OwnerName = s.Owner.FirstName + s.Owner.MidName + s.Owner.LastName,
                     Status = s.Status,
                     Description = s.Description
                 })
@@ -248,7 +248,7 @@ namespace BE.Controllers.Expert
                     CategoryName = s.Category.Name,
                     IsFeatured = s.IsFeatured,
                     OwnerId = s.OwnerId,
-                    OwnerName = s.Owner.FullName,
+                    OwnerName = s.Owner.FirstName + s.Owner.MidName + s.Owner.LastName,
                     Status = s.Status,
                     Description = s.Description
                 })
