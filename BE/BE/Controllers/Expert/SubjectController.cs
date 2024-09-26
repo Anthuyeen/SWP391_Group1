@@ -257,5 +257,67 @@ namespace BE.Controllers.Expert
             return Ok(subjects);
         }
 
+        [HttpGet("GetSubjectById/{id}")]
+        public async Task<ActionResult<SubjectDetailsDto>> GetSubjectById(int id)
+        {
+            var subject = await _context.Subjects
+                .Include(s => s.Category)
+                .Include(s => s.Owner)
+                .Include(s => s.Lessons)
+                .Include(s => s.Dimensions)
+                .Include(s => s.Quizzes)
+                .Include(s => s.PricePackages)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (subject == null)
+            {
+                return NotFound("Subject not found.");
+            }
+
+            var subjectDetails = new SubjectDetailsDto
+            {
+                Id = subject.Id,
+                Name = subject.Name,
+                Thumbnail = subject.Thumbnail,
+                CategoryName = subject.Category?.Name,
+                IsFeatured = subject.IsFeatured,
+                OwnerName = $"{subject.Owner?.FirstName} {subject.Owner?.MidName} {subject.Owner?.LastName}".Trim(),
+                Status = subject.Status,
+                Description = subject.Description,
+
+                Lessons = subject.Lessons.Select(l => new LessonSummaryDto
+                {
+                    Id = l.Id,
+                    Name = l.Name,
+                    Status = l.Status
+                }).ToList(),
+
+                Dimensions = subject.Dimensions.Select(d => new DimensionSummaryDto
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    Type = d.Type
+                }).ToList(),
+
+                Quizzes = subject.Quizzes.Select(q => new QuizSummaryDto
+                {
+                    Id = q.Id,
+                    Name = q.Name,
+                    Level = q.Level,
+                    DurationMinutes = q.DurationMinutes
+                }).ToList(),
+
+                PricePackages = subject.PricePackages.Select(p => new PricePackageSummaryDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    ListPrice = p.ListPrice,
+                    SalePrice = p.SalePrice,
+                    DurationMonths = p.DurationMonths
+                }).ToList()
+            };
+
+            return Ok(subjectDetails);
+        }
     }
 }

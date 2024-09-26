@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BE.DTOs.ExpertDto;
 using BE.DTOs.UserDto;
 using BE.Models;
 using BE.Service.IService;
@@ -92,5 +93,75 @@ namespace BE.Controllers.AdminHomeController
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ListAllExperts()
+        {
+            try
+            {
+                var experts = await _context.Users
+                    .Where(u => u.Role == "Teacher")
+                    .Select(u => new UserAdminDto
+                    {
+                        Id = u.Id,
+                        FirstName = u.FirstName,
+                        MidName = u.MidName,
+                        LastName = u.LastName,
+                        Email = u.Email,
+                        Mobile = u.Mobile,
+                        Gender = u.Gender,
+                        Avatar = u.Avatar,
+                        Role = u.Role,
+                        Status = u.Status
+                    })
+                    .ToListAsync();
+
+                return Ok(experts);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while fetching experts: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetExpertById(int id)
+        {
+            try
+            {
+                var expert = await _context.Users
+                    .Where(u => u.Id == id && u.Role == "Teacher")
+                    .Select(u => new ExpertDetailsDto
+                    {
+                        Id = u.Id,
+                        FirstName = u.FirstName,
+                        MidName = u.MidName,
+                        LastName = u.LastName,
+                        Email = u.Email,
+                        Mobile = u.Mobile,
+                        Gender = u.Gender,
+                        Avatar = u.Avatar,
+                        Role = u.Role,
+                        Status = u.Status,
+                        Subjects = u.Subjects.Select(s => new SubjectSummaryDto
+                        {
+                            Id = s.Id,
+                            Name = s.Name,
+                            Status = s.Status
+                        }).ToList()
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (expert == null)
+                {
+                    return NotFound($"Expert with ID {id} not found or is not a teacher.");
+                }
+
+                return Ok(expert);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while fetching the expert: {ex.Message}");
+            }
+        }
     }
 }
