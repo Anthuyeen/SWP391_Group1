@@ -36,7 +36,7 @@ namespace BE.Service.ImplService
                 {
                 new Claim(ClaimTypes.Role, user.Role ?? "User"),
                  new Claim("Id", user.Id.ToString()),
-                 new Claim("Name", user.FullName),
+                 new Claim("Name", user.FirstName + user.MidName + user.LastName),
             }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
@@ -66,7 +66,7 @@ namespace BE.Service.ImplService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
             new Claim("Id", user.Id.ToString()),
-            new Claim("FullName", user.FullName),
+            new Claim("FullName", user.FirstName + user.MidName + user.LastName),       
             new Claim("Email", user.Email),
             new Claim("Role", user.Role ?? "User")
         };

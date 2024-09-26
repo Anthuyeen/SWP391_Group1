@@ -50,7 +50,7 @@ public partial class OnlineLearningSystemContext : DbContext
     {
         modelBuilder.Entity<AnswerOption>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ANSWER_O__3213E83FEAADDD34");
+            entity.HasKey(e => e.Id).HasName("PK__ANSWER_O__3213E83F45F46D1D");
 
             entity.ToTable("ANSWER_OPTION");
 
@@ -66,7 +66,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CATEGORY__3213E83F90BD666E");
+            entity.HasKey(e => e.Id).HasName("PK__CATEGORY__3213E83F99F89B89");
 
             entity.ToTable("CATEGORY");
 
@@ -81,7 +81,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<Dimension>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DIMENSIO__3213E83F972E26DA");
+            entity.HasKey(e => e.Id).HasName("PK__DIMENSIO__3213E83F4CDE8FD4");
 
             entity.ToTable("DIMENSION");
 
@@ -102,7 +102,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<Lesson>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__LESSON__3213E83F12DCD19D");
+            entity.HasKey(e => e.Id).HasName("PK__LESSON__3213E83FA0373881");
 
             entity.ToTable("LESSON");
 
@@ -123,7 +123,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<Post>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__POST__3213E83F8CCB27D0");
+            entity.HasKey(e => e.Id).HasName("PK__POST__3213E83FC09A393A");
 
             entity.ToTable("POST");
 
@@ -149,7 +149,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<PricePackage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PRICE_PA__3213E83F50B78CC1");
+            entity.HasKey(e => e.Id).HasName("PK__PRICE_PA__3213E83F1323C494");
 
             entity.ToTable("PRICE_PACKAGE");
 
@@ -177,7 +177,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<Question>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__QUESTION__3213E83F24E8A984");
+            entity.HasKey(e => e.Id).HasName("PK__QUESTION__3213E83F31F2D2AA");
 
             entity.ToTable("QUESTION");
 
@@ -202,7 +202,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<Quiz>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__QUIZ__3213E83F79B4F5F7");
+            entity.HasKey(e => e.Id).HasName("PK__QUIZ__3213E83F260EBD92");
 
             entity.ToTable("QUIZ");
 
@@ -229,7 +229,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<Registration>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__REGISTRA__3213E83F8EE1C996");
+            entity.HasKey(e => e.Id).HasName("PK__REGISTRA__3213E83F778598FB");
 
             entity.ToTable("REGISTRATION");
 
@@ -269,7 +269,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<Subject>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__SUBJECT__3213E83F7BD3438E");
+            entity.HasKey(e => e.Id).HasName("PK__SUBJECT__3213E83FB8270A0F");
 
             entity.ToTable("SUBJECT");
 
@@ -299,11 +299,11 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__USER__3213E83F7550CC44");
+            entity.HasKey(e => e.Id).HasName("PK__USER__3213E83F703C5BC4");
 
             entity.ToTable("USER");
 
-            entity.HasIndex(e => e.Email, "UQ__USER__AB6E61647AC6151C").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__USER__AB6E6164DC85DF7D").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Avatar)
@@ -312,12 +312,18 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .HasColumnName("email");
-            entity.Property(e => e.FullName)
-                .HasMaxLength(100)
-                .HasColumnName("full_name");
+            entity.Property(e => e.FirstName)
+                .HasMaxLength(50)
+                .HasColumnName("first_name");
             entity.Property(e => e.Gender)
                 .HasMaxLength(10)
                 .HasColumnName("gender");
+            entity.Property(e => e.LastName)
+                .HasMaxLength(50)
+                .HasColumnName("last_name");
+            entity.Property(e => e.MidName)
+                .HasMaxLength(50)
+                .HasColumnName("mid_name");
             entity.Property(e => e.Mobile)
                 .HasMaxLength(20)
                 .HasColumnName("mobile");

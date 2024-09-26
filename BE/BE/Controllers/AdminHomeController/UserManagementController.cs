@@ -37,6 +37,7 @@ namespace BE.Controllers.AdminHomeController
             }
 
         }
+
         [HttpPost]
         public async Task<IActionResult> AddExpert(ExpertAddDto expert)
         {
@@ -49,7 +50,9 @@ namespace BE.Controllers.AdminHomeController
 
                 var e = new User()
                 {
-                    FullName = expert.FullName,
+                    FirstName = expert.FirstName,
+                    MidName = expert.MidName,
+                    LastName = expert.LastName,
                     Avatar = expert.Avatar,
                     Email = expert.Email,
                     Gender = expert.Gender,
