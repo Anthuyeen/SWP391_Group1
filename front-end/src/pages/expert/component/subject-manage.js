@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchAllSubjects } from '../../../service/subject';
+import { fetchSubjectsByOwner } from '../../../service/subject';
 import { fetchCategories } from '../../../service/subject';
 import { createSubject } from '../../../service/subject';
 import { editSubject } from '../../../service/subject';
@@ -24,11 +25,12 @@ const SubjectManage = () => {
     description: ''
   });
   const [categories, setCategories] = useState([]);
+  const ownerId = localStorage.getItem('id'); // Lấy ID của người dùng từ localStorage
 
   useEffect(() => {
     const loadSubjects = async () => {
       try {
-        const data = await fetchAllSubjects();
+        const data = await fetchSubjectsByOwner(ownerId);
         setSubjects(data);
         const categoryData = await fetchCategories();
         setCategories(categoryData);
@@ -37,7 +39,7 @@ const SubjectManage = () => {
       }
     };
     loadSubjects();
-  }, []);
+  }, [ownerId]);
 
   const handleOpenCreate = () => {
     // Đặt giá trị mặc định cho newSubject
@@ -139,7 +141,7 @@ const SubjectManage = () => {
             <TableCell>Thumbnail</TableCell>
             <TableCell>Category</TableCell>
             <TableCell>Featured</TableCell>
-            <TableCell>Owner ID</TableCell>
+            {/* <TableCell>Owner ID</TableCell> */}
             <TableCell>Description</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
@@ -152,7 +154,7 @@ const SubjectManage = () => {
               <TableCell>{subject.thumbnail}</TableCell>
               <TableCell>{categories.find(c => c.id === subject.categoryId)?.name}</TableCell>
               <TableCell>{subject.isFeatured ? 'Yes' : 'No'}</TableCell>
-              <TableCell>{subject.ownerId}</TableCell>
+              {/* <TableCell>{subject.ownerId}</TableCell> */}
               <TableCell>{subject.description}</TableCell>
               <TableCell>
                 <IconButton onClick={() => handleOpenEdit(subject)}><EditIcon /></IconButton>
