@@ -66,7 +66,7 @@ namespace BE.Service.ImplService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
             new Claim("Id", user.Id.ToString()),
-            new Claim("FullName", user.FirstName + user.MidName + user.LastName),       
+            new Claim("FullName", user.FirstName +" "+ user.MidName +" "+ user.LastName),       
             new Claim("Email", user.Email),
             new Claim("Role", user.Role ?? "User")
         };
