@@ -132,3 +132,28 @@ export const fetchSubjectsByOwner = async (ownerId) => {
     throw error;
   }
 };
+//get subject by id
+export const fetchSubjectById = async (subjectId) => {
+  try {
+      const response = await fetch(`https://localhost:7043/api/Subject/GetSubjectById/GetSubjectById/${subjectId}`, {
+          method: 'GET', // phương thức HTTP, trong trường hợp này là GET
+          headers: {
+              'Content-Type': 'application/json', // chỉ định kiểu dữ liệu gửi đi là JSON
+              // thêm Authorization nếu cần, ví dụ nếu cần token để truy cập
+              // 'Authorization': `Bearer ${yourToken}`,
+          }
+      });
+
+      // Kiểm tra xem yêu cầu có thành công không
+      if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Parse JSON từ response
+      const data = await response.json();
+      return data;
+  } catch (error) {
+      console.error('Error fetching subject by id:', error);
+      throw error; // nếu muốn bắt lỗi ở nơi khác có thể ném lỗi này ra
+  }
+};

@@ -122,7 +122,7 @@ const Employee = () => {
                         {users.map((user) => (
                             <TableRow key={user.id}>
                                 <TableCell>{user.id}</TableCell>
-                                <TableCell>{user.fullName}</TableCell>
+                                <TableCell>{`${user.firstName} ${user.midName} ${user.lastName}`}</TableCell>
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>{user.mobile}</TableCell>
                                 <TableCell>{user.gender === 'Male' ? 'Nam' : 'Nữ'}</TableCell>

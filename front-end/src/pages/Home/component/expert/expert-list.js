@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { fetchAllSubjects } from '../../../../service/subject'; // Đảm bảo đường dẫn đúng
 import { Box, Grid, Typography, Card, CardContent, CardMedia, Container } from '@mui/material';
+import { fetchAllExperts } from '../../../../service/expert'; // Đảm bảo đường dẫn đúng
 import { useNavigate } from 'react-router-dom'; // Import useNavigate để điều hướng
 
-const CourseCard = ({ course }) => {
+// Component hiển thị thông tin chi tiết một chuyên gia
+const ExpertCard = ({ expert }) => {
     const navigate = useNavigate(); // Khởi tạo useNavigate
 
     const handleCardClick = () => {
-        navigate(`/course/${course.id}`); // Điều hướng đến trang chi tiết khóa học
+        navigate(`/expert/${expert.id}`);
     };
 
     return (
@@ -21,13 +22,12 @@ const CourseCard = ({ course }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 height: '100%',
-            }}
-            onClick={handleCardClick} // Gọi hàm điều hướng khi nhấn vào card
+            }} onClick={handleCardClick} 
         >
             <CardMedia
                 component="img"
-                image={course.thumbnail || 'default_thumbnail.png'} // Thay ảnh mặc định nếu không có thumbnail
-                alt={course.name}
+                image={expert.avatar || 'default_avatar.png'} // Hiển thị avatar mặc định nếu không có
+                alt={`${expert.firstName} ${expert.lastName}`}
                 sx={{
                     height: 140,
                     backgroundSize: 'cover',
@@ -37,15 +37,13 @@ const CourseCard = ({ course }) => {
             <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <Box>
                     <Typography gutterBottom variant="h6" component="div" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                        {course.name}
+                        {`${expert.firstName} ${expert.midName || ''} ${expert.lastName}`}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {course.ownerName} {/* Hiển thị tên người sở hữu */}
+                        {expert.email} {/* Hiển thị email */}
                     </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
-                    <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#f15123' }}>
-                        {course.price || 'Miễn phí'} {/* Thay giá nếu không có */}
+                    <Typography variant="body2" color="text.secondary">
+                        {expert.mobile} {/* Hiển thị số điện thoại */}
                     </Typography>
                 </Box>
             </CardContent>
@@ -53,23 +51,24 @@ const CourseCard = ({ course }) => {
     );
 };
 
-const CourseDisplay = () => {
-    const [courses, setCourses] = useState([]);
+// Component hiển thị danh sách các chuyên gia
+const ExpertDisplay = () => {
+    const [experts, setExperts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const loadCourses = async () => {
+        const loadExperts = async () => {
             try {
-                const data = await fetchAllSubjects();
-                setCourses(data || []); // Đảm bảo rằng courses luôn là một mảng
+                const data = await fetchAllExperts();
+                setExperts(data || []); // Đảm bảo rằng experts luôn là một mảng
             } catch (e) {
-                setError('Unable to fetch courses');
+                setError('Unable to fetch experts');
             }
             setLoading(false);
         };
 
-        loadCourses();
+        loadExperts();
     }, []);
 
     if (loading) return <div>Loading...</div>;
@@ -78,12 +77,12 @@ const CourseDisplay = () => {
     return (
         <Container maxWidth="lg" sx={{ mt: 4 }}>
             <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                Khóa học miễn phí
+                Danh sách chuyên gia
             </Typography>
             <Grid container spacing={2}>
-                {courses.map((course) => (
-                    <Grid item key={course.id} xs={12} sm={6} md={4} lg={3}>
-                        <CourseCard course={course} />
+                {experts.map((expert) => (
+                    <Grid item key={expert.id} xs={12} sm={6} md={4} lg={3}>
+                        <ExpertCard expert={expert} /> {/* Sử dụng ExpertCard cho từng chuyên gia */}
                     </Grid>
                 ))}
             </Grid>
@@ -91,4 +90,4 @@ const CourseDisplay = () => {
     );
 };
 
-export default CourseDisplay;
+export default ExpertDisplay;
