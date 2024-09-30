@@ -54,6 +54,8 @@ const theme = createTheme({
 });
 
 const Navbar = () => {
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // Trạng thái đăng nhập
+    const [userName, setUserName] = useState(''); // Trạng thái tên người dùng
     const [openLogin, setOpenLogin] = useState(false);
     const [openRegister, setOpenRegister] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -77,7 +79,15 @@ const Navbar = () => {
 
     const navigate = useNavigate();
 
-    const handleOpenLogin = () => setOpenLogin(true);
+    const handleOpenLogin = () => {
+        // Xóa giá trị của email, password và các lỗi trước đó khi mở lại form
+        setEmail('');
+        setPassword('');
+        setEmailError('');
+        setPasswordError('');
+        setOpenLogin(true);
+    };
+    
     const handleCloseLogin = () => setOpenLogin(false);
     
     const handleOpenRegister = () => setOpenRegister(true);
@@ -92,7 +102,7 @@ const Navbar = () => {
 
     const handleLogin = async () => {
         let isValid = true;
-
+    
         if (!email) {
             setEmailError('Email không được để trống');
             isValid = false;
@@ -102,14 +112,14 @@ const Navbar = () => {
         } else {
             setEmailError('');
         }
-
+    
         if (!password) {
             setPasswordError('Mật khẩu không được để trống');
             isValid = false;
         } else {
             setPasswordError('');
         }
-
+    
         if (isValid) {
             try {
                 const token = await fetchLogin(email, password);
@@ -118,43 +128,59 @@ const Navbar = () => {
                 const userId = decodedToken.Id;
                 const role = decodedToken.role;
                 const expirationTime = decodedToken.exp * 1000;
+                const nameAcc = decodedToken.Name;
+    
                 localStorage.setItem('expirationTime', expirationTime.toString());
                 localStorage.setItem('role', role);
                 localStorage.setItem('id', userId);
-                const nameAcc = decodedToken.Name;
                 localStorage.setItem('name', nameAcc);
-                
+    
+                // Cập nhật trực tiếp trạng thái đăng nhập và tên người dùng
+                setIsLoggedIn(true);
+                setUserName(nameAcc);
+    
                 // Điều hướng dựa vào role
                 if (role === 'Admin') {
                     navigate('/admin/home');
                 } else if (role === 'Student') {
-                    navigate('/user');
+                    navigate('/');
                 } else if (role === 'Teacher') {
                     navigate('/expert/home');
                 }
-
+    
                 handleCloseLogin();
-                // Tự động đăng xuất khi token hết hạn
-                // setTimeout(() => {
-                //     handleLogout();
-                // }, expirationTime - Date.now());
-                setTimeout(() => {
-                    handleLogout();
-                }, 36000000);
             } catch (error) {
                 console.error('Đăng nhập thất bại:', error);
             }
         }
     };
+    
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('expirationTime');
-        localStorage.removeItem('role');
-        localStorage.removeItem('id');
-        localStorage.removeItem('name');
+        localStorage.clear();
+        setIsLoggedIn(false);
+        setUserName('');
+        
+        // Xóa giá trị của email, password và các lỗi khi đăng xuất
+        setEmail('');
+        setPassword('');
+        setEmailError('');
+        setPasswordError('');
+        
         navigate('/');
     };
+    
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            setIsLoggedIn(true);
+            const storedName = localStorage.getItem('name');
+            if (storedName) {
+                setUserName(storedName);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         const checkTokenExpiration = () => {
@@ -229,14 +255,25 @@ const Navbar = () => {
                             )
                         }}
                     />
-                    <div>
-                        <Button color="inherit" sx={{ color: 'primary.main', backgroundColor: 'transparent', textTransform: 'none', mr: 1 }} onClick={handleOpenRegister}>
-                            Đăng ký
-                        </Button>
-                        <Button color="inherit" sx={{ color: 'primary.main', backgroundColor: 'transparent', textTransform: 'none' }} onClick={handleOpenLogin}>
-                            Đăng nhập
-                        </Button>
-                    </div>
+                     {isLoggedIn ? (
+                        <div>
+                            <Typography variant="body1" sx={{ display: 'inline', mr: 2 }}>
+                                Xin chào, {userName}
+                            </Typography>
+                            <Button color="inherit" sx={{ textTransform: 'none' }} onClick={handleLogout}>
+                                Đăng xuất
+                            </Button>
+                        </div>
+                    ) : (
+                        <div>
+                            <Button color="inherit" sx={{ textTransform: 'none', mr: 1 }} onClick={() => setOpenRegister(true)}>
+                                Đăng ký
+                            </Button>
+                            <Button color="inherit" sx={{ textTransform: 'none' }} onClick={handleOpenLogin}>
+                                Đăng nhập
+                            </Button>
+                        </div>
+                    )}
                 </Toolbar>
             </AppBar>
             <Box sx={{ height: '1px', backgroundColor: 'grey.500' }} />
