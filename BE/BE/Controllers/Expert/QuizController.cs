@@ -171,6 +171,34 @@ namespace BE.Controllers.Expert
             }
         }
 
+        [HttpGet("GetQuizzesByExpert/{expertId}")]
+        public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesByExpert(int expertId)
+        {
+            var expertExists = await _context.Users.AnyAsync(u => u.Id == expertId);
+            if (!expertExists)
+            {
+                return NotFound("Expert not found.");
+            }
+
+            var quizzes = await _context.Quizzes
+                .Include(q => q.Subject)
+                .Where(q => q.Subject.OwnerId == expertId)
+                .Select(q => new QuizDto
+                {
+                    Id = q.Id,
+                    Name = q.Name,
+                    Level = q.Level,
+                    DurationMinutes = q.DurationMinutes,
+                    PassRate = q.PassRate,
+                    Type = q.Type,
+                    SubjectId = q.SubjectId,
+                    SubjectName = q.Subject.Name
+                })
+                .ToListAsync();
+
+            return Ok(quizzes);
+        }
+
 
         private bool QuizExists(int id)
         {
