@@ -1,23 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { fetchUsers, addUser, setActiveExpert } from '../../../service/employee-fetch'; // Import hàm toggleUserStatus
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    TextField,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
+import { fetchUsers, addUser, setActiveExpert } from '../../../service/employee-fetch';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Select, MenuItem, FormControl, InputLabel, FormHelperText,
 } from '@mui/material';
 
 const Employee = () => {
@@ -25,14 +8,17 @@ const Employee = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [open, setOpen] = useState(false);
+    const [formErrors, setFormErrors] = useState({});
     const [newUser, setNewUser] = useState({
-        fullName: '',
+        firstName: '',
+        midName: '',
+        lastName: '',
         email: '',
         password: '',
         mobile: '',
         gender: '',
         avatar: '',
-        role: 'Teacher', // Giả sử mặc định là Teacher
+        role: 'Teacher',
         status: 'Active',
     });
 
@@ -57,34 +43,66 @@ const Employee = () => {
     const handleClose = () => {
         setOpen(false);
         setNewUser({
-            fullName: '',
+            firstName: '',
+            midName: '',
+            lastName: '',
             email: '',
             password: '',
             mobile: '',
             gender: '',
             avatar: '',
             role: 'Teacher',
-            status: 'active',
+            status: 'Active',
         });
+        setFormErrors({});
     };
-  
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setNewUser((prev) => ({ ...prev, [name]: value }));
     };
 
+    const validateForm = () => {
+        let errors = {};
+
+        // Kiểm tra email hợp lệ
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newUser.email)) {
+            errors.email = 'Email không hợp lệ';
+        }
+
+        // Kiểm tra mật khẩu hợp lệ (ít nhất 8 ký tự, bao gồm chữ viết hoa và số)
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        if (!passwordRegex.test(newUser.password)) {
+            errors.password =
+                'Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa và số';
+        }
+
+        // Kiểm tra các trường bắt buộc khác
+        if (!newUser.firstName) errors.firstName = 'Họ là bắt buộc';
+        if (!newUser.lastName) errors.lastName = 'Tên là bắt buộc';
+        if (!newUser.mobile) errors.mobile = 'Số điện thoại là bắt buộc';
+        if (!newUser.gender) errors.gender = 'Giới tính là bắt buộc';
+
+        setFormErrors(errors);
+
+        // Trả về true nếu không có lỗi
+        return Object.keys(errors).length === 0;
+    };
+
     const handleSubmit = async () => {
-        const result = await addUser(newUser);
-        if (result) {
-            setUsers((prev) => [...prev, result]); // Thêm người dùng mới vào danh sách
-            handleClose();
+        if (validateForm()) {
+            const result = await addUser(newUser);
+            if (result) {
+                setUsers((prev) => [...prev, result]); // Thêm người dùng mới vào danh sách
+                handleClose();
+            }
         }
     };
 
-    // Hàm đổi trạng thái người dùng
     const handleToggleStatus = async (user) => {
         const updatedStatus = user.status === 'Active' ? 'Inactive' : 'Active';
-        const result = await setActiveExpert(user.id, updatedStatus); // Gọi API cập nhật trạng thái
+        const result = await setActiveExpert(user.id, updatedStatus);
         if (result) {
             setUsers((prev) =>
                 prev.map((u) => (u.id === user.id ? { ...u, status: updatedStatus } : u))
@@ -142,19 +160,44 @@ const Employee = () => {
                 </Table>
             </TableContainer>
 
-            <Dialog open={open} onClose={handleClose}>
+            {/* Dialog toàn màn hình */}
+            <Dialog fullScreen open={open} onClose={handleClose}>
                 <DialogTitle>Thêm User</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
                         margin="dense"
-                        name="fullName"
-                        label="Họ và Tên"
+                        name="firstName"
+                        label="First Name"
                         type="text"
                         fullWidth
-                        value={newUser.fullName}
+                        value={newUser.firstName}
                         onChange={handleInputChange}
                         style={{ marginBottom: '1rem' }}
+                        error={!!formErrors.firstName}
+                        helperText={formErrors.firstName}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="midName"
+                        label="Middle Name"
+                        type="text"
+                        fullWidth
+                        value={newUser.midName}
+                        onChange={handleInputChange}
+                        style={{ marginBottom: '1rem' }}
+                    />
+                    <TextField
+                        margin="dense"
+                        name="lastName"
+                        label="Last Name"
+                        type="text"
+                        fullWidth
+                        value={newUser.lastName}
+                        onChange={handleInputChange}
+                        style={{ marginBottom: '1rem' }}
+                        error={!!formErrors.lastName}
+                        helperText={formErrors.lastName}
                     />
                     <TextField
                         margin="dense"
@@ -165,6 +208,8 @@ const Employee = () => {
                         value={newUser.email}
                         onChange={handleInputChange}
                         style={{ marginBottom: '1rem' }}
+                        error={!!formErrors.email}
+                        helperText={formErrors.email}
                     />
                     <TextField
                         margin="dense"
@@ -175,6 +220,8 @@ const Employee = () => {
                         value={newUser.password}
                         onChange={handleInputChange}
                         style={{ marginBottom: '1rem' }}
+                        error={!!formErrors.password}
+                        helperText={formErrors.password}
                     />
                     <TextField
                         margin="dense"
@@ -185,6 +232,8 @@ const Employee = () => {
                         value={newUser.mobile}
                         onChange={handleInputChange}
                         style={{ marginBottom: '1rem' }}
+                        error={!!formErrors.mobile}
+                        helperText={formErrors.mobile}
                     />
                     <FormControl fullWidth margin="dense" style={{ marginBottom: '1rem' }}>
                         <InputLabel id="gender-label">Giới tính</InputLabel>
@@ -198,6 +247,7 @@ const Employee = () => {
                             <MenuItem value="Male">Nam</MenuItem>
                             <MenuItem value="Female">Nữ</MenuItem>
                         </Select>
+                        {formErrors.gender && <FormHelperText error>{formErrors.gender}</FormHelperText>}
                     </FormControl>
                 </DialogContent>
                 <DialogActions>

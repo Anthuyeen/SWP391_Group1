@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Drawer, List, ListItem, ListItemText, Box, Button } from '@mui/material';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 
-
 const sidebarOptions = [
-    { id: 4, label: 'Expert Manager', path: '/admin/home/employee-profile' }, // Trỏ tới URL
+    { id: 4, label: `Hi ${localStorage.getItem('name')}`, path: '/admin/home/user-profile' },
+    { id: 5, label: 'Expert Manager', path: '/admin/home/employee-profile' },
 ];
+
 const AdminPage = () => {
     const [selectedContent, setSelectedContent] = useState('Select an option from the sidebar');
     const location = useLocation();
@@ -18,6 +19,7 @@ const AdminPage = () => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('expirationTime');
+        localStorage.clear();
         navigate('/');
     };
 

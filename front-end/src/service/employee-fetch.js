@@ -19,7 +19,8 @@ export const fetchUsers = async () => {
         return null; 
     }
 };
-//post
+//post https://localhost:7043/api/UserManagement/AddExpert
+
 export const addUser = async (userData) => {
     try {
         const response = await fetch('https://localhost:7043/api/UserManagement/AddExpert', {

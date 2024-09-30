@@ -121,7 +121,7 @@ const Navbar = () => {
                 localStorage.setItem('expirationTime', expirationTime.toString());
                 localStorage.setItem('role', role);
                 localStorage.setItem('id', userId);
-                const nameAcc = decodedToken.last_name;
+                const nameAcc = decodedToken.Name;
                 localStorage.setItem('name', nameAcc);
                 
                 // Điều hướng dựa vào role
