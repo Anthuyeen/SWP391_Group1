@@ -1,22 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    AppBar,
-    Toolbar,
-    Typography,
-    Button,
-    TextField,
-    InputAdornment,
-    ThemeProvider,
-    createTheme,
-    Box,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    IconButton,
-    Grid,
-    Select,
-    MenuItem,
-} from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, TextField, InputAdornment, ThemeProvider, createTheme, Box, Dialog, DialogTitle, DialogContent, IconButton, Grid, Select, MenuItem, } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -337,7 +320,7 @@ const Navbar = () => {
             </Dialog>
 
             {/* Modal đăng ký */}
-            <Dialog open={openRegister} onClose={handleCloseRegister} maxWidth="xs" fullWidth>
+            <Dialog open={openRegister} onClose={handleCloseRegister} maxWidth="xs" fullWidth >
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     Đăng ký
                     <IconButton edge="end" color="inherit" onClick={handleCloseRegister}>
@@ -354,6 +337,7 @@ const Navbar = () => {
                                 margin="dense"
                                 value={regEmail}
                                 onChange={(e) => setRegEmail(e.target.value)}
+                                required
                             />
                         </Grid>
                         <Grid item>
@@ -364,6 +348,7 @@ const Navbar = () => {
                                 margin="dense"
                                 value={regPassword}
                                 onChange={(e) => setRegPassword(e.target.value)}
+                                required
                             />
                         </Grid>
                         <Grid item>
@@ -376,6 +361,7 @@ const Navbar = () => {
                                 onChange={(e) => setRegConfirmPassword(e.target.value)}
                                 error={!!confirmPasswordError}
                                 helperText={confirmPasswordError}
+                                required
                             />
                         </Grid>
                         <Grid item>
@@ -386,6 +372,7 @@ const Navbar = () => {
                                 margin="dense"
                                 value={phoneNumber}
                                 onChange={(e) => setPhoneNumber(e.target.value)}
+                                required
                             />
                         </Grid>
                         <Grid item>
@@ -395,6 +382,7 @@ const Navbar = () => {
                                 onChange={(e) => setGender(e.target.value)}
                                 displayEmpty
                                 margin="dense"
+                                required
                             >
                                 <MenuItem value="">
                                     <em>Giới tính</em>
@@ -410,6 +398,7 @@ const Navbar = () => {
                                 margin="dense"
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
+                                required
                             />
                         </Grid>
                         <Grid item>
@@ -419,6 +408,7 @@ const Navbar = () => {
                                 margin="dense"
                                 value={middleName}
                                 onChange={(e) => setMiddleName(e.target.value)}
+                                required
                             />
                         </Grid>
                         <Grid item>
@@ -428,6 +418,7 @@ const Navbar = () => {
                                 margin="dense"
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
+                                required
                             />
                         </Grid>
                         <Grid item>

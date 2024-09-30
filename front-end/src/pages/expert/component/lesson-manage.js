@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Accordion, AccordionSummary, AccordionDetails, Typography, List, ListItem, ListItemText, CircularProgress, Box, Chip, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import {
+    Accordion, AccordionSummary, AccordionDetails, Typography, List, ListItem, ListItemText, CircularProgress, Box, Chip, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions,
+    TextField, MenuItem, Select, FormControl, InputLabel
+} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';  // Thêm icon edit
@@ -17,6 +19,8 @@ const LessonManager = () => {
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [newLesson, setNewLesson] = useState({ subjectId: '', name: '', content: '', status: 'Active' });
     const [editingLesson, setEditingLesson] = useState(null); // State để lưu lesson đang được chỉnh sửa
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // Quản lý mở/đóng dialog xóa
+    const [lessonToDelete, setLessonToDelete] = useState(null); // Quản lý bài học cần xóa
 
     useEffect(() => {
         const loadSubjects = async () => {
@@ -56,6 +60,15 @@ const LessonManager = () => {
         } catch (err) {
             console.error('Failed to delete lesson:', err);
         }
+    };
+    const handleDeleteLessonOpen = (lessonId, subjectId) => {
+        setLessonToDelete({ lessonId, subjectId }); // Lưu cả lessonId và subjectId
+        setOpenDeleteDialog(true);
+    };
+
+    const handleDeleteLessonClose = () => {
+        setOpenDeleteDialog(false);
+        setLessonToDelete(null);
     };
 
     const handleAddLessonOpen = (subjectId) => {
@@ -171,7 +184,7 @@ const LessonManager = () => {
                                                         <IconButton
                                                             edge="end"
                                                             aria-label="delete"
-                                                            onClick={() => handleDeleteLesson(lesson.id, subject.id)}
+                                                            onClick={() => handleDeleteLessonOpen(lesson.id, subject.id)}
                                                         >
                                                             <DeleteIcon />
                                                         </IconButton>
@@ -204,7 +217,7 @@ const LessonManager = () => {
             )}
 
             {/* Dialog để thêm bài học */}
-            <Dialog open={openAddDialog} onClose={handleAddLessonClose}>
+            <Dialog fullScreen open={openAddDialog} onClose={handleAddLessonClose}>
                 <DialogTitle>Add Lesson</DialogTitle>
                 <DialogContent>
                     <TextField
@@ -234,7 +247,7 @@ const LessonManager = () => {
             </Dialog>
 
             {/* Dialog để chỉnh sửa bài học */}
-            <Dialog open={openEditDialog} onClose={handleEditLessonClose}>
+            <Dialog fullScreen open={openEditDialog} onClose={handleEditLessonClose}>
                 <DialogTitle>Edit Lesson</DialogTitle>
                 <DialogContent>
                     <TextField
@@ -272,6 +285,24 @@ const LessonManager = () => {
                     <Button onClick={handleEditLessonSubmit} color="primary">Save</Button>
                 </DialogActions>
             </Dialog>
+            {/**xóa */}
+            <Dialog
+                open={openDeleteDialog}
+                onClose={handleDeleteLessonClose}
+            >
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <Typography>Are you sure you want to delete this lesson?</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteLessonClose} color="primary">Cancel</Button>
+                    <Button onClick={() => {
+                        handleDeleteLesson(lessonToDelete.lessonId, lessonToDelete.subjectId); // Truyền cả hai tham số
+                        handleDeleteLessonClose();
+                    }} color="secondary">Delete</Button>
+                </DialogActions>
+            </Dialog>
+
         </Box>
     );
 };

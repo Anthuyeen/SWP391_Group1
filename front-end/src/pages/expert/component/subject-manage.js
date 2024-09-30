@@ -166,7 +166,7 @@ const SubjectManage = () => {
       </Table>
 
       {/* Create Subject Dialog */}
-      <Dialog open={openCreate} onClose={handleCloseCreate}>
+      <Dialog fullScreen open={openCreate} onClose={handleCloseCreate}>
         <DialogTitle>Create New Subject</DialogTitle>
         <DialogContent>
           <TextField margin="dense" label="Name" name="name" fullWidth value={newSubject.name} onChange={handleInputChange} />
