@@ -11,6 +11,8 @@ import LessonManage from './pages/expert/component/lesson-manage'
 import QuizManage from "./pages/expert/component/quiz-manage"
 import SubjectDetail from './pages/Home/component/courses/course-detail'
 import ExpertDetail from './pages/Home/component/expert/expert-detail'
+import ExpertListAll from './pages/Home/component/expert/expert-list-all';
+import CourseListAll from './pages/Home/component/courses/course-list';
 function App() {
   return (
     <Routes>
@@ -18,6 +20,9 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/course/:courseId" element={<SubjectDetail />} />
       <Route path="/expert/:id" element={<ExpertDetail />} />
+      <Route path="/experts" element={<ExpertListAll />} />
+      <Route path="/courses" element={<CourseListAll />} />
+
       {/**Admin */}
       <Route path="/admin/home/" element={<ProtectedRoute requiredRole="Admin"><AdminHome /></ProtectedRoute>}>
         <Route path="employee-profile" element={<Employee />} />

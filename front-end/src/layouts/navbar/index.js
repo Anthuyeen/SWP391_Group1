@@ -70,12 +70,12 @@ const Navbar = () => {
         setPasswordError('');
         setOpenLogin(true);
     };
-    
+
     const handleCloseLogin = () => setOpenLogin(false);
-    
+
     const handleOpenRegister = () => setOpenRegister(true);
     const handleCloseRegister = () => setOpenRegister(false);
-    
+
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
     const validateEmail = (email) => {
@@ -85,7 +85,7 @@ const Navbar = () => {
 
     const handleLogin = async () => {
         let isValid = true;
-    
+
         if (!email) {
             setEmailError('Email không được để trống');
             isValid = false;
@@ -95,14 +95,14 @@ const Navbar = () => {
         } else {
             setEmailError('');
         }
-    
+
         if (!password) {
             setPasswordError('Mật khẩu không được để trống');
             isValid = false;
         } else {
             setPasswordError('');
         }
-    
+
         if (isValid) {
             try {
                 const token = await fetchLogin(email, password);
@@ -112,16 +112,16 @@ const Navbar = () => {
                 const role = decodedToken.role;
                 const expirationTime = decodedToken.exp * 1000;
                 const nameAcc = decodedToken.Name;
-    
+
                 localStorage.setItem('expirationTime', expirationTime.toString());
                 localStorage.setItem('role', role);
                 localStorage.setItem('id', userId);
                 localStorage.setItem('name', nameAcc);
-    
+
                 // Cập nhật trực tiếp trạng thái đăng nhập và tên người dùng
                 setIsLoggedIn(true);
                 setUserName(nameAcc);
-    
+
                 // Điều hướng dựa vào role
                 if (role === 'Admin') {
                     navigate('/admin/home');
@@ -130,29 +130,29 @@ const Navbar = () => {
                 } else if (role === 'Teacher') {
                     navigate('/expert/home');
                 }
-    
+
                 handleCloseLogin();
             } catch (error) {
                 console.error('Đăng nhập thất bại:', error);
             }
         }
     };
-    
+
 
     const handleLogout = () => {
         localStorage.clear();
         setIsLoggedIn(false);
         setUserName('');
-        
+
         // Xóa giá trị của email, password và các lỗi khi đăng xuất
         setEmail('');
         setPassword('');
         setEmailError('');
         setPasswordError('');
-        
+
         navigate('/');
     };
-    
+
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -214,17 +214,35 @@ const Navbar = () => {
         <ThemeProvider theme={theme}>
             <AppBar position="static" color="default" sx={{ backgroundColor: 'background.default', boxShadow: 'none' }}>
                 <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Button color="inherit" sx={{ color: 'primary.main', backgroundColor: 'transparent', textTransform: 'none' }}>
-                    <Typography
-                        variant="h6"
-                        component="div"
-                        onClick={() => navigate('/')} // Điều hướng về trang chính khi nhấp vào
-                    >
-                        Online learning course
-                    </Typography>
-                    </Button>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Button
+                            color="inherit"
+                            sx={{ color: 'primary.main', backgroundColor: 'transparent', textTransform: 'none' }}
+                            onClick={() => navigate('/')} // Điều hướng về trang chính khi nhấp vào
+                        >
+                            <Typography variant="h6" component="div">
+                                Online learning course
+                            </Typography>
+                        </Button>
+
+                        <Button
+                            color="inherit"
+                            sx={{ textTransform: 'none' }}
+                            onClick={() => navigate('/experts')} // Điều hướng đến trang Chuyên gia
+                        >
+                            Chuyên gia
+                        </Button>
+                        <Button
+                            color="inherit"
+                            sx={{ textTransform: 'none' }}
+                            onClick={() => navigate('/courses')} // Điều hướng đến trang Khóa học
+                        >
+                            Khóa học
+                        </Button>
+                    </Box>
+
                     <TextField
-                        sx={{ width: '40%', maxWidth: '500px' }}
+                        sx={{ width: '30%', maxWidth: '300px', ml: 50 }} // Thêm marginLeft vào search bar
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
@@ -238,7 +256,8 @@ const Navbar = () => {
                             )
                         }}
                     />
-                     {isLoggedIn ? (
+
+                    {isLoggedIn ? (
                         <div>
                             <Typography variant="body1" sx={{ display: 'inline', mr: 2 }}>
                                 Xin chào, {userName}
@@ -259,6 +278,7 @@ const Navbar = () => {
                     )}
                 </Toolbar>
             </AppBar>
+
             <Box sx={{ height: '1px', backgroundColor: 'grey.500' }} />
 
             {/* Modal đăng nhập */}
