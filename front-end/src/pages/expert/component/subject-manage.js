@@ -26,7 +26,12 @@ const SubjectManage = () => {
   });
   const [categories, setCategories] = useState([]);
   const ownerId = localStorage.getItem('id'); // Lấy ID của người dùng từ localStorage
-
+  const [errors, setErrors] = useState({
+    name: '',
+    thumbnail: '',
+    categoryId: '',
+    description: ''
+  });
   useEffect(() => {
     const loadSubjects = async () => {
       try {
@@ -72,27 +77,57 @@ const SubjectManage = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewSubject({ ...newSubject, [name]: value });
+
+    // Clear error message when user starts typing
+    setErrors({ ...errors, [name]: '' });
   };
 
   const handleCreateSubject = async () => {
-    if (!newSubject.name || !newSubject.thumbnail || !newSubject.categoryId || !newSubject.description) {
-      alert("All fields must be filled!");
+    // Kiểm tra nếu có bất kỳ trường nào trống, hiển thị lỗi tương ứng
+    let validationErrors = {};
+  
+    if (!newSubject.name.trim()) {
+      validationErrors.name = "Name is required.";
+    }
+  
+    if (!newSubject.thumbnail.trim()) {
+      validationErrors.thumbnail = "Thumbnail URL is required.";
+    }
+  
+    if (!newSubject.categoryId) {
+      validationErrors.categoryId = "Category is required.";
+    }
+  
+    if (!newSubject.description.trim()) {
+      validationErrors.description = "Description is required.";
+    }
+  
+    // Nếu có lỗi, cập nhật state và dừng lại
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
   
+    // Nếu hợp lệ, tiếp tục tạo subject
     const subjectToCreate = {
       ...newSubject,
-      status: 'Active' // Đặt trạng thái 'active' mặc định
+      status: 'Active'
     };
-  
-    console.log('Creating subject:', subjectToCreate); // In ra để kiểm tra
   
     try {
       const createdSubject = await createSubject(subjectToCreate);
+      
+      // Cập nhật danh sách subjects nếu thành công
       setSubjects([...subjects, createdSubject]);
+      
+      // Đóng dialog sau khi tạo thành công
       handleCloseCreate();
     } catch (error) {
-      alert('Thêm Subject thành công !'); // Thông báo cho người dùng
+      // Cập nhật lỗi vào state hoặc log ra console
+      console.error('Error creating subject:', error);
+      
+      // Thêm vào state để hiển thị lỗi cho người dùng (thay vì alert)
+      setErrors({ apiError: error.message });
     }
   };
   
@@ -166,17 +201,59 @@ const SubjectManage = () => {
       </Table>
 
       {/* Create Subject Dialog */}
-      <Dialog open={openCreate} onClose={handleCloseCreate}>
+      <Dialog fullScreen open={openCreate} onClose={handleCloseCreate}>
         <DialogTitle>Create New Subject</DialogTitle>
         <DialogContent>
-          <TextField margin="dense" label="Name" name="name" fullWidth value={newSubject.name} onChange={handleInputChange} />
-          <TextField margin="dense" label="Thumbnail" name="thumbnail" fullWidth value={newSubject.thumbnail} onChange={handleInputChange} />
-          <Select label="Category" name="categoryId" fullWidth value={newSubject.categoryId} onChange={handleInputChange}>
+          {/* Name field */}
+          <TextField
+            margin="dense"
+            label="Name"
+            name="name"
+            fullWidth
+            value={newSubject.name}
+            onChange={handleInputChange}
+            error={!!errors.name} // Hiển thị lỗi nếu có
+            helperText={errors.name} // Dòng thông báo lỗi
+          />
+
+          {/* Thumbnail field */}
+          <TextField
+            margin="dense"
+            label="Thumbnail"
+            name="thumbnail"
+            fullWidth
+            value={newSubject.thumbnail}
+            onChange={handleInputChange}
+            error={!!errors.thumbnail}
+            helperText={errors.thumbnail}
+          />
+
+          {/* Category field */}
+          <Select
+            label="Category"
+            name="categoryId"
+            fullWidth
+            value={newSubject.categoryId}
+            onChange={handleInputChange}
+            error={!!errors.categoryId}
+          >
             {categories.map((category) => (
               <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
             ))}
           </Select>
-          <TextField margin="dense" label="Description" name="description" fullWidth value={newSubject.description} onChange={handleInputChange} />
+          {errors.categoryId && <p style={{ color: 'red' }}>{errors.categoryId}</p>}
+
+          {/* Description field */}
+          <TextField
+            margin="dense"
+            label="Description"
+            name="description"
+            fullWidth
+            value={newSubject.description}
+            onChange={handleInputChange}
+            error={!!errors.description}
+            helperText={errors.description}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseCreate} color="secondary">Cancel</Button>

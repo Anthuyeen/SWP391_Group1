@@ -49,21 +49,24 @@ try {
 //create subject
 // subject.js
 export const createSubject = async (subjectData) => {
-const response = await fetch('https://localhost:7043/api/Subject/AddSubject/AddSubject', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify(subjectData),
-});
+  const response = await fetch('https://localhost:7043/api/Subject/AddSubject/AddSubject', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(subjectData),
+  });
 
-if (!response.ok) {
-  const errorData = await response.json(); // Lấy thông tin lỗi từ phản hồi
-  throw new Error(`Error: ${response.status} ${errorData.message || response.statusText}`); // Thông báo lỗi chi tiết
-}
+  // Kiểm tra nếu phản hồi không thành công
+  if (!response.ok) {
+    let errorMessage = `Error: ${response.status} ${response.statusText}`;
 
-const data = await response.json();
-return data; // Trả về dữ liệu đã tạo
+    // Không cố parse JSON nếu server chỉ trả về mã trạng thái
+    throw new Error(errorMessage); 
+  }
+
+  // Nếu phản hồi thành công mà không có nội dung trả về (trường hợp chỉ trả về mã trạng thái)
+  return { success: true };
 };
 
 
@@ -130,5 +133,30 @@ export const fetchSubjectsByOwner = async (ownerId) => {
   } catch (error) {
     console.error('Failed to fetch subjects by owner:', error);
     throw error;
+  }
+};
+//get subject by id
+export const fetchSubjectById = async (subjectId) => {
+  try {
+      const response = await fetch(`https://localhost:7043/api/Subject/GetSubjectById/GetSubjectById/${subjectId}`, {
+          method: 'GET', // phương thức HTTP, trong trường hợp này là GET
+          headers: {
+              'Content-Type': 'application/json', // chỉ định kiểu dữ liệu gửi đi là JSON
+              // thêm Authorization nếu cần, ví dụ nếu cần token để truy cập
+              // 'Authorization': `Bearer ${yourToken}`,
+          }
+      });
+
+      // Kiểm tra xem yêu cầu có thành công không
+      if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Parse JSON từ response
+      const data = await response.json();
+      return data;
+  } catch (error) {
+      console.error('Error fetching subject by id:', error);
+      throw error; // nếu muốn bắt lỗi ở nơi khác có thể ném lỗi này ra
   }
 };
