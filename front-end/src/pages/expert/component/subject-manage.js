@@ -26,7 +26,12 @@ const SubjectManage = () => {
   });
   const [categories, setCategories] = useState([]);
   const ownerId = localStorage.getItem('id'); // Lấy ID của người dùng từ localStorage
-
+  const [errors, setErrors] = useState({
+    name: '',
+    thumbnail: '',
+    categoryId: '',
+    description: ''
+  });
   useEffect(() => {
     const loadSubjects = async () => {
       try {
@@ -53,9 +58,9 @@ const SubjectManage = () => {
     });
     setOpenCreate(true);
   };
-  
+
   const handleCloseCreate = () => setOpenCreate(false);
-  
+
   const handleOpenEdit = (subject) => {
     setSelectedSubject(subject);
     setNewSubject(subject); // Pre-fill dialog with the selected subject data
@@ -72,40 +77,68 @@ const SubjectManage = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewSubject({ ...newSubject, [name]: value });
+
+    // Clear error message when user starts typing
+    setErrors({ ...errors, [name]: '' });
   };
 
   const handleCreateSubject = async () => {
-    if (!newSubject.name || !newSubject.thumbnail || !newSubject.categoryId || !newSubject.description) {
-      alert("All fields must be filled!");
+    // Kiểm tra lỗi
+    let validationErrors = {};
+  
+    if (!newSubject.name.trim()) {
+      validationErrors.name = "Name is required.";
+    }
+  
+    if (!newSubject.thumbnail.trim()) {
+      validationErrors.thumbnail = "Thumbnail URL is required.";
+    }
+  
+    if (!newSubject.categoryId) {
+      validationErrors.categoryId = "Category is required.";
+    }
+  
+    if (!newSubject.description.trim()) {
+      validationErrors.description = "Description is required.";
+    }
+  
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
   
     const subjectToCreate = {
       ...newSubject,
-      status: 'Active' // Đặt trạng thái 'active' mặc định
+      status: 'Active'
     };
-  
-    console.log('Creating subject:', subjectToCreate); // In ra để kiểm tra
   
     try {
       const createdSubject = await createSubject(subjectToCreate);
-      setSubjects([...subjects, createdSubject]);
+  
+      // Cập nhật danh sách subjects bằng cách thêm subject mới
+      setSubjects((prevSubjects) => [...prevSubjects, createdSubject]);
+  
+      // Đóng dialog sau khi tạo thành công
+      window.location.reload();
+
       handleCloseCreate();
     } catch (error) {
-      alert('Thêm Subject thành công !'); // Thông báo cho người dùng
+      console.error('Error creating subject:', error);
+      setErrors({ apiError: error.message });
     }
   };
   
+
 
   const handleEditSubject = async () => {
     if (!newSubject.name || !newSubject.thumbnail || !newSubject.categoryId || !newSubject.description) {
       alert("All fields must be filled!");
       return;
     }
-  
+
     try {
       await editSubject(selectedSubject.id, newSubject);
-      setSubjects(subjects.map((subject) => 
+      setSubjects(subjects.map((subject) =>
         subject.id === selectedSubject.id ? { ...subject, ...newSubject } : subject
       ));
       handleCloseEdit();
@@ -114,7 +147,7 @@ const SubjectManage = () => {
       alert('There was an error editing the subject. Please try again.'); // Thông báo cho người dùng
     }
   };
-  
+
 
   const handleDeleteSubject = async () => {
     try {
@@ -132,7 +165,6 @@ const SubjectManage = () => {
       <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleOpenCreate}>
         Create Subject
       </Button>
-
       <Table>
         <TableHead>
           <TableRow>
@@ -147,36 +179,80 @@ const SubjectManage = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {subjects.map((subject) => (
-            <TableRow key={subject.id}>
-              <TableCell>{subject.id}</TableCell>
-              <TableCell>{subject.name}</TableCell>
-              <TableCell>{subject.thumbnail}</TableCell>
-              <TableCell>{categories.find(c => c.id === subject.categoryId)?.name}</TableCell>
-              <TableCell>{subject.isFeatured ? 'Yes' : 'No'}</TableCell>
-              {/* <TableCell>{subject.ownerId}</TableCell> */}
-              <TableCell>{subject.description}</TableCell>
-              <TableCell>
-                <IconButton onClick={() => handleOpenEdit(subject)}><EditIcon /></IconButton>
-                <IconButton onClick={() => handleOpenDelete(subject)}><DeleteIcon /></IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+  {subjects.map((subject) => (
+    <TableRow key={subject.id}> {/* Đảm bảo subject.id là duy nhất */}
+      <TableCell>{subject.id}</TableCell>
+      <TableCell>{subject.name}</TableCell>
+      <TableCell>{subject.thumbnail ? subject.thumbnail : 'No Image'}</TableCell>
+      <TableCell>{subject.categoryName}</TableCell> {/* Sử dụng categoryName từ JSON */}
+      <TableCell>{subject.isFeatured ? 'Yes' : 'No'}</TableCell>
+      <TableCell>{subject.description}</TableCell>
+      <TableCell>
+        <IconButton onClick={() => handleOpenEdit(subject)}><EditIcon /></IconButton>
+        <IconButton onClick={() => handleOpenDelete(subject)}><DeleteIcon /></IconButton>
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+
+
+
       </Table>
 
       {/* Create Subject Dialog */}
       <Dialog fullScreen open={openCreate} onClose={handleCloseCreate}>
         <DialogTitle>Create New Subject</DialogTitle>
         <DialogContent>
-          <TextField margin="dense" label="Name" name="name" fullWidth value={newSubject.name} onChange={handleInputChange} />
-          <TextField margin="dense" label="Thumbnail" name="thumbnail" fullWidth value={newSubject.thumbnail} onChange={handleInputChange} />
-          <Select label="Category" name="categoryId" fullWidth value={newSubject.categoryId} onChange={handleInputChange}>
+          {/* Name field */}
+          <TextField
+            margin="dense"
+            label="Name"
+            name="name"
+            fullWidth
+            value={newSubject.name}
+            onChange={handleInputChange}
+            error={!!errors.name} // Hiển thị lỗi nếu có
+            helperText={errors.name} // Dòng thông báo lỗi
+          />
+
+          {/* Thumbnail field */}
+          <TextField
+            margin="dense"
+            label="Thumbnail"
+            name="thumbnail"
+            fullWidth
+            value={newSubject.thumbnail}
+            onChange={handleInputChange}
+            error={!!errors.thumbnail}
+            helperText={errors.thumbnail}
+          />
+
+          {/* Category field */}
+          <Select
+            label="Category"
+            name="categoryId"
+            fullWidth
+            value={newSubject.categoryId}
+            onChange={handleInputChange}
+            error={!!errors.categoryId}
+          >
             {categories.map((category) => (
               <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
             ))}
           </Select>
-          <TextField margin="dense" label="Description" name="description" fullWidth value={newSubject.description} onChange={handleInputChange} />
+          {errors.categoryId && <p style={{ color: 'red' }}>{errors.categoryId}</p>}
+
+          {/* Description field */}
+          <TextField
+            margin="dense"
+            label="Description"
+            name="description"
+            fullWidth
+            value={newSubject.description}
+            onChange={handleInputChange}
+            error={!!errors.description}
+            helperText={errors.description}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseCreate} color="secondary">Cancel</Button>
@@ -186,50 +262,50 @@ const SubjectManage = () => {
 
       {/* Edit Subject Dialog */}
       {/* Edit Subject Dialog */}
-<Dialog open={openEdit} onClose={handleCloseEdit}>
-  <DialogTitle>Edit Subject</DialogTitle>
-  <DialogContent>
-    <TextField 
-      margin="dense" 
-      label="Name" 
-      name="name" 
-      fullWidth 
-      value={newSubject.name} 
-      onChange={handleInputChange} 
-    />
-    <TextField 
-      margin="dense" 
-      label="Thumbnail" 
-      name="thumbnail" 
-      fullWidth 
-      value={newSubject.thumbnail} 
-      onChange={handleInputChange} 
-    />
-    <Select 
-      label="Category" 
-      name="categoryId" 
-      fullWidth 
-      value={newSubject.categoryId} 
-      onChange={handleInputChange}
-    >
-      {categories.map((category) => (
-        <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
-      ))}
-    </Select>
-    <TextField 
-      margin="dense" 
-      label="Description" 
-      name="description" 
-      fullWidth 
-      value={newSubject.description} 
-      onChange={handleInputChange} 
-    />
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={handleCloseEdit} color="secondary">Cancel</Button>
-    <Button onClick={handleEditSubject} color="primary">Edit</Button> {/* Thay đổi nhãn thành "Edit" */}
-  </DialogActions>
-</Dialog>
+      <Dialog open={openEdit} onClose={handleCloseEdit}>
+        <DialogTitle>Edit Subject</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Name"
+            name="name"
+            fullWidth
+            value={newSubject.name}
+            onChange={handleInputChange}
+          />
+          <TextField
+            margin="dense"
+            label="Thumbnail"
+            name="thumbnail"
+            fullWidth
+            value={newSubject.thumbnail}
+            onChange={handleInputChange}
+          />
+          <Select
+            label="Category"
+            name="categoryId"
+            fullWidth
+            value={newSubject.categoryId}
+            onChange={handleInputChange}
+          >
+            {categories.map((category) => (
+              <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
+            ))}
+          </Select>
+          <TextField
+            margin="dense"
+            label="Description"
+            name="description"
+            fullWidth
+            value={newSubject.description}
+            onChange={handleInputChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEdit} color="secondary">Cancel</Button>
+          <Button onClick={handleEditSubject} color="primary">Edit</Button> {/* Thay đổi nhãn thành "Edit" */}
+        </DialogActions>
+      </Dialog>
 
 
       {/* Delete Confirmation Dialog */}
