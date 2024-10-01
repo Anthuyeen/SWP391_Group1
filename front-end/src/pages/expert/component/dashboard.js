@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Drawer, List, ListItem, ListItemText, Box, Button } from '@mui/material';
-import { useNavigate, Outlet, useLocation } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 
 const sidebarOptions = [
-    { label: `Hi ${localStorage.getItem('name')}`},
-    { id: 4, label: 'Subject Manager', path: '/Expert/Home/subject-manage' }, // Trỏ tới URL
+    { id: 4, label: 'Subject Manager', path: '/Expert/Home/subject-manage' },
     { label: 'Lesson Manager', path: '/Expert/Home/lesson-manage' },
     { label: 'Quiz Manager', path: '/Expert/Home/quiz-manage' }
 ];
+
 const ExpertPage = () => {
+    const [userName, setUserName] = useState(`Hi ${localStorage.getItem('name')}`); // Tạo state để lưu tên người dùng
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const name = localStorage.getItem('name');
+        if (name) {
+            setUserName(`Hi ${name}`); // Cập nhật state khi component được mount
+        }
+    }, []); // Chỉ chạy một lần khi component được mount
 
     const handleListItemClick = (path) => {
         navigate(path); // Điều hướng đến URL
@@ -38,6 +45,10 @@ const ExpertPage = () => {
                 }}
             >
                 <List>
+                    {/* Cập nhật tên người dùng trong sidebarOptions */}
+                    <ListItem>
+                        <ListItemText primary={userName} /> {/* Sử dụng state userName */}
+                    </ListItem>
                     {sidebarOptions.map((option) => (
                         <ListItem button key={option.id} onClick={() => handleListItemClick(option.path)}>
                             <ListItemText primary={option.label} />
@@ -65,5 +76,3 @@ const ExpertPage = () => {
 };
 
 export default ExpertPage;
-
-

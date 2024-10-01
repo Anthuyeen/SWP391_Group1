@@ -64,3 +64,26 @@ export const editQuiz = async (id, quiz) => {
     
     return await response.json(); // Nếu có nội dung trả về
   }; 
+  //view quiz by expert
+  export const fetchQuizzesByExpert = async (expertId) => {
+    try {
+      const response = await fetch(`https://localhost:7043/api/Quiz/GetQuizzesByExpert/GetQuizzesByExpert/${expertId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // Thêm các headers khác nếu cần, ví dụ như Authorization nếu có token
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json(); // Parse JSON từ response
+      return data; // Trả về dữ liệu quiz từ API
+    } catch (error) {
+      console.error("Failed to fetch quizzes by expert:", error);
+      throw error; // Ném lỗi để có thể xử lý ngoài
+    }
+  };
+  
