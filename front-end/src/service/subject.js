@@ -48,6 +48,26 @@ try {
 
 //create subject
 // subject.js
+// export const createSubject = async (subjectData) => {
+//   const response = await fetch('https://localhost:7043/api/Subject/AddSubject/AddSubject', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify(subjectData),
+//   });
+
+//   // Kiểm tra nếu phản hồi không thành công
+//   if (!response.ok) {
+//     let errorMessage = `Error: ${response.status} ${response.statusText}`;
+
+//     // Không cố parse JSON nếu server chỉ trả về mã trạng thái
+//     throw new Error(errorMessage); 
+//   }
+
+//   // Nếu phản hồi thành công mà không có nội dung trả về (trường hợp chỉ trả về mã trạng thái)
+//   return { success: true };
+// };
 export const createSubject = async (subjectData) => {
   const response = await fetch('https://localhost:7043/api/Subject/AddSubject/AddSubject', {
     method: 'POST',
@@ -65,8 +85,15 @@ export const createSubject = async (subjectData) => {
     throw new Error(errorMessage); 
   }
 
-  // Nếu phản hồi thành công mà không có nội dung trả về (trường hợp chỉ trả về mã trạng thái)
-  return { success: true };
+  // Nếu phản hồi thành công nhưng không có nội dung JSON trả về
+  // Bạn có thể trả về ID hoặc bất kỳ thông tin nào mà bạn mong muốn
+  // Nếu API trả về một thông điệp thành công bạn cũng có thể muốn lấy nó từ headers hoặc trạng thái
+  return {
+    success: true,
+    message: 'Subject created successfully',
+    // Nếu có ID mới từ API, bạn có thể thêm nó vào đối tượng trả về, nếu không bạn có thể để lại trống
+    // id: response.headers.get('Location') // Nếu API trả về URL của tài nguyên mới
+  };
 };
 
 
