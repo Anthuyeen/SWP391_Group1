@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "../../../assets/css/quiz-manage.css";
 import { fetchQuizzes, addQuiz, editQuiz, deleteQuiz } from "../../../service/quiz";
+import { fetchAllSubjects } from "../../../service/subject"; // Giả sử bạn đã có hàm fetchSubjects từ API
 
 const QuizManage = () => {
   const [quizzes, setQuizzes] = useState([]);
+  const [subjects, setSubjects] = useState([]); // State để lưu danh sách subjects
   const [newQuiz, setNewQuiz] = useState({
     name: "",
     level: "",
@@ -17,6 +19,7 @@ const QuizManage = () => {
 
   useEffect(() => {
     loadQuizzes();
+    loadSubjects(); // Load danh sách subjects
   }, []);
 
   const loadQuizzes = async () => {
@@ -25,6 +28,15 @@ const QuizManage = () => {
       setQuizzes(data);
     } catch (error) {
       console.error("Failed to load quizzes", error);
+    }
+  };
+
+  const loadSubjects = async () => {
+    try {
+      const data = await fetchAllSubjects(); // Fetch subjects từ API
+      setSubjects(data); // Cập nhật state subjects với dữ liệu trả về
+    } catch (error) {
+      console.error("Failed to load subjects", error);
     }
   };
 
@@ -129,81 +141,88 @@ const QuizManage = () => {
         </table>
       </div>
 
-      {isModalOpen && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>{selectedQuiz ? "Edit Quiz" : "Create Quiz"}</h2>
-            <label>Name:</label>
-            <input
-              type="text"
-              value={newQuiz.name}
-              onChange={(e) =>
-                setNewQuiz({ ...newQuiz, name: e.target.value })
-              }
-            />
-            <label>Level:</label>
-            <select
-              value={newQuiz.level}
-              onChange={(e) =>
-                setNewQuiz({ ...newQuiz, level: e.target.value })
-              }
-              className="select-input"
-            >
-              <option value="">Select Level</option>
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
-            <label>Duration (minutes):</label>
-            <input
-              type="number"
-              value={newQuiz.durationMinutes}
-              onChange={(e) =>
-                setNewQuiz({ ...newQuiz, durationMinutes: e.target.value })
-              }
-            />
-            <label>Pass Rate (%):</label>
-            <input
-              type="number"
-              value={newQuiz.passRate}
-              onChange={(e) =>
-                setNewQuiz({ ...newQuiz, passRate: e.target.value })
-              }
-            />
-            <label>Type:</label>
-            <select
-              value={newQuiz.type}
-              onChange={(e) =>
-                setNewQuiz({ ...newQuiz, type: e.target.value })
-              }
-              className="select-input"
-            >
-              <option value="">Select Type</option>
-              <option value="Test">Test</option>
-              <option value="Practice">Practice</option>
-            </select>
-            <label>Subject ID:</label>
-            <input
-              type="number"
-              value={newQuiz.subjectId}
-              onChange={(e) =>
-                setNewQuiz({ ...newQuiz, subjectId: e.target.value })
-              }
-            />
-            <div className="modal-buttons">
-              <button onClick={handleAddOrEdit}>
-                {selectedQuiz ? "Save Changes" : "Add Quiz"}
-              </button>
-              <button className="close-btn" onClick={closeModal}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+   {isModalOpen && (
+  <div className="modal">
+    <div className="modal-content">
+      <h2>{selectedQuiz ? "Edit Quiz" : "Create Quiz"}</h2>
+
+      <input
+        type="text"
+        value={newQuiz.name}
+        onChange={(e) => setNewQuiz({ ...newQuiz, name: e.target.value })}
+        required
+        placeholder="Enter Quiz Name" // Thêm placeholder cho trường Name
+      />
+
+      <select
+        value={newQuiz.level}
+        onChange={(e) => setNewQuiz({ ...newQuiz, level: e.target.value })}
+        className="select-input"
+        required
+      >
+        <option value="">Select Level</option>
+        <option value="Easy">Easy</option>
+        <option value="Medium">Medium</option>
+        <option value="Hard">Hard</option>
+      </select>
+
+      <input
+        type="number"
+        value={newQuiz.durationMinutes}
+        onChange={(e) =>
+          setNewQuiz({ ...newQuiz, durationMinutes: e.target.value })
+        }
+        required
+        placeholder="Enter Duration (minutes)" // Thêm placeholder cho trường Duration
+      />
+
+      <input
+        type="number"
+        value={newQuiz.passRate}
+        onChange={(e) => setNewQuiz({ ...newQuiz, passRate: e.target.value })}
+        required
+        placeholder="Enter Pass Rate (%)" // Thêm placeholder cho trường Pass Rate
+      />
+
+      <select
+        value={newQuiz.type}
+        onChange={(e) => setNewQuiz({ ...newQuiz, type: e.target.value })}
+        className="select-input"
+        required
+      >
+        <option value="">Select Type</option>
+        <option value="Test">Test</option>
+        <option value="Practice">Practice</option>
+      </select>
+
+      <select
+        value={newQuiz.subjectId}
+        onChange={(e) => setNewQuiz({ ...newQuiz, subjectId: e.target.value })}
+        className="select-input"
+        required
+      >
+        <option value="">Select Subject</option>
+        {subjects.map((subject) => (
+          <option key={subject.id} value={subject.id}>
+            {subject.name}
+          </option>
+        ))}
+      </select>
+
+      <div className="modal-buttons">
+        <button onClick={handleAddOrEdit}>
+          {selectedQuiz ? "Save Changes" : "Add Quiz"}
+        </button>
+        <button className="close-btn" onClick={closeModal}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
 
 export default QuizManage;
-
