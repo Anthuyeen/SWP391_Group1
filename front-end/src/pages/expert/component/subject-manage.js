@@ -262,7 +262,7 @@ const SubjectManage = () => {
 
       {/* Edit Subject Dialog */}
       {/* Edit Subject Dialog */}
-      <Dialog open={openEdit} onClose={handleCloseEdit}>
+      <Dialog fullScreen open={openEdit} onClose={handleCloseEdit}>
         <DialogTitle>Edit Subject</DialogTitle>
         <DialogContent>
           <TextField
