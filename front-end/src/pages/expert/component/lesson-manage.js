@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Accordion, AccordionSummary, AccordionDetails, Typography, List, ListItem, ListItemText, CircularProgress, Box, Chip, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, MenuItem, Select, FormControl, InputLabel
+    TextField, MenuItem, Select, FormControl, InputLabel, FormHelperText
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -239,6 +239,23 @@ const LessonManager = () => {
                         value={newLesson.content}
                         onChange={(e) => setNewLesson({ ...newLesson, content: e.target.value })}
                     />
+                    <FormControl fullWidth margin="dense">
+                        <InputLabel shrink>Video File</InputLabel>
+                        <TextField
+                            type="file"
+                            inputProps={{
+                                accept: "video/*"
+                            }}
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                setNewLesson({ ...newLesson, videoFile: file });
+                            }}
+                            variant="outlined"
+                        />
+                        <FormHelperText>
+                            {newLesson.videoFile ? `Selected file: ${newLesson.videoFile.name}` : 'Choose a video file from your computer'}
+                        </FormHelperText>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleAddLessonClose} color="primary">Cancel</Button>
@@ -270,6 +287,27 @@ const LessonManager = () => {
                         onChange={(e) => setEditingLesson({ ...editingLesson, content: e.target.value })}
                     />
                     <FormControl fullWidth margin="dense">
+                        <InputLabel shrink>Video File</InputLabel>
+                        <TextField
+                            type="file"
+                            inputProps={{
+                                accept: "video/*"
+                            }}
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                setEditingLesson({ ...editingLesson, videoFile: file });
+                            }}
+                            variant="outlined"
+                        />
+                        <FormHelperText>
+                            {editingLesson?.videoFile
+                                ? `Selected file: ${editingLesson.videoFile.name}`
+                                : editingLesson?.videoPath
+                                    ? `Current video: ${editingLesson.videoPath}`
+                                    : 'Choose a video file from your computer'}
+                        </FormHelperText>
+                    </FormControl>
+                    <FormControl fullWidth margin="dense">
                         <InputLabel>Status</InputLabel>
                         <Select
                             value={editingLesson?.status || ''}
@@ -285,6 +323,7 @@ const LessonManager = () => {
                     <Button onClick={handleEditLessonSubmit} color="primary">Save</Button>
                 </DialogActions>
             </Dialog>
+            
             {/**xóa */}
             <Dialog
                 open={openDeleteDialog}
