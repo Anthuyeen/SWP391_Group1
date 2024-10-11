@@ -8,7 +8,7 @@ import { fetchSubjectsByOwner } from '../../../service/subject';
 import { fetchCategories } from '../../../service/subject';
 import { createSubject } from '../../../service/subject';
 import { editSubject } from '../../../service/subject';
-import { deleteSubject } from '../../../service/subject';
+import { deleteSubject, uploadImage } from '../../../service/subject';
 
 const SubjectManage = () => {
   const [subjects, setSubjects] = useState([]);
@@ -16,6 +16,8 @@ const SubjectManage = () => {
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [imageFileEdit, setImageFileEdit] = useState(null); // Thêm state cho ảnh chỉnh sửa
   const [newSubject, setNewSubject] = useState({
     name: '',
     thumbnail: '',
@@ -64,8 +66,10 @@ const SubjectManage = () => {
   const handleOpenEdit = (subject) => {
     setSelectedSubject(subject);
     setNewSubject(subject); // Pre-fill dialog with the selected subject data
+    setImageFileEdit(null); // Clear previous image file if any
     setOpenEdit(true);
   };
+
   const handleCloseEdit = () => setOpenEdit(false);
 
   const handleOpenDelete = (subject) => {
@@ -85,39 +89,42 @@ const SubjectManage = () => {
   const handleCreateSubject = async () => {
     // Kiểm tra lỗi
     let validationErrors = {};
-  
+
     if (!newSubject.name.trim()) {
       validationErrors.name = "Name is required.";
     }
-  
-    if (!newSubject.thumbnail.trim()) {
-      validationErrors.thumbnail = "Thumbnail URL is required.";
+
+    if (!imageFile) {
+      validationErrors.thumbnail = "Thumbnail is required.";
     }
-  
+
     if (!newSubject.categoryId) {
       validationErrors.categoryId = "Category is required.";
     }
-  
+
     if (!newSubject.description.trim()) {
       validationErrors.description = "Description is required.";
     }
-  
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-  
-    const subjectToCreate = {
-      ...newSubject,
-      status: 'Active'
-    };
-  
+
     try {
+      // Upload image trước khi tạo subject
+      const uploadedImage = await uploadImage(imageFile); // Gọi hàm upload ảnh
+      const subjectToCreate = {
+        ...newSubject,
+        thumbnail: uploadedImage.url, // URL trả về từ API uploadImage
+        status: 'Active',
+      };
+
       const createdSubject = await createSubject(subjectToCreate);
-  
+
       // Cập nhật danh sách subjects bằng cách thêm subject mới
       setSubjects((prevSubjects) => [...prevSubjects, createdSubject]);
-  
+
       // Đóng dialog sau khi tạo thành công
       window.location.reload();
 
@@ -127,26 +134,38 @@ const SubjectManage = () => {
       setErrors({ apiError: error.message });
     }
   };
-  
+
+
 
 
   const handleEditSubject = async () => {
-    if (!newSubject.name || !newSubject.thumbnail || !newSubject.categoryId || !newSubject.description) {
+    if (!newSubject.name || !newSubject.categoryId || !newSubject.description) {
       alert("All fields must be filled!");
       return;
     }
-
+  
     try {
-      await editSubject(selectedSubject.id, newSubject);
+      let updatedSubject = { ...newSubject };
+  
+      // Nếu có ảnh mới, upload ảnh
+      if (imageFileEdit) {
+        const uploadedImage = await uploadImage(imageFileEdit); // Gọi hàm upload ảnh
+        updatedSubject.thumbnail = uploadedImage.url; // Cập nhật URL ảnh
+      }
+  
+      await editSubject(selectedSubject.id, updatedSubject);
+  
+      // Cập nhật danh sách subjects sau khi chỉnh sửa
       setSubjects(subjects.map((subject) =>
-        subject.id === selectedSubject.id ? { ...subject, ...newSubject } : subject
+        subject.id === selectedSubject.id ? { ...subject, ...updatedSubject } : subject
       ));
       handleCloseEdit();
     } catch (error) {
       console.error('Error editing subject:', error);
-      alert('There was an error editing the subject. Please try again.'); // Thông báo cho người dùng
+      alert('There was an error editing the subject. Please try again.');
     }
   };
+  
 
 
   const handleDeleteSubject = async () => {
@@ -179,21 +198,21 @@ const SubjectManage = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-  {subjects.map((subject) => (
-    <TableRow key={subject.id}> {/* Đảm bảo subject.id là duy nhất */}
-      <TableCell>{subject.id}</TableCell>
-      <TableCell>{subject.name}</TableCell>
-      <TableCell>{subject.thumbnail ? subject.thumbnail : 'No Image'}</TableCell>
-      <TableCell>{subject.categoryName}</TableCell> {/* Sử dụng categoryName từ JSON */}
-      <TableCell>{subject.isFeatured ? 'Yes' : 'No'}</TableCell>
-      <TableCell>{subject.description}</TableCell>
-      <TableCell>
-        <IconButton onClick={() => handleOpenEdit(subject)}><EditIcon /></IconButton>
-        <IconButton onClick={() => handleOpenDelete(subject)}><DeleteIcon /></IconButton>
-      </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
+          {subjects.map((subject) => (
+            <TableRow key={subject.id}> {/* Đảm bảo subject.id là duy nhất */}
+              <TableCell>{subject.id}</TableCell>
+              <TableCell>{subject.name}</TableCell>
+              <TableCell>{subject.thumbnail ? subject.thumbnail : 'No Image'}</TableCell>
+              <TableCell>{subject.categoryName}</TableCell> {/* Sử dụng categoryName từ JSON */}
+              <TableCell>{subject.isFeatured ? 'Yes' : 'No'}</TableCell>
+              <TableCell>{subject.description}</TableCell>
+              <TableCell>
+                <IconButton onClick={() => handleOpenEdit(subject)}><EditIcon /></IconButton>
+                <IconButton onClick={() => handleOpenDelete(subject)}><DeleteIcon /></IconButton>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
 
 
 
@@ -214,19 +233,12 @@ const SubjectManage = () => {
             error={!!errors.name} // Hiển thị lỗi nếu có
             helperText={errors.name} // Dòng thông báo lỗi
           />
-
           {/* Thumbnail field */}
-          <TextField
-            margin="dense"
-            label="Thumbnail"
-            name="thumbnail"
-            fullWidth
-            value={newSubject.thumbnail}
-            onChange={handleInputChange}
-            error={!!errors.thumbnail}
-            helperText={errors.thumbnail}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFile(e.target.files[0])} // Lưu file vào state
           />
-
           {/* Category field */}
           <Select
             label="Category"
@@ -273,13 +285,10 @@ const SubjectManage = () => {
             value={newSubject.name}
             onChange={handleInputChange}
           />
-          <TextField
-            margin="dense"
-            label="Thumbnail"
-            name="thumbnail"
-            fullWidth
-            value={newSubject.thumbnail}
-            onChange={handleInputChange}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFileEdit(e.target.files[0])} // Lưu file ảnh vào state
           />
           <Select
             label="Category"
@@ -322,4 +331,7 @@ const SubjectManage = () => {
 };
 
 export default SubjectManage;
+
+
+
 

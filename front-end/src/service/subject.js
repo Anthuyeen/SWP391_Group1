@@ -187,3 +187,29 @@ export const fetchSubjectById = async (subjectId) => {
       throw error; // nếu muốn bắt lỗi ở nơi khác có thể ném lỗi này ra
   }
 };
+
+// uplaod image
+export const uploadImage = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file); // Thêm file vào formData
+
+    const response = await fetch('https://localhost:7043/api/Upload/upload', {
+      method: 'POST',
+      body: formData, // Gửi dữ liệu file
+      headers: {
+        // Có thể thêm Authorization hoặc headers khác nếu cần
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const data = await response.json(); // Kết quả sau khi ảnh được upload lên Cloudinary
+    return data; // Trả về thông tin URL hoặc id của ảnh trên Cloudinary
+  } catch (error) {
+    console.error('Error during upload:', error);
+    throw error;
+  }
+};
