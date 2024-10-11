@@ -187,7 +187,6 @@ const SubjectManage = () => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>ID</TableCell>
             <TableCell>Name</TableCell>
             <TableCell>Thumbnail</TableCell>
             <TableCell>Category</TableCell>
@@ -200,7 +199,6 @@ const SubjectManage = () => {
         <TableBody>
           {subjects.map((subject) => (
             <TableRow key={subject.id}> {/* Đảm bảo subject.id là duy nhất */}
-              <TableCell>{subject.id}</TableCell>
               <TableCell>{subject.name}</TableCell>
               <TableCell>{subject.thumbnail ? subject.thumbnail : 'No Image'}</TableCell>
               <TableCell>{subject.categoryName}</TableCell> {/* Sử dụng categoryName từ JSON */}
