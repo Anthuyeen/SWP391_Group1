@@ -31,11 +31,15 @@ public partial class OnlineLearningSystemContext : DbContext
 
     public virtual DbSet<Quiz> Quizzes { get; set; }
 
+    public virtual DbSet<QuizAttempt> QuizAttempts { get; set; }
+
     public virtual DbSet<Registration> Registrations { get; set; }
 
     public virtual DbSet<Subject> Subjects { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<UserAnswer> UserAnswers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -227,6 +231,39 @@ public partial class OnlineLearningSystemContext : DbContext
                 .HasConstraintName("FK__QUIZ__subject_id__59FA5E80");
         });
 
+        modelBuilder.Entity<QuizAttempt>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__QUIZ_ATT__3213E83FE1EC1DD8");
+
+            entity.ToTable("QUIZ_ATTEMPT");
+
+            entity.HasIndex(e => new { e.UserId, e.QuizId }, "IX_QUIZ_ATTEMPT_USER_QUIZ");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.AttemptNumber).HasColumnName("attempt_number");
+            entity.Property(e => e.EndTime)
+                .HasColumnType("datetime")
+                .HasColumnName("end_time");
+            entity.Property(e => e.QuizId).HasColumnName("quiz_id");
+            entity.Property(e => e.Score)
+                .HasColumnType("decimal(5, 2)")
+                .HasColumnName("score");
+            entity.Property(e => e.StartTime)
+                .HasColumnType("datetime")
+                .HasColumnName("start_time");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Quiz).WithMany(p => p.QuizAttempts)
+                .HasForeignKey(d => d.QuizId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__QUIZ_ATTE__quiz___17036CC0");
+
+            entity.HasOne(d => d.User).WithMany(p => p.QuizAttempts)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__QUIZ_ATTE__user___160F4887");
+        });
+
         modelBuilder.Entity<Registration>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__REGISTRA__3213E83F778598FB");
@@ -336,6 +373,36 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasColumnName("status");
+        });
+
+        modelBuilder.Entity<UserAnswer>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__USER_ANS__3213E83F1569B16A");
+
+            entity.ToTable("USER_ANSWER");
+
+            entity.HasIndex(e => e.QuizAttemptId, "IX_USER_ANSWER_QUIZ_ATTEMPT");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.AnswerOptionId).HasColumnName("answer_option_id");
+            entity.Property(e => e.IsCorrect).HasColumnName("is_correct");
+            entity.Property(e => e.QuestionId).HasColumnName("question_id");
+            entity.Property(e => e.QuizAttemptId).HasColumnName("quiz_attempt_id");
+
+            entity.HasOne(d => d.AnswerOption).WithMany(p => p.UserAnswers)
+                .HasForeignKey(d => d.AnswerOptionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__USER_ANSW__answe__1BC821DD");
+
+            entity.HasOne(d => d.Question).WithMany(p => p.UserAnswers)
+                .HasForeignKey(d => d.QuestionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__USER_ANSW__quest__1AD3FDA4");
+
+            entity.HasOne(d => d.QuizAttempt).WithMany(p => p.UserAnswers)
+                .HasForeignKey(d => d.QuizAttemptId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__USER_ANSW__quiz___19DFD96B");
         });
 
         OnModelCreatingPartial(modelBuilder);

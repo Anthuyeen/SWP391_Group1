@@ -22,4 +22,6 @@ public partial class Question
     public virtual ICollection<AnswerOption> AnswerOptions { get; } = new List<AnswerOption>();
 
     public virtual Quiz? Quiz { get; set; }
+
+    public virtual ICollection<UserAnswer> UserAnswers { get; } = new List<UserAnswer>();
 }
