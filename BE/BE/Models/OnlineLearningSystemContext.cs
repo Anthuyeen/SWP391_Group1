@@ -54,7 +54,7 @@ public partial class OnlineLearningSystemContext : DbContext
     {
         modelBuilder.Entity<AnswerOption>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ANSWER_O__3213E83F45F46D1D");
+            entity.HasKey(e => e.Id).HasName("PK__ANSWER_O__3213E83F0CFB1C71");
 
             entity.ToTable("ANSWER_OPTION");
 
@@ -65,12 +65,12 @@ public partial class OnlineLearningSystemContext : DbContext
 
             entity.HasOne(d => d.Question).WithMany(p => p.AnswerOptions)
                 .HasForeignKey(d => d.QuestionId)
-                .HasConstraintName("FK__ANSWER_OP__quest__628FA481");
+                .HasConstraintName("FK__ANSWER_OP__quest__534D60F1");
         });
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CATEGORY__3213E83F99F89B89");
+            entity.HasKey(e => e.Id).HasName("PK__CATEGORY__3213E83F735D4258");
 
             entity.ToTable("CATEGORY");
 
@@ -85,7 +85,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<Dimension>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DIMENSIO__3213E83F4CDE8FD4");
+            entity.HasKey(e => e.Id).HasName("PK__DIMENSIO__3213E83FBD7F6257");
 
             entity.ToTable("DIMENSION");
 
@@ -101,12 +101,12 @@ public partial class OnlineLearningSystemContext : DbContext
 
             entity.HasOne(d => d.Subject).WithMany(p => p.Dimensions)
                 .HasForeignKey(d => d.SubjectId)
-                .HasConstraintName("FK__DIMENSION__subje__5535A963");
+                .HasConstraintName("FK__DIMENSION__subje__5441852A");
         });
 
         modelBuilder.Entity<Lesson>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__LESSON__3213E83FA0373881");
+            entity.HasKey(e => e.Id).HasName("PK__LESSON__3213E83F25E294F5");
 
             entity.ToTable("LESSON");
 
@@ -122,12 +122,12 @@ public partial class OnlineLearningSystemContext : DbContext
 
             entity.HasOne(d => d.Subject).WithMany(p => p.Lessons)
                 .HasForeignKey(d => d.SubjectId)
-                .HasConstraintName("FK__LESSON__subject___46E78A0C");
+                .HasConstraintName("FK__LESSON__subject___5535A963");
         });
 
         modelBuilder.Entity<Post>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__POST__3213E83FC09A393A");
+            entity.HasKey(e => e.Id).HasName("PK__POST__3213E83F469A7EF1");
 
             entity.ToTable("POST");
 
@@ -148,12 +148,12 @@ public partial class OnlineLearningSystemContext : DbContext
 
             entity.HasOne(d => d.Category).WithMany(p => p.Posts)
                 .HasForeignKey(d => d.CategoryId)
-                .HasConstraintName("FK__POST__category_i__6754599E");
+                .HasConstraintName("FK__POST__category_i__5629CD9C");
         });
 
         modelBuilder.Entity<PricePackage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PRICE_PA__3213E83F1323C494");
+            entity.HasKey(e => e.Id).HasName("PK__PRICE_PA__3213E83F3E9C9245");
 
             entity.ToTable("PRICE_PACKAGE");
 
@@ -176,21 +176,17 @@ public partial class OnlineLearningSystemContext : DbContext
 
             entity.HasOne(d => d.Subject).WithMany(p => p.PricePackages)
                 .HasForeignKey(d => d.SubjectId)
-                .HasConstraintName("FK__PRICE_PAC__subje__4AB81AF0");
+                .HasConstraintName("FK__PRICE_PAC__subje__571DF1D5");
         });
 
         modelBuilder.Entity<Question>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__QUESTION__3213E83F31F2D2AA");
+            entity.HasKey(e => e.Id).HasName("PK__QUESTION__3213E83F47435F6A");
 
             entity.ToTable("QUESTION");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Content).HasColumnName("content");
-            entity.Property(e => e.Explanation).HasColumnName("explanation");
-            entity.Property(e => e.Level)
-                .HasMaxLength(20)
-                .HasColumnName("level");
             entity.Property(e => e.MediaUrl)
                 .HasMaxLength(255)
                 .HasColumnName("media_url");
@@ -201,20 +197,17 @@ public partial class OnlineLearningSystemContext : DbContext
 
             entity.HasOne(d => d.Quiz).WithMany(p => p.Questions)
                 .HasForeignKey(d => d.QuizId)
-                .HasConstraintName("FK__QUESTION__quiz_i__5EBF139D");
+                .HasConstraintName("FK__QUESTION__quiz_i__5812160E");
         });
 
         modelBuilder.Entity<Quiz>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__QUIZ__3213E83F260EBD92");
+            entity.HasKey(e => e.Id).HasName("PK__QUIZ__3213E83FFAD10F55");
 
             entity.ToTable("QUIZ");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.DurationMinutes).HasColumnName("duration_minutes");
-            entity.Property(e => e.Level)
-                .HasMaxLength(20)
-                .HasColumnName("level");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
                 .HasColumnName("name");
@@ -228,12 +221,12 @@ public partial class OnlineLearningSystemContext : DbContext
 
             entity.HasOne(d => d.Subject).WithMany(p => p.Quizzes)
                 .HasForeignKey(d => d.SubjectId)
-                .HasConstraintName("FK__QUIZ__subject_id__59FA5E80");
+                .HasConstraintName("FK__QUIZ__subject_id__59063A47");
         });
 
         modelBuilder.Entity<QuizAttempt>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__QUIZ_ATT__3213E83FE1EC1DD8");
+            entity.HasKey(e => e.Id).HasName("PK__QUIZ_ATT__3213E83F67F64CD9");
 
             entity.ToTable("QUIZ_ATTEMPT");
 
@@ -256,17 +249,17 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.HasOne(d => d.Quiz).WithMany(p => p.QuizAttempts)
                 .HasForeignKey(d => d.QuizId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__QUIZ_ATTE__quiz___17036CC0");
+                .HasConstraintName("FK__QUIZ_ATTE__quiz___59FA5E80");
 
             entity.HasOne(d => d.User).WithMany(p => p.QuizAttempts)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__QUIZ_ATTE__user___160F4887");
+                .HasConstraintName("FK__QUIZ_ATTE__user___5AEE82B9");
         });
 
         modelBuilder.Entity<Registration>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__REGISTRA__3213E83F778598FB");
+            entity.HasKey(e => e.Id).HasName("PK__REGISTRA__3213E83FD9EA1273");
 
             entity.ToTable("REGISTRATION");
 
@@ -293,20 +286,20 @@ public partial class OnlineLearningSystemContext : DbContext
 
             entity.HasOne(d => d.Package).WithMany(p => p.Registrations)
                 .HasForeignKey(d => d.PackageId)
-                .HasConstraintName("FK__REGISTRAT__packa__5165187F");
+                .HasConstraintName("FK__REGISTRAT__packa__5BE2A6F2");
 
             entity.HasOne(d => d.Subject).WithMany(p => p.Registrations)
                 .HasForeignKey(d => d.SubjectId)
-                .HasConstraintName("FK__REGISTRAT__subje__5070F446");
+                .HasConstraintName("FK__REGISTRAT__subje__5CD6CB2B");
 
             entity.HasOne(d => d.User).WithMany(p => p.Registrations)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__REGISTRAT__user___4F7CD00D");
+                .HasConstraintName("FK__REGISTRAT__user___5DCAEF64");
         });
 
         modelBuilder.Entity<Subject>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__SUBJECT__3213E83FB8270A0F");
+            entity.HasKey(e => e.Id).HasName("PK__SUBJECT__3213E83F8D43C379");
 
             entity.ToTable("SUBJECT");
 
@@ -327,20 +320,20 @@ public partial class OnlineLearningSystemContext : DbContext
 
             entity.HasOne(d => d.Category).WithMany(p => p.Subjects)
                 .HasForeignKey(d => d.CategoryId)
-                .HasConstraintName("FK__SUBJECT__categor__4222D4EF");
+                .HasConstraintName("FK__SUBJECT__categor__5EBF139D");
 
             entity.HasOne(d => d.Owner).WithMany(p => p.Subjects)
                 .HasForeignKey(d => d.OwnerId)
-                .HasConstraintName("FK__SUBJECT__owner_i__4316F928");
+                .HasConstraintName("FK__SUBJECT__owner_i__5FB337D6");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__USER__3213E83F703C5BC4");
+            entity.HasKey(e => e.Id).HasName("PK__USER__3213E83F27D3194A");
 
             entity.ToTable("USER");
 
-            entity.HasIndex(e => e.Email, "UQ__USER__AB6E6164DC85DF7D").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__USER__AB6E616408441777").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Avatar)
@@ -377,7 +370,7 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<UserAnswer>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__USER_ANS__3213E83F1569B16A");
+            entity.HasKey(e => e.Id).HasName("PK__USER_ANS__3213E83F769DC8A9");
 
             entity.ToTable("USER_ANSWER");
 
@@ -392,17 +385,17 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.HasOne(d => d.AnswerOption).WithMany(p => p.UserAnswers)
                 .HasForeignKey(d => d.AnswerOptionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__USER_ANSW__answe__1BC821DD");
+                .HasConstraintName("FK__USER_ANSW__answe__60A75C0F");
 
             entity.HasOne(d => d.Question).WithMany(p => p.UserAnswers)
                 .HasForeignKey(d => d.QuestionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__USER_ANSW__quest__1AD3FDA4");
+                .HasConstraintName("FK__USER_ANSW__quest__619B8048");
 
             entity.HasOne(d => d.QuizAttempt).WithMany(p => p.UserAnswers)
                 .HasForeignKey(d => d.QuizAttemptId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__USER_ANSW__quiz___19DFD96B");
+                .HasConstraintName("FK__USER_ANSW__quiz___628FA481");
         });
 
         OnModelCreatingPartial(modelBuilder);

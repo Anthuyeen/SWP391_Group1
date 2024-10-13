@@ -303,7 +303,6 @@ namespace BE.Controllers.Expert
                 {
                     Id = q.Id,
                     Name = q.Name,
-                    Level = q.Level,
                     DurationMinutes = q.DurationMinutes
                 }).ToList(),
 
