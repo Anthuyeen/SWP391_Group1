@@ -27,7 +27,6 @@ namespace BE.Controllers.Expert
                 {
                     Id = q.Id,
                     Name = q.Name,
-                    Level = q.Level,
                     DurationMinutes = q.DurationMinutes,
                     PassRate = q.PassRate,
                     Type = q.Type,
@@ -70,7 +69,6 @@ namespace BE.Controllers.Expert
 
             quiz.SubjectId = editQuizDto.SubjectId;
             quiz.Name = editQuizDto.Name;
-            quiz.Level = editQuizDto.Level;
             quiz.DurationMinutes = editQuizDto.DurationMinutes;
             quiz.PassRate = editQuizDto.PassRate;
             quiz.Type = editQuizDto.Type;
@@ -121,7 +119,6 @@ namespace BE.Controllers.Expert
             {
                 SubjectId = editQuizDto.SubjectId,
                 Name = editQuizDto.Name,
-                Level = editQuizDto.Level,
                 DurationMinutes = editQuizDto.DurationMinutes,
                 PassRate = editQuizDto.PassRate,
                 Type = editQuizDto.Type
@@ -187,7 +184,6 @@ namespace BE.Controllers.Expert
                 {
                     Id = q.Id,
                     Name = q.Name,
-                    Level = q.Level,
                     DurationMinutes = q.DurationMinutes,
                     PassRate = q.PassRate,
                     Type = q.Type,

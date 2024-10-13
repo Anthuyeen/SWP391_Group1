@@ -11,8 +11,6 @@ public partial class Quiz
 
     public string Name { get; set; } = null!;
 
-    public string? Level { get; set; }
-
     public int DurationMinutes { get; set; }
 
     public decimal PassRate { get; set; }
@@ -20,6 +18,8 @@ public partial class Quiz
     public string? Type { get; set; }
 
     public virtual ICollection<Question> Questions { get; } = new List<Question>();
+
+    public virtual ICollection<QuizAttempt> QuizAttempts { get; } = new List<QuizAttempt>();
 
     public virtual Subject? Subject { get; set; }
 }
