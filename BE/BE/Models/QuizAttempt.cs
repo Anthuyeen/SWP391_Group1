@@ -19,6 +19,8 @@ public partial class QuizAttempt
 
     public int AttemptNumber { get; set; }
 
+    public bool IsPassed { get; set; }
+
     public virtual Quiz Quiz { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;

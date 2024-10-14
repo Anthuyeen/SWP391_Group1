@@ -214,6 +214,9 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.Property(e => e.PassRate)
                 .HasColumnType("decimal(5, 2)")
                 .HasColumnName("pass_rate");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasColumnName("status");
             entity.Property(e => e.SubjectId).HasColumnName("subject_id");
             entity.Property(e => e.Type)
                 .HasMaxLength(20)
@@ -378,9 +381,12 @@ public partial class OnlineLearningSystemContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AnswerOptionId).HasColumnName("answer_option_id");
+            entity.Property(e => e.CorrectAnswerContent).HasColumnName("correct_answer_content");
             entity.Property(e => e.IsCorrect).HasColumnName("is_correct");
+            entity.Property(e => e.QuestionContent).HasColumnName("question_content");
             entity.Property(e => e.QuestionId).HasColumnName("question_id");
             entity.Property(e => e.QuizAttemptId).HasColumnName("quiz_attempt_id");
+            entity.Property(e => e.SelectedAnswerContent).HasColumnName("selected_answer_content");
 
             entity.HasOne(d => d.AnswerOption).WithMany(p => p.UserAnswers)
                 .HasForeignKey(d => d.AnswerOptionId)

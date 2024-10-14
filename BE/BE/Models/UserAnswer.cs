@@ -15,6 +15,12 @@ public partial class UserAnswer
 
     public bool IsCorrect { get; set; }
 
+    public string QuestionContent { get; set; } = null!;
+
+    public string SelectedAnswerContent { get; set; } = null!;
+
+    public string CorrectAnswerContent { get; set; } = null!;
+
     public virtual AnswerOption AnswerOption { get; set; } = null!;
 
     public virtual Question Question { get; set; } = null!;
