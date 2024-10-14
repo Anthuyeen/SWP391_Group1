@@ -13,6 +13,8 @@ import SubjectDetail from './pages/Home/component/courses/course-detail'
 import ExpertDetail from './pages/Home/component/expert/expert-detail'
 import ExpertListAll from './pages/Home/component/expert/expert-list-all';
 import CourseListAll from './pages/Home/component/courses/course-list';
+import UserProfile from './pages/Home/component/user-profile';
+import ManageProfile from './pages/admin/component/profile';
 function App() {
   return (
     <Routes>
@@ -22,16 +24,19 @@ function App() {
       <Route path="/expert/:id" element={<ExpertDetail />} />
       <Route path="/experts" element={<ExpertListAll />} />
       <Route path="/courses" element={<CourseListAll />} />
-
+      <Route path="/UserProfile" element={<ProtectedRoute requiredRole="Student"><UserProfile /></ProtectedRoute>}/>
       {/**Admin */}
       <Route path="/admin/home/" element={<ProtectedRoute requiredRole="Admin"><AdminHome /></ProtectedRoute>}>
         <Route path="employee-profile" element={<Employee />} />
+        <Route path="user-profile" element={<ManageProfile />} />
       </Route>
       {/**Expert */}
       <Route path="/Expert/Home" element={<ProtectedRoute requiredRole="Teacher"><ExpertHome /></ProtectedRoute>}>
         <Route path="subject-manage" element={<SubjectManage />} />
         <Route path="lesson-manage" element={<LessonManage />} />
         <Route path="quiz-manage" element={<QuizManage />} />
+        <Route path="user-profile" element={<ManageProfile />} />
+
 
       </Route>
     </Routes>

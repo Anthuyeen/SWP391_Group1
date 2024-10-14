@@ -7,7 +7,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { fetchLogin } from '../../service/authAPI';
-
 const theme = createTheme({
     palette: {
         primary: {
@@ -259,9 +258,13 @@ const Navbar = () => {
 
                     {isLoggedIn ? (
                         <div>
-                            <Typography variant="body1" sx={{ display: 'inline', mr: 2 }}>
+                            <Button
+                                variant="body1"
+                                sx={{ display: 'inline', mr: 2 }}
+                                onClick={() => navigate('/UserProfile')}
+                            >
                                 Xin chào, {userName}
-                            </Typography>
+                            </Button>
                             <Button color="inherit" sx={{ textTransform: 'none' }} onClick={handleLogout}>
                                 Đăng xuất
                             </Button>

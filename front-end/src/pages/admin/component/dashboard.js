@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Drawer, List, ListItem, ListItemText, Box, Button } from '@mui/material';
-import { useNavigate, Outlet, useLocation } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation, Link } from 'react-router-dom';
 
 const sidebarOptions = [
-    { id: 4, label: `Hi ${localStorage.getItem('name')}`, path: '/admin/home/user-profile' },
     { id: 5, label: 'Expert Manager', path: '/admin/home/employee-profile' },
 ];
 
@@ -11,7 +10,7 @@ const AdminPage = () => {
     const [selectedContent, setSelectedContent] = useState('Select an option from the sidebar');
     const location = useLocation();
     const navigate = useNavigate();
-
+    const [userName, setUserName] = useState(`Hi ${localStorage.getItem('name')}`);
     const handleListItemClick = (path) => {
         navigate(path); // Điều hướng đến URL
     };
@@ -38,6 +37,9 @@ const AdminPage = () => {
                 }}
             >
                 <List>
+                <ListItem button component={Link} to="/admin/home/user-profile">
+                        <ListItemText primary={userName} /> {/* Sử dụng state userName */}
+                    </ListItem>
                     {sidebarOptions.map((option) => (
                         <ListItem button key={option.id} onClick={() => handleListItemClick(option.path)}>
                             <ListItemText primary={option.label} />

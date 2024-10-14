@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Drawer, List, ListItem, ListItemText, Box, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const sidebarOptions = [
     { id: 4, label: 'Subject Manager', path: '/Expert/Home/subject-manage' },
     { label: 'Lesson Manager', path: '/Expert/Home/lesson-manage' },
-    { label: 'Quiz Manager', path: '/Expert/Home/quiz-manage' }
+    { label: 'Quiz Manager', path: '/Expert/Home/quiz-manage' },
+
 ];
 
 const ExpertPage = () => {
@@ -46,7 +47,7 @@ const ExpertPage = () => {
             >
                 <List>
                     {/* Cập nhật tên người dùng trong sidebarOptions */}
-                    <ListItem>
+                    <ListItem button component={Link} to="/Expert/Home/user-profile">
                         <ListItemText primary={userName} /> {/* Sử dụng state userName */}
                     </ListItem>
                     {sidebarOptions.map((option) => (
