@@ -99,12 +99,15 @@ namespace BE.Controllers.UserHomeController
                     LastName = registerDto.LName,
                     MidName = registerDto.MName,
                     Mobile = registerDto.Phone,
-                    Role = "Student"
+                    Role = "Student",
+                    Password = registerDto.Password,
+                    Status = "Active"
                 };
                 await _onlineLearningSystemContext.Users.AddAsync(account);
                 await _onlineLearningSystemContext.SaveChangesAsync();
                 return Ok(new { message = "Đăng ký thành công" });
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
