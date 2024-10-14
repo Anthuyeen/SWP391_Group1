@@ -13,13 +13,11 @@ public partial class Question
 
     public string? MediaUrl { get; set; }
 
-    public string? Level { get; set; }
-
     public string? Status { get; set; }
-
-    public string? Explanation { get; set; }
 
     public virtual ICollection<AnswerOption> AnswerOptions { get; } = new List<AnswerOption>();
 
     public virtual Quiz? Quiz { get; set; }
+
+    public virtual ICollection<UserAnswer> UserAnswers { get; } = new List<UserAnswer>();
 }

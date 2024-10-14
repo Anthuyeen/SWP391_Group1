@@ -1,3 +1,4 @@
+using BE.DTOs;
 using BE.Models;
 using BE.Service.ImplService;
 using BE.Service.IService;
@@ -134,6 +135,22 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
     };
 });
+
+//twillio
+builder.Services.AddSingleton<ISMSService>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    return new SMSService(
+        configuration["Twilio:AccountSid"],
+        configuration["Twilio:AuthToken"],
+        configuration["Twilio:PhoneNumber"]);
+});
+//email
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailService, EmailService>();
+//otp
+builder.Services.AddSingleton<OtpService>();
+builder.Services.AddMemoryCache();
 
 // Register services
 builder.Services.AddScoped<IUserService, UserService>();
