@@ -7,8 +7,6 @@
         public string FName { get; set; } = null!;
         public string LName { get; set; } = null!;
         public string MName { get; set; } = null!;
-        public string Address { get; set; } = null!;
-        public DateTime Dob { get; set; }
         public string Gender { get; set; } = null!; public string Phone { get; set; }
     }
 }
