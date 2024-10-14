@@ -61,7 +61,7 @@ namespace BE.Controllers.UserHomeController
         }
 
         [HttpPost]
-        public IActionResult VerifyOtpEmailAndResetPass([FromBody] OtpRequestEmail request)
+        public async Task<IActionResult> VerifyOtpEmailAndResetPass([FromBody] OtpRequestEmail request)
         {
 
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Otp))
@@ -73,6 +73,10 @@ namespace BE.Controllers.UserHomeController
             if (isValid)
             {
                 var newPassword = GenerateRandomPassword();
+                var user = _onlineLearningSystemContext.Users.FirstOrDefault(x => x.Email == request.Email);
+                user.Password = newPassword;
+                _onlineLearningSystemContext.Update(user);
+                await _onlineLearningSystemContext.SaveChangesAsync();
                 _emailService.SendEmailAsync(new Mailrequest { Email = request.Email, Subject = "New password", Emailbody = $"Your new password is: {newPassword}" });
                 return Ok("OTP verified successfully.");
             }
