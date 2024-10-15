@@ -15,6 +15,9 @@ import ExpertListAll from './pages/Home/component/expert/expert-list-all';
 import CourseListAll from './pages/Home/component/courses/course-list';
 import UserProfile from './pages/Home/component/user-profile';
 import ManageProfile from './pages/admin/component/profile';
+import Register from './layouts/registration';
+import ForgotPassword from './layouts/navbar/forgot-password';
+import Question from './pages/expert/component/question';
 function App() {
   return (
     <Routes>
@@ -25,6 +28,9 @@ function App() {
       <Route path="/experts" element={<ExpertListAll />} />
       <Route path="/courses" element={<CourseListAll />} />
       <Route path="/UserProfile" element={<ProtectedRoute requiredRole="Student"><UserProfile /></ProtectedRoute>}/>
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgotpassword" element={<ForgotPassword />} />
+
       {/**Admin */}
       <Route path="/admin/home/" element={<ProtectedRoute requiredRole="Admin"><AdminHome /></ProtectedRoute>}>
         <Route path="employee-profile" element={<Employee />} />
@@ -36,8 +42,7 @@ function App() {
         <Route path="lesson-manage" element={<LessonManage />} />
         <Route path="quiz-manage" element={<QuizManage />} />
         <Route path="user-profile" element={<ManageProfile />} />
-
-
+        <Route path="question/:quizId" element={<Question />} />
       </Route>
     </Routes>
 
