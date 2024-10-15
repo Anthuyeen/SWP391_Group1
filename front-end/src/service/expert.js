@@ -21,18 +21,5 @@ export const fetchAllExperts = async () => {
         throw error; // Ném lỗi nếu cần xử lý ở nơi khác
     }
 };
-//get expert by id
-export const fetchExpertById = async (id) => {
-    try {
-      const response = await fetch(`https://localhost:7043/api/UserManagement/GetExpertById/${id}`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching expert by id:', error);
-      throw error;
-    }
-  };
+
   
