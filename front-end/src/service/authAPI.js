@@ -17,22 +17,7 @@ export const fetchLogin = async (email, password) => {
     const data = await response.json();
     return data.token; // Giả sử token được trả về từ trường 'token'
 };
-//register
-export const fetchRegister = async (userData) => {
-    const response = await fetch('https://localhost:7043/api/Authentication/Register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-    });
 
-    if (!response.ok) {
-        throw new Error('Đăng ký thất bại');
-    }
-
-    return response.json();
-};
 //send otp to mail
 export const sendOtpEmail = async (email) => {
     const url = `https://localhost:7043/api/Authentication/SendOtpEmail?email=${encodeURIComponent(email)}`;
