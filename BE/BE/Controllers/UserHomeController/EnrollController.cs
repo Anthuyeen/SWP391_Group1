@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BE.Controllers.UserHomeController
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class EnrollController : ControllerBase
     {
