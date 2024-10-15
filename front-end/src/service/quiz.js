@@ -252,32 +252,5 @@ export const editQuestion = async (questionId, updatedQuestion) => {
 // };
 
 
-export const addQuestionsToQuiz = async (quizId, newQuestions) => {
-  const url = `https://localhost:7043/api/QA/AddQuestionsToQuiz/AddQuestionsToQuiz/${quizId}`;
-  
-  try {
-      const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(newQuestions), // Chuyển đổi đối tượng câu hỏi mới thành JSON
-      });
 
-      console.log('Response Status:', response.status); // In mã trạng thái
-
-      if (!response.ok) {
-          // Kiểm tra phản hồi có thể không phải là JSON
-          const errorText = await response.text(); // Đọc phản hồi như văn bản
-          throw new Error(`Failed to add questions to the quiz: ${errorText}`);
-      }
-
-      // Đọc phản hồi như văn bản khi thành công
-      const successMessage = await response.text();
-      return successMessage; 
-  } catch (error) {
-      console.error('Error adding questions to quiz:', error);
-      throw error; 
-  }
-};
 
