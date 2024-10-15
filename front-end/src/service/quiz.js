@@ -103,7 +103,7 @@ export const fetchSubjectsByExpert = async (expertId) => {
     }
 
     const data = await response.json();
-    return data.$values; // Giả sử data là một mảng các subject
+    return data; // Giả sử data là một mảng các subject
   } catch (error) {
     console.error('Error fetching subjects by expert:', error);
     throw error;
