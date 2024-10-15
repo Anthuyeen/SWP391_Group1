@@ -59,10 +59,7 @@ namespace BE.Controllers.Expert
                 return BadRequest("Name cannot be null or empty.");
             }
 
-            if (!validLevels.Contains(editQuizDto.Level))
-            {
-                return BadRequest("Invalid level. Allowed values are 'Easy', 'Medium', and 'Hard'.");
-            }
+        
 
             if (!validTypes.Contains(editQuizDto.Type))
             {

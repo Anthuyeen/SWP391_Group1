@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Drawer, List, ListItem, ListItemText, Box, Button } from '@mui/material';
 import { useNavigate, Outlet, useLocation, Link } from 'react-router-dom';
+import { fetchUserById } from '../../../service/profile-manage'; // Cập nhật đường dẫn
 
 const sidebarOptions = [
     { id: 5, label: 'Expert Manager', path: '/admin/home/employee-profile' },
@@ -11,10 +12,30 @@ const AdminPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [userName, setUserName] = useState(`Hi ${localStorage.getItem('name')}`);
+    const userId = localStorage.getItem("id");
+    const [user, setUser] = useState(null);
+
     const handleListItemClick = (path) => {
         navigate(path); // Điều hướng đến URL
     };
+    useEffect(() => {
+        const getUserData = async () => {
+            try {
+                console.log("Fetching user with ID:", userId);
+                const data = await fetchUserById(userId);
+                console.log("User data received:", data);
+                setUser(data);
+            } catch (err) {
+            } finally {
+            }
+        };
 
+        if (userId) {
+            getUserData();
+        } else {
+
+        }
+    }, [userId]);
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('expirationTime');
@@ -37,8 +58,8 @@ const AdminPage = () => {
                 }}
             >
                 <List>
-                <ListItem button component={Link} to="/admin/home/user-profile">
-                        <ListItemText primary={userName} /> {/* Sử dụng state userName */}
+                    <ListItem button component={Link} to="/admin/home/user-profile">
+                        <ListItemText primary={user ? `${user.firstName} ${user.midName} ${user.lastName}` : 'No Name'} />
                     </ListItem>
                     {sidebarOptions.map((option) => (
                         <ListItem button key={option.id} onClick={() => handleListItemClick(option.path)}>
