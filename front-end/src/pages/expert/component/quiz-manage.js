@@ -34,7 +34,7 @@ const QuizManage = () => {
       const expertId = localStorage.getItem("id"); // Lấy expertId từ localStorage
       if (expertId) {
         const data = await fetchQuizzesByExpert(expertId); // Fetch quizzes của expert
-        setQuizzes(data);
+        setQuizzes(data.$values);
       }
     } catch (error) {
       console.error("Failed to load quizzes", error);
@@ -45,7 +45,7 @@ const QuizManage = () => {
     try {
       const expertId = localStorage.getItem("id"); // Lấy expertId từ localStorage
       const data = await fetchSubjectsByExpert(expertId); // Fetch subjects từ API
-      setSubjects(data); // Giả sử data là một mảng các subject
+      setSubjects(data.$values); // Giả sử data là một mảng các subject
     } catch (error) {
       console.error("Failed to load subjects", error);
     }

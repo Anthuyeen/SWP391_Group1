@@ -15,7 +15,7 @@ export const fetchAllExperts = async () => {
         }
 
         const data = await response.json(); // parse JSON từ phản hồi
-        return data;
+        return data.$values;
     } catch (error) {
         console.error('Error fetching experts:', error);
         throw error; // Ném lỗi nếu cần xử lý ở nơi khác
