@@ -1,21 +1,28 @@
 import React, { useEffect, useState } from "react";
 import "../../../assets/css/quiz-manage.css";
 import { fetchQuizzesByExpert, addQuiz, editQuiz, deleteQuiz } from "../../../service/quiz";
-import { fetchAllSubjects } from "../../../service/subject";
+import { fetchSubjectsByExpert } from "../../../service/quiz"; // Sử dụng hàm mới
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { IconButton } from '@mui/material';
+import { red } from "@mui/material/colors";
+import InfoIcon from '@mui/icons-material/Info';
+import { useNavigate } from 'react-router-dom';
 
 const QuizManage = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [newQuiz, setNewQuiz] = useState({
     name: "",
-    level: "",
-    durationMinutes: 0,
-    passRate: 0,
+    durationMinutes: "",
+    passRate: "",
     type: "",
-    subjectId: null
+    subjectId: null,
+    status: ""
   });
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadSubjects(); // Load danh sách subjects
@@ -36,8 +43,9 @@ const QuizManage = () => {
 
   const loadSubjects = async () => {
     try {
-      const data = await fetchAllSubjects(); // Fetch subjects từ API
-      setSubjects(data);
+      const expertId = localStorage.getItem("id"); // Lấy expertId từ localStorage
+      const data = await fetchSubjectsByExpert(expertId); // Fetch subjects từ API
+      setSubjects(data); // Giả sử data là một mảng các subject
     } catch (error) {
       console.error("Failed to load subjects", error);
     }
@@ -48,14 +56,14 @@ const QuizManage = () => {
       setSelectedQuiz(quiz);
       setNewQuiz({
         name: quiz.name,
-        level: quiz.level,
         durationMinutes: quiz.durationMinutes,
         passRate: quiz.passRate,
         type: quiz.type,
-        subjectId: quiz.subjectId
+        subjectId: quiz.subjectId,
+        status: quiz.status
       });
     } else {
-      setNewQuiz({ name: "", level: "", durationMinutes: 0, passRate: 0, type: "", subjectId: null });
+      setNewQuiz({ name: "", durationMinutes: 0, passRate: 0, type: "", subjectId: null });
       setSelectedQuiz(null);
     }
     setIsModalOpen(true);
@@ -64,7 +72,7 @@ const QuizManage = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedQuiz(null);
-    setNewQuiz({ name: "", level: "", durationMinutes: 0, passRate: 0, type: "", subjectId: null });
+    setNewQuiz({ name: "", durationMinutes: 0, passRate: 0, type: "", subjectId: null });
   };
 
   const handleAddOrEdit = async () => {
@@ -104,7 +112,6 @@ const QuizManage = () => {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Level</th>
               <th>Duration (minutes)</th>
               <th>Pass Rate (%)</th>
               <th>Type</th>
@@ -116,22 +123,26 @@ const QuizManage = () => {
             {quizzes.map((q) => (
               <tr key={q.id}>
                 <td>{q.name}</td>
-                <td>{q.level}</td>
                 <td>{q.durationMinutes}</td>
                 <td>{q.passRate}</td>
                 <td>{q.type}</td>
                 <td>{q.subjectName}</td>
+
                 <td>
-                  <button className="edit-btn" onClick={() => openModal(q)}>
-                    Edit
-                  </button>
-                  <button
-                    className="delete-btn"
-                    onClick={() => handleDelete(q.id)}
+                  <IconButton onClick={() => openModal(q)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton sx={{ color: red[500] }} onClick={() => handleDelete(q.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                  <IconButton
+                    title="Xem các câu hỏi"
+                    onClick={() => navigate(`/Expert/Home/question/${q.id}`)} // Thay đổi đường dẫn đến trang Question
                   >
-                    Delete
-                  </button>
+                    <InfoIcon />
+                  </IconButton>
                 </td>
+
               </tr>
             ))}
           </tbody>
@@ -149,17 +160,6 @@ const QuizManage = () => {
               required
               placeholder="Enter Quiz Name"
             />
-            <select
-              value={newQuiz.level}
-              onChange={(e) => setNewQuiz({ ...newQuiz, level: e.target.value })}
-              className="select-input"
-              required
-            >
-              <option value="">Select Level</option>
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
             <input
               type="number"
               value={newQuiz.durationMinutes}
@@ -199,6 +199,13 @@ const QuizManage = () => {
                 </option>
               ))}
             </select>
+            <input
+              type="text"
+              value={newQuiz.status}
+              onChange={(e) => setNewQuiz({ ...newQuiz, status: e.target.value })}
+              required
+              placeholder="Enter status"
+            />
             <div className="modal-buttons">
               <button onClick={handleAddOrEdit}>
                 {selectedQuiz ? "Save Changes" : "Add Quiz"}

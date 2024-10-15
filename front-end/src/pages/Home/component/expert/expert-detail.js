@@ -1,39 +1,45 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'; // Import useParams để lấy id từ URL
+import { useParams } from 'react-router-dom';
 import { fetchExpertById } from '../../../../service/expert';
+import { fetchSubjectsByOwner } from '../../../../service/subject'; // Import hàm fetchSubjectsByOwner
 import { Container, Typography, Avatar, Grid, List, ListItem, ListItemText, CircularProgress, Alert } from '@mui/material';
 import Navbar from '../../../../layouts/navbar';
 import Footer from '../../../../layouts/footer';
+
 const ExpertDetail = () => {
-    const { id } = useParams(); // Lấy id từ URL
+    const { id } = useParams();
 
     const [expert, setExpert] = useState(null);
+    const [subjects, setSubjects] = useState([]); // Trạng thái cho subjects
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const loadExpert = async () => {
-            console.log('Fetching expert with id:', id); // Log id
+            console.log('Fetching expert with id:', id);
             try {
                 const data = await fetchExpertById(id);
-                console.log('Expert data received:', data); // Log dữ liệu nhận được
+                console.log('Expert data received:', data);
                 setExpert(data);
+
+                // Gọi fetchSubjectsByOwner sau khi nhận được dữ liệu expert
+                const subjectsData = await fetchSubjectsByOwner(data.id); // Giả sử `data.id` là ownerId
+                setSubjects(subjectsData);
             } catch (err) {
-                console.error('Error fetching expert:', err); // Log lỗi
+                console.error('Error fetching expert:', err);
                 setError('Failed to fetch expert details.');
             } finally {
                 setLoading(false);
             }
         };
 
-        if (id) { // Chỉ gọi API khi id không phải undefined
+        if (id) {
             loadExpert();
         } else {
-            console.log('No id found in URL'); // Log khi không có id
-            setLoading(false); // Đặt loading về false nếu không có id
+            console.log('No id found in URL');
+            setLoading(false);
         }
     }, [id]);
-
 
     if (loading) {
         return <CircularProgress />;
@@ -75,9 +81,9 @@ const ExpertDetail = () => {
 
                 <Typography variant="h5" gutterBottom>Subjects</Typography>
 
-                {expert.subjects.length > 0 ? (
+                {subjects.length > 0 ? ( // Thay expert.subjects thành subjects
                     <List>
-                        {expert.subjects.map((subject) => (
+                        {subjects.map((subject) => (
                             <ListItem key={subject.id}>
                                 <ListItemText
                                     primary={subject.name}
