@@ -84,11 +84,11 @@ const Employee = () => {
         }
 
         // Validate password
-        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
-        if (!passwordRegex.test(newUser.password)) {
-            errors.password =
-                'Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa và số';
-        }
+        // const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        // if (!passwordRegex.test(newUser.password)) {
+        //     errors.password =
+        //         'Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa và số';
+        // }
 
         // Check required fields
         if (!newUser.firstName) errors.firstName = 'Họ là bắt buộc';
