@@ -3,7 +3,7 @@
     public class EditQuestionDto
     {
         public string Content { get; set; }
-        public string MediaUrl { get; set; }
+        public string? MediaUrl { get; set; }
         public string Status { get; set; }
         public List<EditAnswerDto> Answers { get; set; }
     }

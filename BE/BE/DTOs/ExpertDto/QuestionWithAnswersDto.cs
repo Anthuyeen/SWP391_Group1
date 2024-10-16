@@ -3,7 +3,7 @@
     public class QuestionWithAnswersDto
     {
         public string Content { get; set; }
-        public string MediaUrl { get; set; }
+        public string? MediaUrl { get; set; }
         public string Status { get; set; }
         public List<AnswerOptionDto> Answers { get; set; }
     }

@@ -14,7 +14,7 @@
     {
         public int Id { get; set; }
         public string Content { get; set; }
-        public string MediaUrl { get; set; }
+        public string? MediaUrl { get; set; }
         public string Status { get; set; }
         public List<AnswerDto> Answers { get; set; }
     }

@@ -9,11 +9,7 @@ public partial class Post
 
     public string Title { get; set; } = null!;
 
-    public string? Thumbnail { get; set; }
-
     public string? BriefInfo { get; set; }
-
-    public string? Content { get; set; }
 
     public int? CategoryId { get; set; }
 
@@ -22,4 +18,8 @@ public partial class Post
     public string? Status { get; set; }
 
     public virtual Category? Category { get; set; }
+
+    public virtual ICollection<PostContent> PostContents { get; } = new List<PostContent>();
+
+    public virtual ICollection<PostImage> PostImages { get; } = new List<PostImage>();
 }

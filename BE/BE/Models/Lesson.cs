@@ -15,5 +15,7 @@ public partial class Lesson
 
     public string? Status { get; set; }
 
+    public string? Url { get; set; }
+
     public virtual Subject? Subject { get; set; }
 }
