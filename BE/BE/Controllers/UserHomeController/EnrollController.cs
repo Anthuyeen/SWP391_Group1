@@ -21,11 +21,14 @@ namespace BE.Controllers.UserHomeController
             try
             {
                 var reg = _learningSystemContext.Registrations.Where(x => x.UserId == accid).FirstOrDefault(x => x.SubjectId == subid);
-                if (reg == null || reg.Status == "Pending")
+                if (reg == null)
                 {
                     var subprice = _learningSystemContext.PricePackages.FirstOrDefault(x => x.SubjectId == subid);
                     return Ok(subprice.SalePrice);
 
+                }else if(reg.Status == "Pending")
+                {
+                    return Ok("Pending");
                 }
 
                 return Ok("Bạn đã đăng ký môn học này");
@@ -56,7 +59,7 @@ namespace BE.Controllers.UserHomeController
                         ValidFrom = DateTime.Now,
                         ValidTo = DateTime.Now.AddMonths(pp.DurationMonths)
                     };
-                    await _learningSystemContext.Registrations.AddAsync(reg);
+                    await _learningSystemContext.Registrations.AddAsync(reg1);
                     await _learningSystemContext.SaveChangesAsync();
                     return Ok(reg1);
                 }

@@ -3,14 +3,14 @@ import { useParams } from 'react-router-dom';
 import {
     Typography,
     Box,
+    Button,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
     List,
     ListItem,
     ListItemIcon,
     ListItemText,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    Button,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { ExpandMore, PlayCircleOutline, Article } from '@mui/icons-material';
 import { fetchSubjectById } from '../../../../service/subject';
+import { fetchRegistrationStatus } from '../../../../service/enroll'; // Import hàm kiểm tra đăng ký
 import Navbar from '../../../../layouts/navbar';
 import Footer from '../../../../layouts/footer';
 import SearchIcon from '@mui/icons-material/Search';
@@ -30,7 +31,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import { fetchLogin } from '../../../../service/authAPI';
 import { jwtDecode } from 'jwt-decode';
 import { fetchRegisterSubject } from '../../../../service/enroll'; // Import hàm fetchEnrollSubject từ service
-
 const CourseOverview = () => {
     const { courseId } = useParams();
     const [course, setCourse] = useState(null);
@@ -42,7 +42,8 @@ const CourseOverview = () => {
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
-    const [registrationInfo, setRegistrationInfo] = useState(null); // State lưu thông tin đăng ký
+    const [registrationInfo, setRegistrationInfo] = useState(null);
+    const [isRegistered, setIsRegistered] = useState(false); // Thêm state để kiểm tra đã đăng ký
 
     useEffect(() => {
         const loadCourse = async () => {
@@ -54,9 +55,30 @@ const CourseOverview = () => {
             }
         };
 
-        loadCourse();
-    }, [courseId]);
+        
 
+        loadCourse();
+        checkRegistration();
+    }, [courseId, isLoggedIn]);
+    const checkRegistration = async () => {
+        if (isLoggedIn) {
+            const accId = localStorage.getItem('id'); // Lấy accId từ localStorage
+            try {
+                const status = await fetchRegistrationStatus(accId, courseId);
+                if (status === "Bạn đã đăng ký môn học này") {
+                    setIsRegistered(true); // Người dùng đã đăng ký
+                } else if (status === "Pending") {
+                    setIsRegistered(false); // Người dùng chưa đăng ký
+                    setRegistrationInfo("Bạn chưa thanh toán khóa học này"); // Lưu thông báo
+                } else {
+                    setIsRegistered(false); // Người dùng chưa đăng ký
+                    setRegistrationInfo(status); // Lưu giá tiền môn học
+                }
+            } catch (err) {
+                console.error('Lỗi kiểm tra trạng thái đăng ký:', err);
+            }
+        }
+    };
     const handleOpenLogin = () => {
         setEmail('');
         setPassword('');
@@ -120,11 +142,12 @@ const CourseOverview = () => {
         if (!isLoggedIn) {
             handleOpenLogin();
         } else {
-            // Gọi API để đăng ký môn học
-            const accId = localStorage.getItem('id'); // Lấy accId từ localStorage
+            const accId = localStorage.getItem('id');
             try {
-                const response = await fetchRegisterSubject(accId, courseId); // Gọi API đăng ký
-                setRegistrationInfo(response); // Lưu thông tin đăng ký vào state
+                const response = await fetchRegisterSubject(accId, courseId);
+                setRegistrationInfo(response);
+                setIsRegistered(true); // Cập nhật trạng thái sau khi đăng ký thành công
+                await checkRegistration(); 
             } catch (error) {
                 console.error('Đăng ký thất bại:', error);
             }
@@ -142,9 +165,13 @@ const CourseOverview = () => {
                     {course.name}
                 </Typography>
 
-                {registrationInfo ? (
+                {isRegistered ? (
                     <Typography variant="h6" color="green" sx={{ marginBottom: 2 }}>
                         ĐÃ ĐĂNG KÍ
+                    </Typography>
+                ) : registrationInfo === "Bạn chưa thanh toán khóa học này" ? (
+                    <Typography variant="h6" color="red" sx={{ marginBottom: 2 }}>
+                        Bạn chưa thanh toán khóa học này
                     </Typography>
                 ) : (
                     <Button
@@ -190,7 +217,6 @@ const CourseOverview = () => {
             </Box>
             <Footer />
 
-            {/* Modal đăng nhập */}
             <Dialog open={openLogin} onClose={handleCloseLogin} maxWidth="xs" fullWidth>
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     Đăng nhập
