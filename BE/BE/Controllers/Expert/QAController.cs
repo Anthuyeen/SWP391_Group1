@@ -97,6 +97,7 @@ namespace BE.Controllers.Expert
                     {
                         Id = a.Id,
                         Content = a.Content,
+                        IsCorrect = a.IsCorrect,
                     }).ToList()
                 }).ToList()
             };

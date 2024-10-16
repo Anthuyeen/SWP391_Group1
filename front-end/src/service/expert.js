@@ -15,7 +15,7 @@ export const fetchAllExperts = async () => {
         }
 
         const data = await response.json(); // parse JSON từ phản hồi
-        return data;
+        return data.$values;
     } catch (error) {
         console.error('Error fetching experts:', error);
         throw error; // Ném lỗi nếu cần xử lý ở nơi khác
@@ -23,16 +23,16 @@ export const fetchAllExperts = async () => {
 };
 //get expert by id
 export const fetchExpertById = async (id) => {
-    try {
-      const response = await fetch(`https://localhost:7043/api/UserManagement/GetExpertById/${id}`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching expert by id:', error);
-      throw error;
+  try {
+    const response = await fetch(`https://localhost:7043/api/UserManagement/GetExpertById/${id}`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
     }
-  };
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching expert by id:', error);
+    throw error;
+  }
+};
   

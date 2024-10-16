@@ -15,7 +15,7 @@ export const fetchAllSubjects = async () => {
       }
 
       const data = await response.json();
-      return data; // Trả về dữ liệu nhận được
+      return data.$values; // Trả về dữ liệu nhận được
   } catch (error) {
       console.error('Failed to fetch subjects:', error);
       throw error; // Ném lỗi để xử lý ở nơi gọi hàm
@@ -39,7 +39,7 @@ try {
     }
 
     const data = await response.json();
-    return data; // Return the fetched categories
+    return data.$values; // Return the fetched categories
 } catch (error) {
     console.error('Failed to fetch categories:', error);
     throw error; // Throw error for further handling
@@ -156,7 +156,7 @@ export const fetchSubjectsByOwner = async (ownerId) => {
     }
 
     const data = await response.json();
-    return data;
+    return data.$values;
   } catch (error) {
     console.error('Failed to fetch subjects by owner:', error);
     throw error;
