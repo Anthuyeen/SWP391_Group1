@@ -21,12 +21,13 @@ namespace BE.Controllers.UserHomeController
             try
             {
                 var reg =  _learningSystemContext.Registrations.Where(x => x.UserId == accid).FirstOrDefault(x => x.SubjectId == subid);
-                if (reg == null)
+                if (reg == null || reg.Status == "Pending")
                 {
                     var subprice = _learningSystemContext.PricePackages.FirstOrDefault(x => x.SubjectId == subid);
                     return Ok(subprice.SalePrice);
 
                 }
+             
                 return Ok("Bạn đã đăng ký môn học này");
             } catch (Exception ex)
             {
