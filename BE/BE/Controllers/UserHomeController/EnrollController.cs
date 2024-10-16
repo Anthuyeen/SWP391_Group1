@@ -15,6 +15,25 @@ namespace BE.Controllers.UserHomeController
             _learningSystemContext = learningSystemContext;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> CheckStatusSubject(int accid, int subid)
+        {
+            try
+            {
+                var reg =  _learningSystemContext.Registrations.Where(x => x.UserId == accid).FirstOrDefault(x => x.SubjectId == subid);
+                if (reg == null)
+                {
+                    var subprice = _learningSystemContext.PricePackages.FirstOrDefault(x => x.SubjectId == subid);
+                    return Ok(subprice.SalePrice);
+
+                }
+                return Ok("Bạn đã đăng ký môn học này");
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
         [HttpPost]
         public async Task<IActionResult> RegisterSubject(int accid, int subid)
         {
