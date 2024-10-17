@@ -271,6 +271,33 @@ namespace BE.Controllers.Expert
                 IsPassed = quizAttempt.IsPassed
             };
         }
+        [HttpGet("GetQuizzesBySubject/{subjectId}")]
+        public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesBySubject(int subjectId)
+        {
+            var subjectExists = await _context.Subjects.AnyAsync(s => s.Id == subjectId);
+            if (!subjectExists)
+            {
+                return NotFound("Subject not found.");
+            }
+
+            var quizzes = await _context.Quizzes
+                .Include(q => q.Subject)
+                .Where(q => q.SubjectId == subjectId)
+                .Select(q => new QuizDto
+                {
+                    Id = q.Id,
+                    Name = q.Name,
+                    DurationMinutes = q.DurationMinutes,
+                    PassRate = q.PassRate,
+                    Type = q.Type,
+                    SubjectId = q.SubjectId,
+                    SubjectName = q.Subject.Name,
+                    Status = q.Status
+                })
+                .ToListAsync();
+
+            return Ok(quizzes);
+        }
 
 
         private bool QuizExists(int id)

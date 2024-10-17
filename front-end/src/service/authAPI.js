@@ -18,6 +18,22 @@ export const fetchLogin = async (email, password) => {
     return data.token; // Giả sử token được trả về từ trường 'token'
 };
 //register
+// export const fetchRegister = async (userData) => {
+//     const response = await fetch('https://localhost:7043/api/Authentication/Register', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(userData),
+//     });
+
+//     if (!response.ok) {
+//         throw new Error('Đăng ký thất bại');
+//     }
+
+//     return response.json();
+// };
+
 export const fetchRegister = async (userData) => {
     const response = await fetch('https://localhost:7043/api/Authentication/Register', {
         method: 'POST',
@@ -28,11 +44,13 @@ export const fetchRegister = async (userData) => {
     });
 
     if (!response.ok) {
-        throw new Error('Đăng ký thất bại');
+        const errorText = await response.text(); // Lấy thông báo lỗi từ response
+        throw new Error(errorText); // Ném lỗi với thông báo chi tiết
     }
 
     return response.json();
 };
+
 //send otp to mail
 export const sendOtpEmail = async (email) => {
     const url = `https://localhost:7043/api/Authentication/SendOtpEmail?email=${encodeURIComponent(email)}`;

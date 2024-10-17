@@ -162,7 +162,11 @@ const Question = () => {
             return updatedQuestions;
         });
     };
-
+    const handleDeleteAnswer = (index) => {
+        const updatedAnswers = newQuestion.answers.filter((_, i) => i !== index);
+        setNewQuestion((prev) => ({ ...prev, answers: updatedAnswers }));
+    };
+    
     return (
         <Container sx={{ mt: 4 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -306,6 +310,9 @@ const Question = () => {
                                 onChange={(e) => handleAnswerChange(index, e.target.value)}
                                 sx={{ mb: 2 }}
                             />
+                              <IconButton onClick={() => handleDeleteAnswer(index)} color="error">
+            <DeleteIcon />
+        </IconButton>
                         </Box>
                     ))}
                     <Button variant="contained" onClick={handleAddAnswer}>

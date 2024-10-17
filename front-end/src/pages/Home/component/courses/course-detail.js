@@ -214,6 +214,30 @@ const CourseOverview = () => {
                         </AccordionDetails>
                     </Accordion>
                 ))}
+                <Typography variant="body1" paragraph>
+    {course.description}
+</Typography>
+
+<Typography variant="h6" gutterBottom>
+    Các bài kiểm tra
+</Typography>
+{course.quizzes?.$values.length > 0 ? (
+    <List>
+        {course.quizzes.$values.map((quiz, index) => (
+            <ListItem key={index}>
+                <ListItemIcon>
+                    <Article />
+                </ListItemIcon>
+                <ListItemText primary={quiz.name} secondary={`Thời gian: ${quiz.durationMinutes} phút`} />
+            </ListItem>
+        ))}
+    </List>
+) : (
+    <Typography variant="body2" color="gray">
+        Không có bài kiểm tra nào cho khóa học này.
+    </Typography>
+)}
+
             </Box>
             <Footer />
 
