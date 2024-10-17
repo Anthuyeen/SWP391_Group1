@@ -48,7 +48,8 @@ namespace BE.Controllers.Expert
                         {
                             QuestionId = question.Id,
                             Content = answerDto.Content,
-                            IsCorrect = answerDto.IsCorrect
+                            IsCorrect = answerDto.IsCorrect,
+                            Status = answerDto.Status
                         };
 
                         _context.AnswerOptions.Add(answer);
@@ -98,6 +99,7 @@ namespace BE.Controllers.Expert
                         Id = a.Id,
                         Content = a.Content,
                         IsCorrect = a.IsCorrect,
+                        Status = a.Status
                     }).ToList()
                 }).ToList()
             };
@@ -117,7 +119,6 @@ namespace BE.Controllers.Expert
             }
 
             using var transaction = await _context.Database.BeginTransactionAsync();
-
             try
             {
                 // Update question properties
@@ -125,24 +126,42 @@ namespace BE.Controllers.Expert
                 question.MediaUrl = editQuestionDto.MediaUrl;
                 question.Status = editQuestionDto.Status;
 
-                // Remove existing answers
-                _context.AnswerOptions.RemoveRange(question.AnswerOptions);
+                // Get existing answers
+                var existingAnswers = question.AnswerOptions.ToDictionary(a => a.Id);
 
-                // Add new answers
                 foreach (var answerDto in editQuestionDto.Answers)
                 {
-                    var answer = new AnswerOption
+                    if (answerDto.Id.HasValue && existingAnswers.ContainsKey(answerDto.Id.Value))
                     {
-                        QuestionId = questionId,
-                        Content = answerDto.Content,
-                        IsCorrect = answerDto.IsCorrect
-                    };
-                    _context.AnswerOptions.Add(answer);
+                        // Update existing answer
+                        var existingAnswer = existingAnswers[answerDto.Id.Value];
+                        existingAnswer.Content = answerDto.Content;
+                        existingAnswer.IsCorrect = answerDto.IsCorrect;
+                        existingAnswer.Status = answerDto.Status;
+                        existingAnswers.Remove(answerDto.Id.Value);
+                    }
+                    else
+                    {
+                        // Add new answer
+                        var newAnswer = new AnswerOption
+                        {
+                            QuestionId = questionId,
+                            Content = answerDto.Content,
+                            IsCorrect = answerDto.IsCorrect,
+                            Status = answerDto.Status
+                        };
+                        _context.AnswerOptions.Add(newAnswer);
+                    }
+                }
+
+                // Set status = false for answers not in the update list (soft delete)
+                foreach (var remainingAnswer in existingAnswers.Values)
+                {
+                    remainingAnswer.Status = false;
                 }
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-
                 return Ok("Question and answers updated successfully.");
             }
             catch (Exception ex)

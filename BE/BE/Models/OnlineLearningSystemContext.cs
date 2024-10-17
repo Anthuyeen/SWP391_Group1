@@ -66,6 +66,7 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.Property(e => e.Content).HasColumnName("content");
             entity.Property(e => e.IsCorrect).HasColumnName("is_correct");
             entity.Property(e => e.QuestionId).HasColumnName("question_id");
+            entity.Property(e => e.Status).HasColumnName("status");
 
             entity.HasOne(d => d.Question).WithMany(p => p.AnswerOptions)
                 .HasForeignKey(d => d.QuestionId)
@@ -175,15 +176,11 @@ public partial class OnlineLearningSystemContext : DbContext
 
         modelBuilder.Entity<PostImage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__POST_IMA__3213E83F617258E5");
-
             entity.ToTable("POST_IMAGES");
 
             entity.HasIndex(e => e.PostId, "idx_post_images_post_id");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
             entity.Property(e => e.PostId).HasColumnName("post_id");
             entity.Property(e => e.Url)

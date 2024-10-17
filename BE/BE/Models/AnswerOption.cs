@@ -13,6 +13,8 @@ public partial class AnswerOption
 
     public bool IsCorrect { get; set; }
 
+    public bool Status { get; set; }
+
     public virtual Question? Question { get; set; }
 
     public virtual ICollection<UserAnswer> UserAnswers { get; } = new List<UserAnswer>();
