@@ -18,6 +18,7 @@ import ManageProfile from './pages/admin/component/profile';
 import Register from './layouts/registration';
 import ForgotPassword from './layouts/navbar/forgot-password';
 import Question from './pages/expert/component/question';
+import AddQuestion from './pages/expert/component/add-question';
 function App() {
   return (
     <Routes>
@@ -43,6 +44,8 @@ function App() {
         <Route path="quiz-manage" element={<QuizManage />} />
         <Route path="user-profile" element={<ManageProfile />} />
         <Route path="question/:quizId" element={<Question />} />
+        <Route path="add-question/:quizId" element={<AddQuestion />} />
+
       </Route>
     </Routes>
 
