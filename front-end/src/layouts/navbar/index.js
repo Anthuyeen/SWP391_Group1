@@ -189,6 +189,13 @@ const Navbar = () => {
                         >
                             Khóa học
                         </Button>
+                        <Button
+                            color="inherit"
+                            sx={{ textTransform: 'none' }}
+                            onClick={() => navigate('/post')} // Điều hướng đến trang Khóa học
+                        >
+                            Tin tức
+                        </Button>
                     </Box>
 
                     <TextField
