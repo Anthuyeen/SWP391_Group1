@@ -15,7 +15,7 @@ export const fetchLessonsBySubjectId = async (subjectId) => {
         }
 
         const data = await response.json();
-        return data;
+        return data.$values;
     } catch (error) {
         console.error('Failed to fetch lessons:', error);
         throw error;

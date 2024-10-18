@@ -81,22 +81,36 @@ const LessonManager = () => {
         setNewLesson({ subjectId: '', name: '', content: '', status: 'Active' });
     };
 
+    // const handleAddLessonSubmit = async () => {
+    //     try {
+    //         await addLesson(newLesson);
+    //         setLessonsBySubject(prev => ({
+    //             ...prev,
+    //             [newLesson.subjectId]: [
+    //                 ...(prev[newLesson.subjectId] || []),
+    //                 { ...newLesson, id: Date.now() }
+    //             ]
+    //         }));
+    //         handleAddLessonClose();
+    //     } catch (err) {
+    //         console.error('Failed to add lesson:', err);
+    //     }
+    // };
     const handleAddLessonSubmit = async () => {
         try {
             await addLesson(newLesson);
             setLessonsBySubject(prev => ({
                 ...prev,
-                [newLesson.subjectId]: [
-                    ...(prev[newLesson.subjectId] || []),
-                    { ...newLesson, id: Date.now() }
-                ]
+                [newLesson.subjectId]: Array.isArray(prev[newLesson.subjectId])
+                    ? [...prev[newLesson.subjectId], { ...newLesson, id: Date.now() }]
+                    : [{ ...newLesson, id: Date.now() }]
             }));
             handleAddLessonClose();
         } catch (err) {
             console.error('Failed to add lesson:', err);
         }
     };
-
+    
     // Mở dialog để chỉnh sửa bài học
     const handleEditLessonOpen = (lesson) => {
         setEditingLesson(lesson);
