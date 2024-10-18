@@ -13,7 +13,7 @@ export const fetchUsers = async () => {
         }
 
         const data = await response.json();
-        return data;
+        return data.$values;
     } catch (error) {
         console.error('There was an error fetching the users:', error);
         return null; 
