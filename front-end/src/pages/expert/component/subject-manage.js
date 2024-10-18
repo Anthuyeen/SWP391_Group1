@@ -187,6 +187,7 @@ const SubjectManage = () => {
       <Table>
         <TableHead>
           <TableRow>
+          <TableCell>ID</TableCell>
             <TableCell>Name</TableCell>
             <TableCell>Thumbnail</TableCell>
             <TableCell>Category</TableCell>
@@ -197,20 +198,38 @@ const SubjectManage = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {subjects.map((subject) => (
-            <TableRow key={subject.id}> {/* Đảm bảo subject.id là duy nhất */}
-              <TableCell>{subject.name}</TableCell>
-              <TableCell>{subject.thumbnail ? subject.thumbnail : 'No Image'}</TableCell>
-              <TableCell>{subject.categoryName}</TableCell> {/* Sử dụng categoryName từ JSON */}
-              <TableCell>{subject.isFeatured ? 'Yes' : 'No'}</TableCell>
-              <TableCell>{subject.description}</TableCell>
-              <TableCell>
-                <IconButton onClick={() => handleOpenEdit(subject)}><EditIcon /></IconButton>
-                <IconButton onClick={() => handleOpenDelete(subject)}><DeleteIcon /></IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+  {subjects.map((subject, index) => (
+    <TableRow key={index}>
+      {/* ID ảo tự tăng từ 1 */}
+      <TableCell>{index + 1}</TableCell> 
+      <TableCell>{subject.name}</TableCell>
+      <TableCell>
+        {subject.thumbnail ? (
+          <img 
+            src={subject.thumbnail} 
+            alt={subject.name} 
+            style={{ width: '200px', height: '110px', objectFit: 'cover' }} 
+          />
+        ) : (
+          'No Image'
+        )}
+      </TableCell>
+      <TableCell>{subject.categoryName}</TableCell>
+      <TableCell>{subject.isFeatured ? 'Yes' : 'No'}</TableCell>
+      <TableCell>{subject.description}</TableCell>
+      <TableCell>
+        <IconButton onClick={() => handleOpenEdit(subject)}>
+          <EditIcon />
+        </IconButton>
+        <IconButton onClick={() => handleOpenDelete(subject)}>
+          <DeleteIcon />
+        </IconButton>
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+
+
 
 
 
