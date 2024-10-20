@@ -31,6 +31,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { fetchLogin } from '../../../../service/authAPI';
 import { jwtDecode } from 'jwt-decode';
 import { fetchRegisterSubject } from '../../../../service/enroll'; // Import hàm fetchEnrollSubject từ service
+import { useNavigate } from 'react-router-dom';
 const CourseOverview = () => {
     const { courseId } = useParams();
     const [course, setCourse] = useState(null);
@@ -44,6 +45,7 @@ const CourseOverview = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
     const [registrationInfo, setRegistrationInfo] = useState(null);
     const [isRegistered, setIsRegistered] = useState(false); // Thêm state để kiểm tra đã đăng ký
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadCourse = async () => {
@@ -55,7 +57,7 @@ const CourseOverview = () => {
             }
         };
 
-        
+
 
         loadCourse();
         checkRegistration();
@@ -147,7 +149,7 @@ const CourseOverview = () => {
                 const response = await fetchRegisterSubject(accId, courseId);
                 setRegistrationInfo(response);
                 setIsRegistered(true); // Cập nhật trạng thái sau khi đăng ký thành công
-                await checkRegistration(); 
+                await checkRegistration();
             } catch (error) {
                 console.error('Đăng ký thất bại:', error);
             }
@@ -164,11 +166,15 @@ const CourseOverview = () => {
                 <Typography variant="h4" gutterBottom>
                     {course.name}
                 </Typography>
-
                 {isRegistered ? (
-                    <Typography variant="h6" color="green" sx={{ marginBottom: 2 }}>
-                        ĐÃ ĐĂNG KÍ
-                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="warning"
+                        onClick={() => navigate(`/lesson/${courseId}`)}  // Điều hướng tới trang khác
+                        sx={{ marginBottom: 2 }}
+                    >
+                        ĐI đến khóa học
+                    </Button>
                 ) : registrationInfo === "Bạn chưa thanh toán khóa học này" ? (
                     <Typography variant="h6" color="red" sx={{ marginBottom: 2 }}>
                         Bạn chưa thanh toán khóa học này
@@ -215,28 +221,28 @@ const CourseOverview = () => {
                     </Accordion>
                 ))}
                 <Typography variant="body1" paragraph>
-    {course.description}
-</Typography>
+                    {course.description}
+                </Typography>
 
-<Typography variant="h6" gutterBottom>
-    Các bài kiểm tra
-</Typography>
-{course.quizzes?.$values.length > 0 ? (
-    <List>
-        {course.quizzes.$values.map((quiz, index) => (
-            <ListItem key={index}>
-                <ListItemIcon>
-                    <Article />
-                </ListItemIcon>
-                <ListItemText primary={quiz.name} secondary={`Thời gian: ${quiz.durationMinutes} phút`} />
-            </ListItem>
-        ))}
-    </List>
-) : (
-    <Typography variant="body2" color="gray">
-        Không có bài kiểm tra nào cho khóa học này.
-    </Typography>
-)}
+                <Typography variant="h6" gutterBottom>
+                    Các bài kiểm tra
+                </Typography>
+                {course.quizzes?.$values.length > 0 ? (
+                    <List>
+                        {course.quizzes.$values.map((quiz, index) => (
+                            <ListItem key={index}>
+                                <ListItemIcon>
+                                    <Article />
+                                </ListItemIcon>
+                                <ListItemText primary={quiz.name} secondary={`Thời gian: ${quiz.durationMinutes} phút`} />
+                            </ListItem>
+                        ))}
+                    </List>
+                ) : (
+                    <Typography variant="body2" color="gray">
+                        Không có bài kiểm tra nào cho khóa học này.
+                    </Typography>
+                )}
 
             </Box>
             <Footer />

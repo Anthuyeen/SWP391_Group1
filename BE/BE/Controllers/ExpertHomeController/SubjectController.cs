@@ -216,7 +216,8 @@ namespace BE.Controllers.Expert
                     Name = l.Name,
                     Content = l.Content,
                     Status = l.Status,
-                    SubjectId = l.SubjectId
+                    SubjectId = l.SubjectId,
+                    Url = l.Url
                     // Bạn có thể thêm các thuộc tính khác nếu cần
                 })
                 .ToListAsync();
@@ -289,7 +290,8 @@ namespace BE.Controllers.Expert
                 {
                     Id = l.Id,
                     Name = l.Name,
-                    Status = l.Status
+                    Status = l.Status,
+                    Url = l.Url
                 }).ToList(),
 
                 Dimensions = subject.Dimensions.Select(d => new DimensionSummaryDto

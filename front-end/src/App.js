@@ -21,6 +21,7 @@ import Question from './pages/expert/component/question';
 import AddQuestion from './pages/expert/component/add-question';
 import ListPost from './pages/Home/component/blog/list-post';
 import PostDetail from './pages/Home/component/blog/view-post';
+import LessonLearn from './pages/Home/component/courses/lesson-video';
 function App() {
   return (
     <Routes>
@@ -35,6 +36,7 @@ function App() {
       <Route path="/forgotpassword" element={<ForgotPassword />} />
       <Route path="/post" element={<ListPost />} />
       <Route path="/post/:id" element={<PostDetail />} />
+      <Route path="/lesson/:courseId" element={<ProtectedRoute requiredRole="Student"><LessonLearn /></ProtectedRoute>}/>
 
       {/**Admin */}
       <Route path="/admin/home/" element={<ProtectedRoute requiredRole="Admin"><AdminHome /></ProtectedRoute>}>
