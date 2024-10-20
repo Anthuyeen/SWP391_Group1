@@ -201,7 +201,7 @@ const CourseOverview = () => {
                     {`${course.dimensions?.$values.length || 0} chương • ${course.lessons?.$values.length || 0} bài học`}
                 </Typography>
 
-                {course.dimensions?.$values.map((chapter, index) => (
+                {/* {course.dimensions?.$values.map((chapter, index) => (
                     <Accordion key={index}>
                         <AccordionSummary expandIcon={<ExpandMore />}>
                             <Typography>{`${index + 1}. ${chapter.name}`}</Typography>
@@ -219,11 +219,22 @@ const CourseOverview = () => {
                             </List>
                         </AccordionDetails>
                     </Accordion>
-                ))}
-                <Typography variant="body1" paragraph>
-                    {course.description}
-                </Typography>
+                ))} */}
 
+                <Accordion>
+                    <AccordionDetails>
+                        <List>
+                            {course.lessons?.$values.map((lesson, lessonIndex) => (
+                                <ListItem key={lessonIndex}>
+                                    <ListItemIcon>
+                                        {lesson.status === 'Active' ? <PlayCircleOutline /> : <Article />}
+                                    </ListItemIcon>
+                                    <ListItemText primary={lesson.name} />
+                                </ListItem>
+                            ))}
+                        </List>
+                    </AccordionDetails>
+                </Accordion>
                 <Typography variant="h6" gutterBottom>
                     Các bài kiểm tra
                 </Typography>
