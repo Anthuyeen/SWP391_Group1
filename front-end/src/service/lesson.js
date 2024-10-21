@@ -84,4 +84,24 @@ export const editLesson = async (lessonId, updatedLessonData) => {
       return { success: false, error: error.message };
     }
   };
-  
+// set status lesson
+export const updateLessonStatus = async (lessonId, status) => {
+    try {
+        const response = await fetch(`https://localhost:7043/api/Lesson/UpdateLessonStatus/${lessonId}/status`, {
+            method: 'PUT', // Hoặc 'PATCH' tùy thuộc vào API
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update lesson status');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error updating lesson status:', error);
+        throw error;
+    }
+};

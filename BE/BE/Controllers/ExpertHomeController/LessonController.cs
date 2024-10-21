@@ -65,6 +65,7 @@ namespace BE.Controllers.Expert
             lesson.Name = editLessonDto.Name;
             lesson.Content = editLessonDto.Content;
             lesson.Status = editLessonDto.Status;
+            lesson.Url = editLessonDto.Url;
 
             try
             {
@@ -108,7 +109,8 @@ namespace BE.Controllers.Expert
                 SubjectId = editLessonDto.SubjectId,
                 Name = editLessonDto.Name,
                 Content = editLessonDto.Content,
-                Status = editLessonDto.Status
+                Status = editLessonDto.Status,
+                Url = editLessonDto.Url,
             };
 
             _context.Lessons.Add(lesson);

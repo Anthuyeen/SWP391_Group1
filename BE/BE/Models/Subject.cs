@@ -23,6 +23,8 @@ public partial class Subject
 
     public virtual Category? Category { get; set; }
 
+    public virtual ICollection<Dimension> Dimensions { get; } = new List<Dimension>();
+
     public virtual ICollection<Lesson> Lessons { get; } = new List<Lesson>();
 
     public virtual User? Owner { get; set; }

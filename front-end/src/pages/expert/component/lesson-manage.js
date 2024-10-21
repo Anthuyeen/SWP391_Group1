@@ -8,7 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';  // Thêm icon edit
 import AddIcon from '@mui/icons-material/Add';
 import { fetchSubjectsByOwner } from '../../../service/subject';
-import { fetchLessonsBySubjectId, deleteLesson, addLesson, editLesson } from '../../../service/lesson'; // Thêm editLesson
+import { fetchLessonsBySubjectId, addLesson, editLesson, updateLessonStatus } from '../../../service/lesson'; // Thêm editLesson
 
 const LessonManager = () => {
     const [subjects, setSubjects] = useState([]);
@@ -19,8 +19,6 @@ const LessonManager = () => {
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [newLesson, setNewLesson] = useState({ subjectId: '', name: '', content: '', status: 'Active' });
     const [editingLesson, setEditingLesson] = useState(null); // State để lưu lesson đang được chỉnh sửa
-    const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // Quản lý mở/đóng dialog xóa
-    const [lessonToDelete, setLessonToDelete] = useState(null); // Quản lý bài học cần xóa
 
     useEffect(() => {
         const loadSubjects = async () => {
@@ -50,27 +48,6 @@ const LessonManager = () => {
         }
     };
 
-    const handleDeleteLesson = async (lessonId, subjectId) => {
-        try {
-            await deleteLesson(lessonId);
-            setLessonsBySubject(prev => ({
-                ...prev,
-                [subjectId]: prev[subjectId].filter(lesson => lesson.id !== lessonId)
-            }));
-        } catch (err) {
-            console.error('Failed to delete lesson:', err);
-        }
-    };
-    const handleDeleteLessonOpen = (lessonId, subjectId) => {
-        setLessonToDelete({ lessonId, subjectId }); // Lưu cả lessonId và subjectId
-        setOpenDeleteDialog(true);
-    };
-
-    const handleDeleteLessonClose = () => {
-        setOpenDeleteDialog(false);
-        setLessonToDelete(null);
-    };
-
     const handleAddLessonOpen = (subjectId) => {
         setNewLesson({ ...newLesson, subjectId });
         setOpenAddDialog(true);
@@ -81,21 +58,6 @@ const LessonManager = () => {
         setNewLesson({ subjectId: '', name: '', content: '', status: 'Active' });
     };
 
-    // const handleAddLessonSubmit = async () => {
-    //     try {
-    //         await addLesson(newLesson);
-    //         setLessonsBySubject(prev => ({
-    //             ...prev,
-    //             [newLesson.subjectId]: [
-    //                 ...(prev[newLesson.subjectId] || []),
-    //                 { ...newLesson, id: Date.now() }
-    //             ]
-    //         }));
-    //         handleAddLessonClose();
-    //     } catch (err) {
-    //         console.error('Failed to add lesson:', err);
-    //     }
-    // };
     const handleAddLessonSubmit = async () => {
         try {
             await addLesson(newLesson);
@@ -110,7 +72,7 @@ const LessonManager = () => {
             console.error('Failed to add lesson:', err);
         }
     };
-    
+
     // Mở dialog để chỉnh sửa bài học
     const handleEditLessonOpen = (lesson) => {
         setEditingLesson(lesson);
@@ -139,6 +101,21 @@ const LessonManager = () => {
             console.error('Failed to update lesson:', err);
         }
     };
+
+    const handleDeleteLesson = async (lesson) => {
+        try {
+            await updateLessonStatus(lesson.id, lesson.status === 'Active' ? 'Inactive' : 'Active');
+            setLessonsBySubject(prev => ({
+                ...prev,
+                [lesson.subjectId]: prev[lesson.subjectId].map(l =>
+                    l.id === lesson.id ? { ...l, status: l.status === 'Active' ? 'Inactive' : 'Active' } : l
+                )
+            }));
+        } catch (err) {
+            console.error('Failed to update lesson status:', err);
+        }
+    };
+    
 
     if (loading) {
         return <Box display="flex" justifyContent="center" alignItems="center" height="100vh"><CircularProgress /></Box>;
@@ -198,7 +175,7 @@ const LessonManager = () => {
                                                         <IconButton
                                                             edge="end"
                                                             aria-label="delete"
-                                                            onClick={() => handleDeleteLessonOpen(lesson.id, subject.id)}
+                                                            onClick={() => handleDeleteLesson(lesson)}
                                                         >
                                                             <DeleteIcon />
                                                         </IconButton>
@@ -254,22 +231,16 @@ const LessonManager = () => {
                         onChange={(e) => setNewLesson({ ...newLesson, content: e.target.value })}
                     />
                     <FormControl fullWidth margin="dense">
-                        <InputLabel shrink>Video File</InputLabel>
                         <TextField
-                            type="file"
-                            inputProps={{
-                                accept: "video/*"
-                            }}
-                            onChange={(e) => {
-                                const file = e.target.files[0];
-                                setNewLesson({ ...newLesson, videoFile: file });
-                            }}
-                            variant="outlined"
+                            label="YouTube Video Link"
+                            type="url"
+                            fullWidth
+                            value={newLesson.url || ''}
+                            onChange={(e) => setNewLesson({ ...newLesson, url: e.target.value })}
                         />
-                        <FormHelperText>
-                            {newLesson.videoFile ? `Selected file: ${newLesson.videoFile.name}` : 'Choose a video file from your computer'}
-                        </FormHelperText>
+                        <FormHelperText>Enter a valid YouTube video link.</FormHelperText>
                     </FormControl>
+
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleAddLessonClose} color="primary">Cancel</Button>
@@ -301,26 +272,18 @@ const LessonManager = () => {
                         onChange={(e) => setEditingLesson({ ...editingLesson, content: e.target.value })}
                     />
                     <FormControl fullWidth margin="dense">
-                        <InputLabel shrink>Video File</InputLabel>
                         <TextField
-                            type="file"
-                            inputProps={{
-                                accept: "video/*"
-                            }}
-                            onChange={(e) => {
-                                const file = e.target.files[0];
-                                setEditingLesson({ ...editingLesson, videoFile: file });
-                            }}
-                            variant="outlined"
+                            label="YouTube Video Link"
+                            type="url"
+                            fullWidth
+                            value={editingLesson?.url || ''}
+                            onChange={(e) => setEditingLesson({ ...editingLesson, url: e.target.value })}
                         />
                         <FormHelperText>
-                            {editingLesson?.videoFile
-                                ? `Selected file: ${editingLesson.videoFile.name}`
-                                : editingLesson?.videoPath
-                                    ? `Current video: ${editingLesson.videoPath}`
-                                    : 'Choose a video file from your computer'}
+                            {editingLesson?.url ? 'Current video link: ' + editingLesson.url : 'Enter a valid YouTube video link.'}
                         </FormHelperText>
                     </FormControl>
+
                     <FormControl fullWidth margin="dense">
                         <InputLabel>Status</InputLabel>
                         <Select
@@ -337,25 +300,6 @@ const LessonManager = () => {
                     <Button onClick={handleEditLessonSubmit} color="primary">Save</Button>
                 </DialogActions>
             </Dialog>
-            
-            {/**xóa */}
-            <Dialog
-                open={openDeleteDialog}
-                onClose={handleDeleteLessonClose}
-            >
-                <DialogTitle>Confirm Delete</DialogTitle>
-                <DialogContent>
-                    <Typography>Are you sure you want to delete this lesson?</Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleDeleteLessonClose} color="primary">Cancel</Button>
-                    <Button onClick={() => {
-                        handleDeleteLesson(lessonToDelete.lessonId, lessonToDelete.subjectId); // Truyền cả hai tham số
-                        handleDeleteLessonClose();
-                    }} color="secondary">Delete</Button>
-                </DialogActions>
-            </Dialog>
-
         </Box>
     );
 };
