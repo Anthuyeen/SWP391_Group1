@@ -126,43 +126,96 @@ namespace BE.Controllers.Expert
             return NoContent();
         }
 
-        [HttpDelete("DeleteQuiz/{id}")]
-        public async Task<IActionResult> DeleteQuiz(int id)
+        [HttpGet("{quizId}")]
+        public async Task<ActionResult<QuizDto>> GetQuizById(int quizId)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            var quiz = await _context.Quizzes.FindAsync(quizId);
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+
+            var quizDto = new QuizDto
+            {
+                Id = quiz.Id,
+                Name = quiz.Name,
+                DurationMinutes = quiz.DurationMinutes,
+                PassRate = quiz.PassRate,
+                Type = quiz.Type,
+                SubjectId = quiz.SubjectId,
+                Status = quiz.Status,
+            };
+
+            return quizDto;
+        }
+
+        [HttpPut("{quizId}/status")]
+        public async Task<ActionResult> EditQuizStatus(int quizId)
+        {
+            var quiz = await _context.Quizzes.FindAsync(quizId);
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+
+            quiz.Status = quiz.Status == "Published" ? "Draft" : "Published";
 
             try
             {
-                var quiz = await _context.Quizzes
-                    .Include(q => q.Questions)
-                    .ThenInclude(q => q.AnswerOptions)
-                    .FirstOrDefaultAsync(q => q.Id == id);
-
-                if (quiz == null)
-                {
-                    return NotFound("Quiz not found.");
-                }
-
-                foreach (var question in quiz.Questions)
-                {
-                    _context.AnswerOptions.RemoveRange(question.AnswerOptions);
-                }
-
-                _context.Questions.RemoveRange(quiz.Questions);
-
-                _context.Quizzes.Remove(quiz);
-
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return NoContent();
             }
-            catch (Exception ex)
+            catch (DbUpdateConcurrencyException)
             {
-                await transaction.RollbackAsync();
-                return StatusCode(500, $"An error occurred while deleting the quiz: {ex.Message}");
+                if (!QuizExists(quizId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
             }
+
+            return Ok(await GetQuizById(quizId));
         }
+
+        //[HttpDelete("DeleteQuiz/{id}")]
+        //public async Task<IActionResult> DeleteQuiz(int id)
+        //{
+        //    using var transaction = await _context.Database.BeginTransactionAsync();
+
+        //    try
+        //    {
+        //        var quiz = await _context.Quizzes
+        //            .Include(q => q.Questions)
+        //            .ThenInclude(q => q.AnswerOptions)
+        //            .FirstOrDefaultAsync(q => q.Id == id);
+
+        //        if (quiz == null)
+        //        {
+        //            return NotFound("Quiz not found.");
+        //        }
+
+        //        foreach (var question in quiz.Questions)
+        //        {
+        //            _context.AnswerOptions.RemoveRange(question.AnswerOptions);
+        //        }
+
+        //        _context.Questions.RemoveRange(quiz.Questions);
+
+        //        _context.Quizzes.Remove(quiz);
+
+        //        await _context.SaveChangesAsync();
+        //        await transaction.CommitAsync();
+
+        //        return NoContent();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        await transaction.RollbackAsync();
+        //        return StatusCode(500, $"An error occurred while deleting the quiz: {ex.Message}");
+        //    }
+        //}
 
         [HttpGet("GetQuizzesByExpert/{expertId}")]
         public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesByExpert(int expertId)
@@ -504,6 +557,8 @@ namespace BE.Controllers.Expert
 
             return Ok(result); // Trả về 200 OK kèm theo kết quả
         }
+
+
         private bool QuizExists(int id)
         {
             return _context.Quizzes.Any(e => e.Id == id);

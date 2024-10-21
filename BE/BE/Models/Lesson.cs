@@ -17,5 +17,7 @@ public partial class Lesson
 
     public string? Url { get; set; }
 
+    public virtual ICollection<LessonCompletion> LessonCompletions { get; } = new List<LessonCompletion>();
+
     public virtual Subject? Subject { get; set; }
 }

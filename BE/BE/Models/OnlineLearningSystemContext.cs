@@ -19,9 +19,9 @@ public partial class OnlineLearningSystemContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<Dimension> Dimensions { get; set; }
-
     public virtual DbSet<Lesson> Lessons { get; set; }
+
+    public virtual DbSet<LessonCompletion> LessonCompletions { get; set; }
 
     public virtual DbSet<Post> Posts { get; set; }
 
@@ -88,27 +88,6 @@ public partial class OnlineLearningSystemContext : DbContext
                 .HasColumnName("type");
         });
 
-        modelBuilder.Entity<Dimension>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__DIMENSIO__3213E83F79A6A6CF");
-
-            entity.ToTable("DIMENSION");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.Name)
-                .HasMaxLength(100)
-                .HasColumnName("name");
-            entity.Property(e => e.SubjectId).HasColumnName("subject_id");
-            entity.Property(e => e.Type)
-                .HasMaxLength(20)
-                .HasColumnName("type");
-
-            entity.HasOne(d => d.Subject).WithMany(p => p.Dimensions)
-                .HasForeignKey(d => d.SubjectId)
-                .HasConstraintName("FK__DIMENSION__subje__571DF1D5");
-        });
-
         modelBuilder.Entity<Lesson>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__LESSON__3213E83FD574C87D");
@@ -131,6 +110,31 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.HasOne(d => d.Subject).WithMany(p => p.Lessons)
                 .HasForeignKey(d => d.SubjectId)
                 .HasConstraintName("FK__LESSON__subject___5812160E");
+        });
+
+        modelBuilder.Entity<LessonCompletion>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__LESSON_C__3213E83F45D22397");
+
+            entity.ToTable("LESSON_COMPLETION");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CompletionDate)
+                .HasColumnType("datetime")
+                .HasColumnName("completion_date");
+            entity.Property(e => e.LessonId).HasColumnName("lesson_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Lesson).WithMany(p => p.LessonCompletions)
+                .HasForeignKey(d => d.LessonId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__LESSON_CO__lesso__17036CC0");
+
+            entity.HasOne(d => d.User).WithMany(p => p.LessonCompletions)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__LESSON_CO__user___160F4887");
         });
 
         modelBuilder.Entity<Post>(entity =>

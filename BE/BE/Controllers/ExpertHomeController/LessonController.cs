@@ -29,7 +29,8 @@ namespace BE.Controllers.Expert
                     Content = l.Content,
                     Status = l.Status,
                     SubjectId = l.SubjectId,
-                    SubjectName = l.Subject.Name
+                    SubjectName = l.Subject.Name,
+                    Url = l.Url
                 })
                 .ToListAsync();
 
@@ -116,22 +117,85 @@ namespace BE.Controllers.Expert
             return NoContent();
         }
 
-        [HttpDelete("DeleteLesson/{id}")]
-        public async Task<IActionResult> DeleteLesson(int id)
+        [HttpGet("{lessonId}")]
+        public async Task<ActionResult<LessonDto>> GetLessonById(int lessonId)
         {
-            var lesson = await _context.Lessons.FindAsync(id);
-
+            var lesson = await _context.Lessons.FindAsync(lessonId);
             if (lesson == null)
             {
-                return NotFound("Lesson not found.");
+                return NotFound();
             }
 
-            _context.Lessons.Remove(lesson);
+            var lessonDto = new LessonDto
+            {
+                Id = lesson.Id,
+                Name = lesson.Name,
+                Content = lesson.Content,
+                Status = lesson.Status,
+                SubjectId = lesson.SubjectId,
+                Url = lesson.Url
+            };
 
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return lessonDto;
         }
+
+        [HttpPut("{lessonId}/status")]
+        public async Task<ActionResult> UpdateLessonStatus(int lessonId)
+        {
+            var lesson = await _context.Lessons.FindAsync(lessonId);
+            if (lesson == null)
+            {
+                return NotFound();
+            }
+
+            lesson.Status = lesson.Status == "Active" ? "Inactive" : "Active";
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!LessonExists(lessonId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok(await GetLessonById(lessonId));
+        }
+
+        [HttpGet("ListAllLessonComplete")]
+        public async Task<ActionResult<IEnumerable<Lesson>>> ListAllLessonComplete(int subjectId, int userId)
+        {
+            var lessonCompletions = await _context.LessonCompletions
+                .Where(lc => lc.Lesson.SubjectId == subjectId && lc.UserId == userId)
+                .Select(lc => lc.Lesson)
+                .ToListAsync();
+
+            return Ok(lessonCompletions);
+        }
+
+        //[HttpDelete("DeleteLesson/{id}")]
+        //public async Task<IActionResult> DeleteLesson(int id)
+        //{
+        //    var lesson = await _context.Lessons.FindAsync(id);
+
+        //    if (lesson == null)
+        //    {
+        //        return NotFound("Lesson not found.");
+        //    }
+
+        //    _context.Lessons.Remove(lesson);
+
+        //    await _context.SaveChangesAsync();
+
+        //    return NoContent();
+        //}
 
 
 
