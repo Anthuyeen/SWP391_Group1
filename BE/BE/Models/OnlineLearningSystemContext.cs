@@ -19,6 +19,8 @@ public partial class OnlineLearningSystemContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<Dimension> Dimensions { get; set; }
+
     public virtual DbSet<Lesson> Lessons { get; set; }
 
     public virtual DbSet<LessonCompletion> LessonCompletions { get; set; }
@@ -86,6 +88,27 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.Property(e => e.Type)
                 .HasMaxLength(20)
                 .HasColumnName("type");
+        });
+
+        modelBuilder.Entity<Dimension>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__DIMENSIO__3213E83FDB4BB65F");
+
+            entity.ToTable("DIMENSION");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
+            entity.Property(e => e.SubjectId).HasColumnName("subject_id");
+            entity.Property(e => e.Type)
+                .HasMaxLength(20)
+                .HasColumnName("type");
+
+            entity.HasOne(d => d.Subject).WithMany(p => p.Dimensions)
+                .HasForeignKey(d => d.SubjectId)
+                .HasConstraintName("FK__DIMENSION__subje__1DB06A4F");
         });
 
         modelBuilder.Entity<Lesson>(entity =>
