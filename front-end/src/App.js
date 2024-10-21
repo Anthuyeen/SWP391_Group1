@@ -22,6 +22,9 @@ import AddQuestion from './pages/expert/component/add-question';
 import ListPost from './pages/Home/component/blog/list-post';
 import PostDetail from './pages/Home/component/blog/view-post';
 import LessonLearn from './pages/Home/component/courses/lesson-video';
+import TakeQuiz from './pages/Home/component/courses/take-quiz';
+import QuizAttemp from './pages/Home/component/courses/quiz-attemp';
+import QuizAttemptDetail from './pages/Home/component/courses/quiz-attemp-deail';
 function App() {
   return (
     <Routes>
@@ -37,6 +40,9 @@ function App() {
       <Route path="/post" element={<ListPost />} />
       <Route path="/post/:id" element={<PostDetail />} />
       <Route path="/lesson/:courseId" element={<ProtectedRoute requiredRole="Student"><LessonLearn /></ProtectedRoute>}/>
+      <Route path="/quiz/:quizId" element={<ProtectedRoute requiredRole="Student"><TakeQuiz /></ProtectedRoute>}/>
+      <Route path="/quiz-attempt" element={<ProtectedRoute requiredRole="Student"><QuizAttemp /></ProtectedRoute>}/>
+      <Route path="//quiz-attempt-detail/:attemptId" element={<ProtectedRoute requiredRole="Student"><QuizAttemptDetail /></ProtectedRoute>}/>
 
       {/**Admin */}
       <Route path="/admin/home/" element={<ProtectedRoute requiredRole="Admin"><AdminHome /></ProtectedRoute>}>

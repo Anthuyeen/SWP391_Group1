@@ -32,6 +32,8 @@ import { fetchLogin } from '../../../../service/authAPI';
 import { jwtDecode } from 'jwt-decode';
 import { fetchRegisterSubject } from '../../../../service/enroll'; // Import hàm fetchEnrollSubject từ service
 import { useNavigate } from 'react-router-dom';
+import QuizIcon from '@mui/icons-material/Quiz';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 const CourseOverview = () => {
     const { courseId } = useParams();
     const [course, setCourse] = useState(null);
@@ -56,9 +58,6 @@ const CourseOverview = () => {
                 setError('Error loading course');
             }
         };
-
-
-
         loadCourse();
         checkRegistration();
     }, [courseId, isLoggedIn]);
@@ -156,6 +155,15 @@ const CourseOverview = () => {
         }
     };
 
+    const handleQuizDetailNavigate = (quizId) => {
+        navigate(`/quiz/${quizId}`);  // Điều hướng đến trang chi tiết quiz theo quizId
+    };
+
+    const handleQuizAttemptsNavigate = () => {
+        const userId = localStorage.getItem('id'); // Lấy userId từ localStorage
+        navigate(`/quiz-attempt/${userId}`); // Điều hướng đến trang quiz-attempt với userId
+    };
+
     if (error) return <div>{error}</div>;
     if (!course) return <div>Loading...</div>;
 
@@ -237,11 +245,27 @@ const CourseOverview = () => {
                 </Accordion>
                 <Typography variant="h6" gutterBottom>
                     Các bài kiểm tra
+                    <IconButton
+                        color="primary"
+                        onClick={() => navigate('/quiz-attempt')} // Điều hướng đến trang quiz-attempt
+                        sx={{ marginLeft: 2 }} // Thêm một chút khoảng cách bên trái
+                    >
+                        <ArrowForwardIcon />
+                    </IconButton>
                 </Typography>
+
                 {course.quizzes?.$values.length > 0 ? (
                     <List>
                         {course.quizzes.$values.map((quiz, index) => (
-                            <ListItem key={index}>
+                            <ListItem key={index} secondaryAction={
+                                <IconButton
+                                    edge="end"
+                                    color="warning"
+                                    onClick={() => handleQuizDetailNavigate(quiz.id)}  // Điều hướng theo quiz.id
+                                >
+                                    <QuizIcon />
+                                </IconButton>
+                            }>
                                 <ListItemIcon>
                                     <Article />
                                 </ListItemIcon>

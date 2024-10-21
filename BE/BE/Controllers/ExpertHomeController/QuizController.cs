@@ -299,7 +299,211 @@ namespace BE.Controllers.Expert
             return Ok(quizzes);
         }
 
+        //[HttpGet("user/{userId}")]
+        //public async Task<ActionResult<IEnumerable<QuizAttemptDto>>> GetQuizAttemptsByUserId(int userId)
+        //{
+        //    var quizAttempts = await _context.QuizAttempts
+        //        .Where(qa => qa.UserId == userId)
+        //        .Include(qa => qa.UserAnswers) // Bao gồm UserAnswers
+        //        .ToListAsync();
 
+        //    if (quizAttempts == null || quizAttempts.Count == 0)
+        //    {
+        //        return NotFound($"Không tìm thấy các lần làm bài kiểm tra cho UserId: {userId}");
+        //    }
+
+        //    // Chuyển đổi QuizAttempt thành QuizAttemptDto
+        //    var result = quizAttempts.Select(qa => new QuizAttemptDto
+        //    {
+        //        Id = qa.Id,
+        //        UserId = qa.UserId,
+        //        QuizId = qa.QuizId,
+        //        Score = qa.Score,
+        //        StartTime = qa.StartTime,
+        //        EndTime = qa.EndTime,
+        //        AttemptNumber = qa.AttemptNumber,
+        //        IsPassed = qa.IsPassed,
+        //        UserAnswers = qa.UserAnswers.Select(ua => new UserAnswerAttempDto
+        //        {
+        //            Id = ua.Id,
+        //            QuestionId = ua.QuestionId,
+        //            AnswerOptionId = ua.AnswerOptionId,
+        //            IsCorrect = ua.IsCorrect,
+        //            QuestionContent = ua.QuestionContent,
+        //            SelectedAnswerContent = ua.SelectedAnswerContent,
+        //            CorrectAnswerContent = ua.CorrectAnswerContent
+        //        }).ToList()
+        //    }).ToList();
+
+        //    return Ok(result);
+        //}
+        [HttpGet("user/{userId}")]
+        //public async Task<ActionResult<IEnumerable<QuizAttemptDto>>> GetQuizAttemptsByUserId(int userId)
+        //{
+        //    var quizAttempts = await _context.QuizAttempts
+        //        .Where(qa => qa.UserId == userId)
+        //        .Include(qa => qa.UserAnswers)
+        //        .Include(qa => qa.Quiz) // Bao gồm Quiz để lấy thông tin về các câu hỏi
+        //        .ThenInclude(q => q.Questions) // Bao gồm các câu hỏi
+        //        .ThenInclude(q => q.AnswerOptions) // Bao gồm các tùy chọn trả lời
+        //        .ToListAsync();
+
+        //    if (quizAttempts == null || quizAttempts.Count == 0)
+        //    {
+        //        return NotFound($"Không tìm thấy các lần làm bài kiểm tra cho UserId: {userId}");
+        //    }
+
+        //    var result = quizAttempts.Select(qa => new QuizAttemptDto
+        //    {
+        //        Id = qa.Id,
+        //        UserId = qa.UserId,
+        //        QuizId = qa.QuizId,
+        //        Score = qa.Score,
+        //        StartTime = qa.StartTime,
+        //        EndTime = qa.EndTime,   
+        //        AttemptNumber = qa.AttemptNumber,
+        //        IsPassed = qa.IsPassed,
+        //        UserAnswers = qa.UserAnswers.Select(ua => new UserAnswerAttempDto
+        //        {
+        //            Id = ua.Id,
+        //            QuestionId = ua.QuestionId,
+        //            AnswerOptionId = ua.AnswerOptionId,
+        //            IsCorrect = ua.IsCorrect,
+        //            QuestionContent = ua.QuestionContent,
+        //            SelectedAnswerContent = ua.SelectedAnswerContent,
+        //            CorrectAnswerContent = ua.CorrectAnswerContent,
+        //            AnswerOptions = _context.Questions
+        //                .Where(q => q.Id == ua.QuestionId)
+        //                .SelectMany(q => q.AnswerOptions.Select(ao => new AnswerOptionAttempDto
+        //                {
+        //                    Id = ao.Id,
+        //                    Content = ao.Content,
+        //                    IsCorrect = ao.IsCorrect
+        //                })).ToList()
+        //        }).ToList()
+        //    }).ToList();
+
+        //    return Ok(result);
+        //}
+        public async Task<ActionResult<IEnumerable<QuizAttemptDto>>> GetQuizAttemptsByUserId(int userId)
+        {
+            var quizAttempts = await _context.QuizAttempts
+                .Where(qa => qa.UserId == userId)
+                .Include(qa => qa.UserAnswers)
+                .Include(qa => qa.Quiz) // Bao gồm Quiz để lấy thông tin về các câu hỏi
+                .ThenInclude(q => q.Questions) // Bao gồm các câu hỏi
+                .ThenInclude(q => q.AnswerOptions) // Bao gồm các tùy chọn trả lời
+                .ToListAsync();
+
+            if (quizAttempts == null || quizAttempts.Count == 0)
+            {
+                return NotFound($"Không tìm thấy các lần làm bài kiểm tra cho UserId: {userId}");
+            }
+
+            var result = quizAttempts.Select(qa => new QuizAttemptDto
+            {
+                Id = qa.Id,
+                UserId = qa.UserId,
+                QuizId = qa.QuizId,
+                Score = qa.Score,
+                StartTime = qa.StartTime,
+                EndTime = qa.EndTime,
+                AttemptNumber = qa.AttemptNumber,
+                IsPassed = qa.IsPassed,
+                UserAnswers = qa.UserAnswers != null && qa.UserAnswers.Any()
+                    ? qa.UserAnswers.Select(ua => new UserAnswerAttempDto
+                    {
+                        Id = ua.Id,
+                        QuestionId = ua.QuestionId,
+                        AnswerOptionId = ua.AnswerOptionId,
+                        IsCorrect = ua.IsCorrect,
+                        QuestionContent = ua.QuestionContent,
+                        SelectedAnswerContent = ua.SelectedAnswerContent,
+                        CorrectAnswerContent = ua.CorrectAnswerContent,
+                        AnswerOptions = _context.Questions
+                            .Where(q => q.Id == ua.QuestionId)
+                            .SelectMany(q => q.AnswerOptions.Select(ao => new AnswerOptionAttempDto
+                            {
+                                Id = ao.Id,
+                                Content = ao.Content,
+                                IsCorrect = ao.IsCorrect
+                            })).ToList()
+                    }).ToList()
+                    : qa.Quiz.Questions.Select(q => new UserAnswerAttempDto
+                    {
+                        QuestionId = q.Id,
+                        QuestionContent = q.Content, // Hoặc thuộc tính chứa nội dung câu hỏi
+                        AnswerOptions = q.AnswerOptions.Select(ao => new AnswerOptionAttempDto
+                        {
+                            Id = ao.Id,
+                            Content = ao.Content,
+                            IsCorrect = ao.IsCorrect
+                        }).ToList()
+                    }).ToList()
+            }).ToList();
+
+            return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<QuizAttemptDto>> GetQuizAttemptById(int id)
+        {
+            var quizAttempt = await _context.QuizAttempts
+                .Include(qa => qa.UserAnswers)
+                .Include(qa => qa.Quiz)
+                    .ThenInclude(q => q.Questions)
+                        .ThenInclude(q => q.AnswerOptions)
+                .FirstOrDefaultAsync(qa => qa.Id == id);
+
+            if (quizAttempt == null)
+            {
+                return NotFound(); // Trả về 404 nếu không tìm thấy
+            }
+
+            var result = new QuizAttemptDto
+            {
+                Id = quizAttempt.Id,
+                UserId = quizAttempt.UserId,
+                QuizId = quizAttempt.QuizId,
+                Score = quizAttempt.Score,
+                StartTime = quizAttempt.StartTime,
+                EndTime = quizAttempt.EndTime,
+                AttemptNumber = quizAttempt.AttemptNumber,
+                IsPassed = quizAttempt.IsPassed,
+                UserAnswers = quizAttempt.UserAnswers != null && quizAttempt.UserAnswers.Any()
+                    ? quizAttempt.UserAnswers.Select(ua => new UserAnswerAttempDto
+                    {
+                        Id = ua.Id,
+                        QuestionId = ua.QuestionId,
+                        AnswerOptionId = ua.AnswerOptionId,
+                        IsCorrect = ua.IsCorrect,
+                        QuestionContent = ua.QuestionContent,
+                        SelectedAnswerContent = ua.SelectedAnswerContent,
+                        CorrectAnswerContent = ua.CorrectAnswerContent,
+                        AnswerOptions = _context.Questions
+                            .Where(q => q.Id == ua.QuestionId)
+                            .SelectMany(q => q.AnswerOptions.Select(ao => new AnswerOptionAttempDto
+                            {
+                                Id = ao.Id,
+                                Content = ao.Content,
+                                IsCorrect = ao.IsCorrect
+                            })).ToList()
+                    }).ToList()
+                    : quizAttempt.Quiz.Questions.Select(q => new UserAnswerAttempDto
+                    {
+                        QuestionId = q.Id,
+                        QuestionContent = q.Content,
+                        AnswerOptions = q.AnswerOptions.Select(ao => new AnswerOptionAttempDto
+                        {
+                            Id = ao.Id,
+                            Content = ao.Content,
+                            IsCorrect = ao.IsCorrect
+                        }).ToList()
+                    }).ToList()
+            };
+
+            return Ok(result); // Trả về 200 OK kèm theo kết quả
+        }
         private bool QuizExists(int id)
         {
             return _context.Quizzes.Any(e => e.Id == id);

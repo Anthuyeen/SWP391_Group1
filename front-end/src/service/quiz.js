@@ -280,4 +280,100 @@ export const addQuestionsToQuiz = async (quizId, newQuestions) => {
   }
 };
 
+//quiz detail
+export const fetchQuizDetails = async (quizId) => {
+  try {
+      const response = await fetch(`https://localhost:7043/api/QA/GetQuizDetails/GetQuizDetails/${quizId}`, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+              // Nếu API yêu cầu token để xác thực, thêm Authorization header
+              // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+      });
 
+      if (!response.ok) {
+          throw new Error(`Error fetching quiz details: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data; // Trả về dữ liệu quiz
+  } catch (error) {
+      console.error('Lỗi khi gọi API lấy chi tiết quiz:', error);
+      throw error; // Ném lỗi để xử lý tiếp ở component gọi hàm này
+  }
+};
+
+//submit quiz
+export const submitQuiz = async (quizId, userId, startTime, answers) => {
+  try {
+    const response = await fetch('https://localhost:7043/api/Quiz/SubmitQuiz/SubmitQuiz', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        quizId,
+        userId,
+        startTime,
+        answers
+      }),
+    });
+
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error('Failed to submit quiz:', response.status);
+    }
+  } catch (error) {
+    console.error('Error submitting quiz:', error);
+  }
+};
+// get quiz attemp
+export const fetchQuizAttemptsByUserId = async (userId) => {
+  try {
+      const response = await fetch(`https://localhost:7043/api/Quiz/GetQuizAttemptsByUserId/user/${userId}`, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+              // Thêm các header khác nếu cần, ví dụ: Authorization
+          },
+      });
+
+      // Kiểm tra nếu phản hồi không thành công
+      if (!response.ok) {
+          throw new Error(`Error: ${response.status} - ${response.statusText}`);
+      }
+
+      // Chuyển đổi phản hồi thành JSON
+      const data = await response.json();
+      return data.$values;
+  } catch (error) {
+      console.error('Lỗi khi gọi API:', error);
+      throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
+  }
+};
+
+//get quiz user take by attemp id
+export const fetchQuizAttemptById = async (quizAttemptId) => {
+  try {
+      const response = await fetch(`https://localhost:7043/api/Quiz/GetQuizAttemptById/${quizAttemptId}`, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+              // Nếu cần token hoặc bất kỳ header nào khác, thêm vào đây
+              // 'Authorization': `Bearer ${token}`
+          },
+      });
+
+      if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data; // Trả về dữ liệu
+  } catch (error) {
+      console.error('Failed to fetch quiz attempt:', error);
+      throw error; // Ném lỗi ra ngoài để xử lý ở nơi gọi
+  }
+};
