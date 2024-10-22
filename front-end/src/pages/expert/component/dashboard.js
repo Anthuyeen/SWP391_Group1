@@ -7,6 +7,7 @@ const sidebarOptions = [
     { label: 'Lesson Manager', path: '/Expert/Home/lesson-manage' },
     { label: 'Quiz Manager', path: '/Expert/Home/quiz-manage' },
 
+
 ];
 
 const ExpertPage = () => {

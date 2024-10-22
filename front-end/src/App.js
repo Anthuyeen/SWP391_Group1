@@ -57,7 +57,6 @@ function App() {
         <Route path="user-profile" element={<ManageProfile />} />
         <Route path="question/:quizId" element={<Question />} />
         <Route path="add-question/:quizId" element={<AddQuestion />} />
-
       </Route>
     </Routes>
 

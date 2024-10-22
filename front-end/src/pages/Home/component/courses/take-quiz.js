@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Checkbox, Typography, Box, Grid } from '@mui/material';
 import { fetchQuizDetails, submitQuiz } from './../../../../service/quiz'; // Hàm fetch nằm ở file khác
-
+import Navbar from '../../../../layouts/navbar';
+import Footer from '../../../../layouts/footer';
 const TakeQuiz = () => {
     const { quizId } = useParams(); // Lấy quizId từ URL
     const navigate = useNavigate(); // Hook để điều hướng
@@ -77,69 +78,73 @@ const TakeQuiz = () => {
     };
 
     return (
-        <Box sx={{ p: 3 }}>
-            {quizData ? (
-                <>
-                    <Typography variant="h4">{quizData.name}</Typography>
-                    {showQuestions ? (
-                        <Typography variant="subtitle1">
-                            Thời gian còn lại: {formatTime(timeLeft)}
-                        </Typography>
-                    ) : (
-                        <Typography variant="subtitle1">
-                            Thời gian làm bài: {quizData.durationMinutes} phút
-                        </Typography>
-                    )}
+        <>
+            <Navbar />
+            <Box sx={{ p: 3 }}>
+                {quizData ? (
+                    <>
+                        <Typography variant="h4">{quizData.name}</Typography>
+                        {showQuestions ? (
+                            <Typography variant="subtitle1">
+                                Thời gian còn lại: {formatTime(timeLeft)}
+                            </Typography>
+                        ) : (
+                            <Typography variant="subtitle1">
+                                Thời gian làm bài: {quizData.durationMinutes} phút
+                            </Typography>
+                        )}
 
-                    {!showQuestions && ( // Ẩn nút khi đã bấm "Làm bài kiểm tra"
-                        <Button 
-                            variant="contained" 
-                            color="primary" 
-                            onClick={handleStartQuiz}
-                            sx={{ mt: 2 }}
-                        >
-                            Làm bài kiểm tra
-                        </Button>
-                    )}
-
-                    {showQuestions && (
-                        <Box sx={{ mt: 3 }}>
-                            {quizData.questions.$values.map((question, index) => (
-                                <Box key={question.id} sx={{ mb: 2 }}>
-                                    <Typography variant="h6">
-                                        Câu {index + 1}: {question.content}
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        {question.answers.$values.map((answer) => (
-                                            <Grid item xs={12} sm={6} key={answer.id}>
-                                                <Box display="flex" alignItems="center">
-                                                    <Checkbox
-                                                        onChange={() => handleAnswerChange(question.id, answer.id)}
-                                                    />
-                                                    <Typography>{answer.content}</Typography>
-                                                </Box>
-                                            </Grid>
-                                        ))}
-                                    </Grid>
-                                </Box>
-                            ))}
-
-                            {/* Nút nộp bài */}
+                        {!showQuestions && ( // Ẩn nút khi đã bấm "Làm bài kiểm tra"
                             <Button
                                 variant="contained"
-                                color="secondary"
-                                onClick={handleSubmitQuiz}
+                                color="primary"
+                                onClick={handleStartQuiz}
                                 sx={{ mt: 2 }}
                             >
-                                Nộp bài kiểm tra
+                                Làm bài kiểm tra
                             </Button>
-                        </Box>
-                    )}
-                </>
-            ) : (
-                <Typography>Đang tải dữ liệu...</Typography>
-            )}
-        </Box>
+                        )}
+
+                        {showQuestions && (
+                            <Box sx={{ mt: 3 }}>
+                                {quizData.questions.$values.map((question, index) => (
+                                    <Box key={question.id} sx={{ mb: 2 }}>
+                                        <Typography variant="h6">
+                                            Câu {index + 1}: {question.content}
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            {question.answers.$values.map((answer) => (
+                                                <Grid item xs={12} sm={6} key={answer.id}>
+                                                    <Box display="flex" alignItems="center">
+                                                        <Checkbox
+                                                            onChange={() => handleAnswerChange(question.id, answer.id)}
+                                                        />
+                                                        <Typography>{answer.content}</Typography>
+                                                    </Box>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </Box>
+                                ))}
+
+                                {/* Nút nộp bài */}
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={handleSubmitQuiz}
+                                    sx={{ mt: 2 }}
+                                >
+                                    Nộp bài kiểm tra
+                                </Button>
+                            </Box>
+                        )}
+                    </>
+                ) : (
+                    <Typography>Đang tải dữ liệu...</Typography>
+                )}
+            </Box>
+            <Footer />
+        </>
     );
 };
 

@@ -126,7 +126,7 @@ const LessonManager = () => {
     }
 
     return (
-        <Box sx={{ maxWidth: 800, margin: 'auto', padding: 2 }}>
+        <Box sx={{ width: '100%', margin: 'auto', padding: 1 }}>
             <Typography variant="h4" gutterBottom>Lesson Manager</Typography>
             {subjects.length === 0 ? (
                 <Typography color="text.secondary" align="center">No subject available</Typography>

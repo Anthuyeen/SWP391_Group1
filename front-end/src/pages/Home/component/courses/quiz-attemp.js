@@ -46,7 +46,8 @@ import React, { useEffect, useState } from 'react';
 import { fetchQuizAttemptsByUserId } from './../../../../service/quiz'; // Import hàm fetch
 import { Typography, Paper, List, ListItem, ListItemText } from '@mui/material';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-
+import Navbar from '../../../../layouts/navbar';
+import Footer from '../../../../layouts/footer';
 const QuizAttempt = () => {
     const [quizAttempts, setQuizAttempts] = useState([]);
     const userId = localStorage.getItem('id'); // Lấy userId từ localStorage
@@ -70,21 +71,25 @@ const QuizAttempt = () => {
     };
 
     return (
-        <Paper sx={{ padding: 2 }}>
-            <Typography variant="h5" gutterBottom>
-                Các lần làm bài kiểm tra
-            </Typography>
-            <List>
-                {quizAttempts.map((attempt) => (
-                    <ListItem key={attempt.id} button onClick={() => handleAttemptClick(attempt)}>
-                        <ListItemText
-                            primary={`Lần thử: ${attempt.attemptNumber}`}
-                            secondary={`Điểm: ${attempt.score}, Thời gian bắt đầu: ${new Date(attempt.startTime).toLocaleString()}`}
-                        />
-                    </ListItem>
-                ))}
-            </List>
-        </Paper>
+        <>
+            <Navbar />
+            <Paper sx={{ padding: 2 }}>
+                <Typography variant="h5" gutterBottom>
+                    Các lần làm bài kiểm tra
+                </Typography>
+                <List>
+                    {quizAttempts.map((attempt) => (
+                        <ListItem key={attempt.id} button onClick={() => handleAttemptClick(attempt)}>
+                            <ListItemText
+                                primary={`Lần thử: ${attempt.attemptNumber}`}
+                                secondary={`Điểm: ${attempt.score}, Thời gian bắt đầu: ${new Date(attempt.startTime).toLocaleString()}`}
+                            />
+                        </ListItem>
+                    ))}
+                </List>
+            </Paper>
+            <Footer />
+        </>
     );
 };
 
