@@ -146,7 +146,6 @@ namespace BE.Controllers.Expert
             try
             {
                 var subject = await _context.Subjects
-                    .Include(s => s.Dimensions)
                     .Include(s => s.Lessons)
                     .Include(s => s.PricePackages)
                     .Include(s => s.Quizzes)
@@ -170,8 +169,6 @@ namespace BE.Controllers.Expert
                     _context.Questions.RemoveRange(quiz.Questions);
                 }
                 _context.Quizzes.RemoveRange(subject.Quizzes);
-
-                _context.Dimensions.RemoveRange(subject.Dimensions);
                 _context.Lessons.RemoveRange(subject.Lessons);
                 _context.PricePackages.RemoveRange(subject.PricePackages);
                 _context.Registrations.RemoveRange(subject.Registrations);
@@ -265,7 +262,6 @@ namespace BE.Controllers.Expert
                 .Include(s => s.Category)
                 .Include(s => s.Owner)
                 .Include(s => s.Lessons)
-                .Include(s => s.Dimensions)
                 .Include(s => s.Quizzes)
                 .Include(s => s.PricePackages)
                 .FirstOrDefaultAsync(s => s.Id == id);
@@ -293,14 +289,7 @@ namespace BE.Controllers.Expert
                     Status = l.Status,
                     Url = l.Url
                 }).ToList(),
-
-                Dimensions = subject.Dimensions.Select(d => new DimensionSummaryDto
-                {
-                    Id = d.Id,
-                    Name = d.Name,
-                    Type = d.Type
-                }).ToList(),
-
+              
                 Quizzes = subject.Quizzes.Select(q => new QuizSummaryDto
                 {
                     Id = q.Id,
