@@ -214,8 +214,9 @@ namespace BE.Controllers.Expert
                     Content = l.Content,
                     Status = l.Status,
                     SubjectId = l.SubjectId,
-                    Url = l.Url
-                    // Bạn có thể thêm các thuộc tính khác nếu cần
+                    Url = l.Url,
+                    ChapterId = l.ChapterId,
+                    DisplayOrder = l.DisplayOrder             
                 })
                 .ToListAsync();
 

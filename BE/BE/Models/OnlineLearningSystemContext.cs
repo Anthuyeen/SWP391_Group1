@@ -19,6 +19,8 @@ public partial class OnlineLearningSystemContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<Chapter> Chapters { get; set; }
+
     public virtual DbSet<Lesson> Lessons { get; set; }
 
     public virtual DbSet<LessonCompletion> LessonCompletions { get; set; }
@@ -87,6 +89,27 @@ public partial class OnlineLearningSystemContext : DbContext
                 .HasColumnName("type");
         });
 
+        modelBuilder.Entity<Chapter>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__CHAPTER__3213E83F54E6F5C0");
+
+            entity.ToTable("CHAPTER");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasColumnName("status");
+            entity.Property(e => e.SubjectId).HasColumnName("subject_id");
+            entity.Property(e => e.Title)
+                .HasMaxLength(255)
+                .HasColumnName("title");
+
+            entity.HasOne(d => d.Subject).WithMany(p => p.Chapters)
+                .HasForeignKey(d => d.SubjectId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CHAPTER__subject__22751F6C");
+        });
+
         modelBuilder.Entity<Lesson>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__LESSON__3213E83FD574C87D");
@@ -94,7 +117,9 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.ToTable("LESSON");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ChapterId).HasColumnName("chapter_id");
             entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
                 .HasColumnName("name");
@@ -105,6 +130,10 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.Property(e => e.Url)
                 .HasMaxLength(255)
                 .HasColumnName("url");
+
+            entity.HasOne(d => d.Chapter).WithMany(p => p.Lessons)
+                .HasForeignKey(d => d.ChapterId)
+                .HasConstraintName("FK_LESSON_CHAPTER");
 
             entity.HasOne(d => d.Subject).WithMany(p => p.Lessons)
                 .HasForeignKey(d => d.SubjectId)
@@ -252,6 +281,7 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.ToTable("QUIZ");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ChapterId).HasColumnName("chapter_id");
             entity.Property(e => e.DurationMinutes).HasColumnName("duration_minutes");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
@@ -266,6 +296,10 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.Property(e => e.Type)
                 .HasMaxLength(20)
                 .HasColumnName("type");
+
+            entity.HasOne(d => d.Chapter).WithMany(p => p.Quizzes)
+                .HasForeignKey(d => d.ChapterId)
+                .HasConstraintName("FK_QUIZ_CHAPTER");
 
             entity.HasOne(d => d.Subject).WithMany(p => p.Quizzes)
                 .HasForeignKey(d => d.SubjectId)

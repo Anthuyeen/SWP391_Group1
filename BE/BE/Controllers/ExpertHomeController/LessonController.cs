@@ -30,7 +30,9 @@ namespace BE.Controllers.Expert
                     Status = l.Status,
                     SubjectId = l.SubjectId,
                     SubjectName = l.Subject.Name,
-                    Url = l.Url
+                    Url = l.Url,
+                    ChapterId = l.ChapterId,
+                    DisplayOrder = l.DisplayOrder,
                 })
                 .ToListAsync();
 
@@ -66,6 +68,8 @@ namespace BE.Controllers.Expert
             lesson.Content = editLessonDto.Content;
             lesson.Status = editLessonDto.Status;
             lesson.Url = editLessonDto.Url;
+            lesson.ChapterId = editLessonDto.ChapterId;
+            lesson.DisplayOrder = editLessonDto.DisplayOrder;
 
             try
             {
@@ -111,6 +115,8 @@ namespace BE.Controllers.Expert
                 Content = editLessonDto.Content,
                 Status = editLessonDto.Status,
                 Url = editLessonDto.Url,
+                ChapterId = editLessonDto.ChapterId,
+                DisplayOrder = editLessonDto.DisplayOrder
             };
 
             _context.Lessons.Add(lesson);
@@ -135,7 +141,9 @@ namespace BE.Controllers.Expert
                 Content = lesson.Content,
                 Status = lesson.Status,
                 SubjectId = lesson.SubjectId,
-                Url = lesson.Url
+                Url = lesson.Url,
+                ChapterId = lesson.ChapterId,
+                DisplayOrder = lesson.DisplayOrder
             };
 
             return lessonDto;

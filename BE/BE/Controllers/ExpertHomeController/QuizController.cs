@@ -34,6 +34,7 @@ namespace BE.Controllers.Expert
                     SubjectId = q.SubjectId,
                     SubjectName = q.Subject.Name,
                     Status = q.Status,
+                    ChapterId = q.ChapterId
                 })
                 .ToListAsync();
 
@@ -72,6 +73,7 @@ namespace BE.Controllers.Expert
             quiz.PassRate = editQuizDto.PassRate;
             quiz.Type = editQuizDto.Type;
             quiz.Status = editQuizDto.Status;
+            quiz.ChapterId = editQuizDto.ChapterId;
 
             try
             {
@@ -117,7 +119,8 @@ namespace BE.Controllers.Expert
                 DurationMinutes = editQuizDto.DurationMinutes,
                 PassRate = editQuizDto.PassRate,
                 Type = editQuizDto.Type,
-                Status = editQuizDto.Status
+                Status = editQuizDto.Status,
+                ChapterId = editQuizDto.ChapterId
             };
 
             _context.Quizzes.Add(quiz);
@@ -144,6 +147,7 @@ namespace BE.Controllers.Expert
                 Type = quiz.Type,
                 SubjectId = quiz.SubjectId,
                 Status = quiz.Status,
+                ChapterId = quiz.ChapterId
             };
 
             return quizDto;
@@ -238,7 +242,8 @@ namespace BE.Controllers.Expert
                     Type = q.Type,
                     SubjectId = q.SubjectId,
                     SubjectName = q.Subject.Name,
-                    Status = q.Status
+                    Status = q.Status,
+                    ChapterId = q.ChapterId
                 })
                 .ToListAsync();
 
@@ -345,7 +350,8 @@ namespace BE.Controllers.Expert
                     Type = q.Type,
                     SubjectId = q.SubjectId,
                     SubjectName = q.Subject.Name,
-                    Status = q.Status
+                    Status = q.Status,
+                    ChapterId = q.ChapterId
                 })
                 .ToListAsync();
 

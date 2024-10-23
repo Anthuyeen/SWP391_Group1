@@ -17,6 +17,12 @@ public partial class Lesson
 
     public string? Url { get; set; }
 
+    public int? ChapterId { get; set; }
+
+    public int DisplayOrder { get; set; }
+
+    public virtual Chapter? Chapter { get; set; }
+
     public virtual ICollection<LessonCompletion> LessonCompletions { get; } = new List<LessonCompletion>();
 
     public virtual Subject? Subject { get; set; }

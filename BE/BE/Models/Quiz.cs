@@ -19,6 +19,10 @@ public partial class Quiz
 
     public string Status { get; set; } = null!;
 
+    public int? ChapterId { get; set; }
+
+    public virtual Chapter? Chapter { get; set; }
+
     public virtual ICollection<Question> Questions { get; } = new List<Question>();
 
     public virtual ICollection<QuizAttempt> QuizAttempts { get; } = new List<QuizAttempt>();

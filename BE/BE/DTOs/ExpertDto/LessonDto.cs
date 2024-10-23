@@ -9,7 +9,8 @@
         public string Status { get; set; }
         public string SubjectName { get; set; }
         public string? Url { get; set; }
-
+        public int? ChapterId { get; set; }
+        public int DisplayOrder { get; set; }
     }
 
     public class EditLessonDto
@@ -19,6 +20,7 @@
         public string Content { get; set; }
         public string Status { get; set; }
         public string? Url { get; set; }
-
+        public int? ChapterId { get; set; }
+        public int DisplayOrder { get; set; }
     }
 }

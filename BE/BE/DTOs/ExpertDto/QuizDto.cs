@@ -10,6 +10,7 @@
         public string? Type { get; set; }
         public string? SubjectName { get; set; }
         public string Status { get; set; } = null!;
+        public int? ChapterId { get; set; }
     }
 
     public class EditQuizDto
@@ -21,5 +22,6 @@
         public decimal PassRate { get; set; }
         public string? Type { get; set; }
         public string Status { get; set; } = null!;
+        public int? ChapterId { get; set; }
     }
 }
