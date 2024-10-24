@@ -1,13 +1,38 @@
 import React, { useEffect, useState } from "react";
-import "../../../assets/css/quiz-manage.css";
-import { fetchQuizzesByExpert, addQuiz, editQuiz, deleteQuiz } from "../../../service/quiz";
-import { fetchSubjectsByExpert } from "../../../service/quiz"; // Sử dụng hàm mới
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { IconButton } from '@mui/material';
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  MenuItem,
+  IconButton,
+  Select,
+  InputLabel,
+  FormControl,
+  Box,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import InfoIcon from "@mui/icons-material/Info";
 import { red } from "@mui/material/colors";
-import InfoIcon from '@mui/icons-material/Info';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import {
+  fetchQuizzesByExpert,
+  addQuiz,
+  editQuiz,
+  deleteQuiz,
+} from "../../../service/quiz";
+import { fetchSubjectsByExpert } from "../../../service/quiz";
+import { fetchChaptersBySubjectId } from "../../../service/chapter";
 
 const QuizManage = () => {
   const [quizzes, setQuizzes] = useState([]);
@@ -18,22 +43,41 @@ const QuizManage = () => {
     passRate: "",
     type: "",
     subjectId: null,
-    status: ""
+    status: "",
+    chapterId: null,
   });
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [chapters, setChapters] = useState([]);
 
   useEffect(() => {
-    loadSubjects(); // Load danh sách subjects
-    loadQuizzes(); // Load quizzes của expert
+    loadSubjects();
+    loadQuizzes();
   }, []);
+
+  useEffect(() => {
+    if (newQuiz.subjectId) {
+      loadChapters(newQuiz.subjectId);
+    } else {
+      setChapters([]); // Clear chapters if no subject is selected
+    }
+  }, [newQuiz.subjectId]);
+
+  const loadChapters = async (subjectId) => {
+    try {
+      const data = await fetchChaptersBySubjectId(subjectId); // Gọi API lấy chapters theo subjectId
+      setChapters(data);
+    } catch (error) {
+      console.error("Failed to load chapters", error);
+    }
+  };
 
   const loadQuizzes = async () => {
     try {
-      const expertId = localStorage.getItem("id"); // Lấy expertId từ localStorage
+      const expertId = localStorage.getItem("id");
       if (expertId) {
-        const data = await fetchQuizzesByExpert(expertId); // Fetch quizzes của expert
+        const data = await fetchQuizzesByExpert(expertId);
         setQuizzes(data);
       }
     } catch (error) {
@@ -43,9 +87,9 @@ const QuizManage = () => {
 
   const loadSubjects = async () => {
     try {
-      const expertId = localStorage.getItem("id"); // Lấy expertId từ localStorage
-      const data = await fetchSubjectsByExpert(expertId); // Fetch subjects từ API
-      setSubjects(data); // Giả sử data là một mảng các subject
+      const expertId = localStorage.getItem("id");
+      const data = await fetchSubjectsByExpert(expertId);
+      setSubjects(data);
     } catch (error) {
       console.error("Failed to load subjects", error);
     }
@@ -60,10 +104,11 @@ const QuizManage = () => {
         passRate: quiz.passRate,
         type: quiz.type,
         subjectId: quiz.subjectId,
-        status: quiz.status
+        status: quiz.status,
+        chapterId: quiz.chapterId || null,
       });
     } else {
-      setNewQuiz({ name: "", durationMinutes: 0, passRate: 0, type: "", subjectId: null });
+      setNewQuiz({ name: "", durationMinutes: 0, passRate: 0, type: "", subjectId: null, chapterId: null });
       setSelectedQuiz(null);
     }
     setIsModalOpen(true);
@@ -72,7 +117,7 @@ const QuizManage = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedQuiz(null);
-    setNewQuiz({ name: "", durationMinutes: 0, passRate: 0, type: "", subjectId: null });
+    setNewQuiz({ name: "", durationMinutes: 0, passRate: 0, type: "", subjectId: null, chapterId: null });
   };
 
   const handleAddOrEdit = async () => {
@@ -84,7 +129,7 @@ const QuizManage = () => {
       } else {
         await addQuiz(newQuiz);
       }
-      await loadQuizzes(); // Reload quizzes data
+      await loadQuizzes();
     } catch (error) {
       console.error("Failed to add or edit quiz", error);
     }
@@ -95,40 +140,48 @@ const QuizManage = () => {
   const handleDelete = async (id) => {
     try {
       await deleteQuiz(id);
-      await loadQuizzes(); // Reload quizzes data after deletion
+      await loadQuizzes();
     } catch (error) {
       console.error("Failed to delete quiz", error.message);
     }
   };
 
   return (
-    <div className="main-container">
-      <div className="content">
-        <h1>Quiz Management</h1>
-        <button className="create-btn" onClick={() => openModal()}>
-          + CREATE QUIZ
-        </button>
-        <table className="quiz-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Duration (minutes)</th>
-              <th>Pass Rate (%)</th>
-              <th>Type</th>
-              <th>Subject</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+    <Box sx={{ padding: 3 }}>
+      <h1>Quiz Management</h1>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => openModal()}
+        sx={{ marginBottom: 2 }}
+      >
+        + CREATE QUIZ
+      </Button>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Duration (minutes)</TableCell>
+              <TableCell>Pass Rate (%)</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Subject</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Chapter title</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {quizzes.map((q) => (
-              <tr key={q.id}>
-                <td>{q.name}</td>
-                <td>{q.durationMinutes}</td>
-                <td>{q.passRate}</td>
-                <td>{q.type}</td>
-                <td>{q.subjectName}</td>
-
-                <td>
+              <TableRow key={q.id}>
+                <TableCell>{q.name}</TableCell>
+                <TableCell>{q.durationMinutes}</TableCell>
+                <TableCell>{q.passRate}</TableCell>
+                <TableCell>{q.type}</TableCell>
+                <TableCell>{q.subjectName}</TableCell>
+                <TableCell>{q.status}</TableCell>
+                <TableCell>{q.chapterTitle}</TableCell>
+                <TableCell>
                   <IconButton onClick={() => openModal(q)}>
                     <EditIcon />
                   </IconButton>
@@ -137,87 +190,107 @@ const QuizManage = () => {
                   </IconButton>
                   <IconButton
                     title="Xem các câu hỏi"
-                    onClick={() => navigate(`/Expert/Home/question/${q.id}`)} // Thay đổi đường dẫn đến trang Question
+                    onClick={() => navigate(`/Expert/Home/question/${q.id}`)}
                   >
                     <InfoIcon />
                   </IconButton>
-                </td>
-
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      {isModalOpen && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>{selectedQuiz ? "Edit Quiz" : "Create Quiz"}</h2>
-            <input
-              type="text"
-              value={newQuiz.name}
-              onChange={(e) => setNewQuiz({ ...newQuiz, name: e.target.value })}
-              required
-              placeholder="Enter Quiz Name"
-            />
-            <input
-              type="number"
-              value={newQuiz.durationMinutes}
-              onChange={(e) =>
-                setNewQuiz({ ...newQuiz, durationMinutes: e.target.value })
-              }
-              required
-              placeholder="Enter Duration (minutes)"
-            />
-            <input
-              type="number"
-              value={newQuiz.passRate}
-              onChange={(e) => setNewQuiz({ ...newQuiz, passRate: e.target.value })}
-              required
-              placeholder="Enter Pass Rate (%)"
-            />
-            <select
+      <Dialog fullScreen open={isModalOpen} onClose={closeModal}>
+        <DialogTitle>{selectedQuiz ? "Edit Quiz" : "Create Quiz"}</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Quiz Name"
+            fullWidth
+            margin="normal"
+            value={newQuiz.name}
+            onChange={(e) => setNewQuiz({ ...newQuiz, name: e.target.value })}
+          />
+          <TextField
+            label="Duration (minutes)"
+            fullWidth
+            margin="normal"
+            type="number"
+            value={newQuiz.durationMinutes}
+            onChange={(e) =>
+              setNewQuiz({ ...newQuiz, durationMinutes: e.target.value })
+            }
+          />
+          <TextField
+            label="Pass Rate (%)"
+            fullWidth
+            margin="normal"
+            type="number"
+            value={newQuiz.passRate}
+            onChange={(e) => setNewQuiz({ ...newQuiz, passRate: e.target.value })}
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Type</InputLabel>
+            <Select
               value={newQuiz.type}
               onChange={(e) => setNewQuiz({ ...newQuiz, type: e.target.value })}
-              className="select-input"
-              required
             >
-              <option value="">Select Type</option>
-              <option value="Test">Test</option>
-              <option value="Practice">Practice</option>
-            </select>
-            <select
+              <MenuItem value="Test">Test</MenuItem>
+              <MenuItem value="Practice">Practice</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Subject</InputLabel>
+            <Select
               value={newQuiz.subjectId}
               onChange={(e) => setNewQuiz({ ...newQuiz, subjectId: e.target.value })}
-              className="select-input"
-              required
             >
-              <option value="">Select Subject</option>
+              <MenuItem value="">
+                <em>Select Subject</em>
+              </MenuItem>
               {subjects.map((subject) => (
-                <option key={subject.id} value={subject.id}>
+                <MenuItem key={subject.id} value={subject.id}>
                   {subject.name}
-                </option>
+                </MenuItem>
               ))}
-            </select>
-            <input
-              type="text"
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Status</InputLabel>
+            <Select
               value={newQuiz.status}
               onChange={(e) => setNewQuiz({ ...newQuiz, status: e.target.value })}
-              required
-              placeholder="Enter status"
-            />
-            <div className="modal-buttons">
-              <button onClick={handleAddOrEdit}>
-                {selectedQuiz ? "Save Changes" : "Add Quiz"}
-              </button>
-              <button className="close-btn" onClick={closeModal}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+            >
+              <MenuItem value="Published">Published</MenuItem>
+              <MenuItem value="Draft">Draft</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Chapter</InputLabel>
+            <Select
+              value={newQuiz.chapterId}
+              onChange={(e) => setNewQuiz({ ...newQuiz, chapterId: e.target.value })}
+              disabled={!newQuiz.subjectId} // Disable if no subject is selected
+            >
+              <MenuItem value="">
+                <em>Select Chapter</em>
+              </MenuItem>
+              {chapters.map((chapter) => (
+                <MenuItem key={chapter.id} value={chapter.id}>
+                  {chapter.title}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeModal}>Cancel</Button>
+          <Button onClick={handleAddOrEdit} variant="contained" color="primary">
+            {selectedQuiz ? "Save Changes" : "Add Quiz"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 
