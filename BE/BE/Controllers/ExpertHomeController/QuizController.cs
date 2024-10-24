@@ -60,7 +60,7 @@ namespace BE.Controllers.Expert
                 return BadRequest("Name cannot be null or empty.");
             }
 
-        
+
 
             if (!validTypes.Contains(editQuizDto.Type))
             {
@@ -232,6 +232,7 @@ namespace BE.Controllers.Expert
 
             var quizzes = await _context.Quizzes
                 .Include(q => q.Subject)
+                .Include(q => q.Chapter)
                 .Where(q => q.Subject.OwnerId == expertId)
                 .Select(q => new QuizDto
                 {
@@ -243,7 +244,8 @@ namespace BE.Controllers.Expert
                     SubjectId = q.SubjectId,
                     SubjectName = q.Subject.Name,
                     Status = q.Status,
-                    ChapterId = q.ChapterId
+                    ChapterId = q.ChapterId,
+                    ChapterTitle = q.Chapter.Title
                 })
                 .ToListAsync();
 
@@ -478,7 +480,6 @@ namespace BE.Controllers.Expert
 
             return Ok(result); // Trả về 200 OK kèm theo kết quả
         }
-
 
         private bool QuizExists(int id)
         {
