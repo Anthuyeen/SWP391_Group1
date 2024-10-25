@@ -11,6 +11,8 @@
         public string? SubjectName { get; set; }
         public string Status { get; set; } = null!;
         public int? ChapterId { get; set; }
+        public string ChapterTitle { get; set; } = null!;
+
     }
 
     public class EditQuizDto
