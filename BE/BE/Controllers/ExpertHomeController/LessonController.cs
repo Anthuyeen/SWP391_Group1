@@ -178,37 +178,7 @@ namespace BE.Controllers.Expert
 
             return Ok(await GetLessonById(lessonId));
         }
-
-        [HttpGet("ListAllLessonComplete")]
-        public async Task<ActionResult<IEnumerable<Lesson>>> ListAllLessonComplete(int subjectId, int userId)
-        {
-            var lessonCompletions = await _context.LessonCompletions
-                .Where(lc => lc.Lesson.SubjectId == subjectId && lc.UserId == userId)
-                .Select(lc => lc.Lesson)
-                .ToListAsync();
-
-            return Ok(lessonCompletions);
-        }
-
-        //[HttpDelete("DeleteLesson/{id}")]
-        //public async Task<IActionResult> DeleteLesson(int id)
-        //{
-        //    var lesson = await _context.Lessons.FindAsync(id);
-
-        //    if (lesson == null)
-        //    {
-        //        return NotFound("Lesson not found.");
-        //    }
-
-        //    _context.Lessons.Remove(lesson);
-
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-
-
+      
         private bool LessonExists(int id)
         {
             return _context.Lessons.Any(e => e.Id == id);
