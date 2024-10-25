@@ -132,4 +132,21 @@ export const fetchLessonCompletion = async (userId, lessonId) => {
       throw error;
     }
   };
+//get lesson finish
+export const fetchLessonCompletionList = async (subjectId, userId) => {
+    try {
+      const response = await fetch(`https://localhost:7043/api/Lesson/ListAllLessonComplete?subjectId=${subjectId}&userId=${userId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch lesson completion list');
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching lesson completion list:", error);
+      return null;
+    }
+  };
+  
   

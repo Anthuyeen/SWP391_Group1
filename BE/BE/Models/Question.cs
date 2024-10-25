@@ -20,4 +20,10 @@ public partial class Question
     public virtual Quiz? Quiz { get; set; }
 
     public virtual ICollection<UserAnswer> UserAnswers { get; } = new List<UserAnswer>();
+
+
+    public void AddAnswerOption(AnswerOption option)
+    {
+        AnswerOptions.Add(option); 
+    }
 }

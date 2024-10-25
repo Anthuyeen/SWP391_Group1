@@ -3,6 +3,7 @@ using BE.DTOs.UserDto;
 using BE.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 
 namespace BE.Controllers.Expert
 {
@@ -480,6 +481,222 @@ namespace BE.Controllers.Expert
 
             return Ok(result); // Trả về 200 OK kèm theo kết quả
         }
+
+
+        //import quiz
+        //[HttpPost("import/{quizId}")]
+        //public async Task<IActionResult> ImportQuestions(int quizId, IFormFile file)
+        //{
+        //    if (file == null || file.Length == 0)
+        //    {
+        //        return BadRequest("No file uploaded.");
+        //    }
+
+        //    var questions = new List<Question>();
+
+        //    try
+        //    {
+        //        using (var stream = new MemoryStream())
+        //        {
+        //            await file.CopyToAsync(stream);
+        //            using (var package = new ExcelPackage(stream))
+        //            {
+        //                var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+        //                if (worksheet == null)
+        //                {
+        //                    return BadRequest("Invalid Excel file.");
+        //                }
+
+        //                for (int row = 2; row <= worksheet.Dimension.End.Row; row++)
+        //                {
+        //                    var content = worksheet.Cells[row, 1].Text.Trim();
+        //                    if (string.IsNullOrWhiteSpace(content)) // Dừng nếu ô đầu tiên trống
+        //                    {
+        //                        break; // Không có dữ liệu ở hàng này, thoát khỏi vòng lặp
+        //                    }
+
+        //                    var mediaUrl = worksheet.Cells[row, 2].Text.Trim();
+        //                    var correctAnswer = worksheet.Cells[row, 3].Text.Trim();
+
+        //                    if (string.IsNullOrWhiteSpace(correctAnswer))
+        //                    {
+        //                        return BadRequest($"Correct answer is missing at row {row}.");
+        //                    }
+
+        //                    var answerOptions = new List<AnswerOption>();
+
+        //                    for (int col = 4; col <= worksheet.Dimension.End.Column; col++)
+        //                    {
+        //                        var optionContent = worksheet.Cells[row, col].Text.Trim();
+        //                        if (string.IsNullOrWhiteSpace(optionContent))
+        //                        {
+        //                            continue; // Bỏ qua nếu ô không có nội dung
+        //                        }
+
+        //                        // Tạo AnswerOption và thêm vào danh sách
+        //                        var answerOption = new AnswerOption
+        //                        {
+        //                            Content = optionContent,
+        //                            IsCorrect = optionContent.Equals(correctAnswer, StringComparison.OrdinalIgnoreCase),
+        //                            Status = true // Trạng thái mặc định là true
+        //                        };
+        //                        answerOptions.Add(answerOption);
+        //                    }
+
+        //                    if (!answerOptions.Any(a => a.IsCorrect))
+        //                    {
+        //                        return BadRequest($"Invalid correct answer '{correctAnswer}' at row {row}. It does not match any option.");
+        //                    }
+
+        //                    // Tạo Question với quizId
+        //                    var question = new Question
+        //                    {
+        //                        Content = content,
+        //                        MediaUrl = mediaUrl,
+        //                        Status = "Active", // Mặc định là Active
+        //                        QuizId = quizId // Gán quizId vào câu hỏi
+        //                    };
+
+        //                    // Thêm AnswerOptions vào câu hỏi
+        //                    foreach (var option in answerOptions)
+        //                    {
+        //                        question.AddAnswerOption(option);
+        //                    }
+
+        //                    questions.Add(question);
+        //                }
+        //            }
+        //        }
+
+        //        // Lưu vào database
+        //        await _context.Questions.AddRangeAsync(questions);
+        //        await _context.SaveChangesAsync();
+
+        //        return Ok(new { Count = questions.Count, Questions = questions });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
+
+        [HttpPost("import/{quizId}")]
+        public async Task<IActionResult> ImportQuestions(int quizId, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+
+            var questions = new List<Question>();
+
+            try
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await file.CopyToAsync(stream);
+                    using (var package = new ExcelPackage(stream))
+                    {
+                        var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+                        if (worksheet == null)
+                        {
+                            return BadRequest("Invalid Excel file.");
+                        }
+
+                        for (int row = 2; row <= worksheet.Dimension.End.Row; row++)
+                        {
+                            var content = worksheet.Cells[row, 1].Text.Trim();
+                            if (string.IsNullOrWhiteSpace(content)) // Dừng nếu ô đầu tiên trống
+                            {
+                                break; // Không có dữ liệu ở hàng này, thoát khỏi vòng lặp
+                            }
+
+                            var mediaUrl = worksheet.Cells[row, 2].Text.Trim();
+                            var correctAnswer = worksheet.Cells[row, 3].Text.Trim();
+
+                            if (string.IsNullOrWhiteSpace(correctAnswer))
+                            {
+                                return BadRequest($"Correct answer is missing at row {row}.");
+                            }
+
+                            var answerOptions = new List<AnswerOption>();
+
+                            for (int col = 4; col <= worksheet.Dimension.End.Column; col++)
+                            {
+                                var optionContent = worksheet.Cells[row, col].Text.Trim();
+                                if (string.IsNullOrWhiteSpace(optionContent))
+                                {
+                                    continue; // Bỏ qua nếu ô không có nội dung
+                                }
+
+                                // Tạo AnswerOption và thêm vào danh sách
+                                var answerOption = new AnswerOption
+                                {
+                                    Content = optionContent,
+                                    IsCorrect = optionContent.Equals(correctAnswer, StringComparison.OrdinalIgnoreCase),
+                                    Status = true // Trạng thái mặc định là true
+                                };
+                                answerOptions.Add(answerOption);
+                            }
+
+                            if (!answerOptions.Any(a => a.IsCorrect))
+                            {
+                                return BadRequest($"Invalid correct answer '{correctAnswer}' at row {row}. It does not match any option.");
+                            }
+
+                            // Kiểm tra câu hỏi đã tồn tại
+                            var existingQuestion = await _context.Questions
+                                .Include(q => q.AnswerOptions) // Đảm bảo bao gồm AnswerOptions để có thể cập nhật
+                                .FirstOrDefaultAsync(q => q.Content == content && q.QuizId == quizId);
+
+                            if (existingQuestion != null)
+                            {
+                                // Cập nhật câu hỏi đã tồn tại
+                                existingQuestion.MediaUrl = mediaUrl; // Cập nhật mediaUrl
+
+                                // Xóa tất cả AnswerOptions cũ và thêm mới
+                                existingQuestion.AnswerOptions.Clear(); // Xóa tất cả AnswerOptions cũ
+                                foreach (var option in answerOptions)
+                                {
+                                    existingQuestion.AddAnswerOption(option); // Thêm AnswerOption mới
+                                }
+                            }
+                            else
+                            {
+                                // Tạo Question mới
+                                var question = new Question
+                                {
+                                    Content = content,
+                                    MediaUrl = mediaUrl,
+                                    Status = "Active", // Mặc định là Active
+                                    QuizId = quizId // Gán quizId vào câu hỏi
+                                };
+
+                                // Thêm AnswerOptions vào câu hỏi
+                                foreach (var option in answerOptions)
+                                {
+                                    question.AddAnswerOption(option);
+                                }
+
+                                questions.Add(question); // Thêm câu hỏi mới vào danh sách
+                            }
+                        }
+                    }
+                }
+
+                // Lưu vào database
+                await _context.Questions.AddRangeAsync(questions); // Thêm các câu hỏi mới
+                await _context.SaveChangesAsync(); // Lưu những thay đổi vào cơ sở dữ liệu
+
+                return Ok(new { Count = questions.Count, Questions = questions });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
 
         private bool QuizExists(int id)
         {
