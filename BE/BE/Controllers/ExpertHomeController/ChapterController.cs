@@ -18,6 +18,24 @@ namespace BE.Controllers.ExpertHomeController
             _context = context;
         }
 
+
+        //get all chapter
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ChapterDto>>> GetChapters()
+        {
+            var chapters = await _context.Chapters
+                .Include(c => c.Subject) // Include Subject để lấy thông tin liên quan
+                .Select(c => new ChapterDto
+                {
+                    Id = c.Id,
+                    Title = c.Title,
+                    Status = c.Status
+                })
+                .ToListAsync();
+
+            return Ok(chapters);
+        }
+
         [HttpGet("ViewAllChapterBySubjectId/{subjectId}")]
         public async Task<ActionResult<IEnumerable<ChapterDto>>> ViewAllChapterBySubjectId(int subjectId)
         {

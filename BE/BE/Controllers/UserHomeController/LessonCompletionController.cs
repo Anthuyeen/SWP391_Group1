@@ -24,6 +24,7 @@ namespace BE.Controllers.UserHomeController
                 UserId = completeLessonDto.UserId,
                 LessonId = completeLessonDto.LessonId,
                 CompletionDate = completeLessonDto.CompletionDate,
+                Status = completeLessonDto.Status
             };
 
             _context.LessonCompletions.Add(lessonCompletion);

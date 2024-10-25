@@ -105,3 +105,31 @@ export const updateLessonStatus = async (lessonId, status) => {
         throw error;
     }
 };
+//finish lesson
+export const fetchLessonCompletion = async (userId, lessonId) => {
+    try {
+      const response = await fetch('https://localhost:7043/api/LessonCompletion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userId,
+          lessonId: lessonId,
+          completionDate: new Date().toISOString(), // Ngày hoàn thành hiện tại
+          status: true, // Cờ đánh dấu hoàn thành
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to complete lesson');
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error completing lesson:', error);
+      throw error;
+    }
+  };
+  

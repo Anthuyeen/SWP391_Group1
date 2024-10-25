@@ -11,6 +11,8 @@
         public string? Url { get; set; }
         public int? ChapterId { get; set; }
         public int DisplayOrder { get; set; }
+        public string Title { get; set; } = null!;
+
     }
 
     public class EditLessonDto

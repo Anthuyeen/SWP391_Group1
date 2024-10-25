@@ -1,24 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Accordion, AccordionSummary, AccordionDetails, Typography, List, ListItem, ListItemText, CircularProgress, Box, Chip, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, MenuItem, Select, FormControl, InputLabel, FormHelperText
-} from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Typography, List, ListItem, ListItemText, CircularProgress, Box, Chip, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Select, FormControl, InputLabel, FormHelperText } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';  // Thêm icon edit
+import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import { fetchSubjectsByOwner } from '../../../service/subject';
-import { fetchLessonsBySubjectId, addLesson, editLesson, updateLessonStatus } from '../../../service/lesson'; // Thêm editLesson
-
+import { fetchLessonsBySubjectId, addLesson, editLesson, updateLessonStatus } from '../../../service/lesson';
+import { fetchChaptersBySubjectId, fetchChapterDetails, addChapter, editChapter, updateChapterStatus } from '../../../service/chapter';
+import AddLessonDialog from './lesson-manage-component/add-lesson-dialog';
+import EditLessonDialog from './lesson-manage-component/edit-lesson-dialog';
+import EditChapterDialog from './lesson-manage-component/edit-chapter-dialog';
+import AddChapterDialog from './lesson-manage-component/add-chapter-dialog';
 const LessonManager = () => {
     const [subjects, setSubjects] = useState([]);
-    const [lessonsBySubject, setLessonsBySubject] = useState({});
+    const [chaptersBySubject, setChaptersBySubject] = useState({});
+    const [lessonsByChapter, setLessonsByChapter] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [openEditDialog, setOpenEditDialog] = useState(false);
-    const [newLesson, setNewLesson] = useState({ subjectId: '', name: '', content: '', status: 'Active' });
-    const [editingLesson, setEditingLesson] = useState(null); // State để lưu lesson đang được chỉnh sửa
+    const [newLesson, setNewLesson] = useState({ subjectId: '', chapterId: '', name: '', content: '', status: 'Active', url: '', displayOrder: 0 });
+    const [editingLesson, setEditingLesson] = useState(null);
+    const [openAddChapterDialog, setOpenAddChapterDialog] = useState(false);
+    const [newChapter, setNewChapter] = useState({ title: '', status: 'Active', subjectId: '' });
+    const [editingChapter, setEditingChapter] = useState(null); // New state for editing chapter
+    const [openEditChapterDialog, setOpenEditChapterDialog] = useState(false); // New dialog state
+    const [newChapterTitle, setNewChapterTitle] = useState(''); // State for chapter title
 
     useEffect(() => {
         const loadSubjects = async () => {
@@ -37,43 +44,60 @@ const LessonManager = () => {
     }, []);
 
     const handleAccordionChange = (subjectId) => async (event, isExpanded) => {
-        if (isExpanded && !lessonsBySubject[subjectId]) {
+        if (isExpanded && !chaptersBySubject[subjectId]) {
             try {
-                const lessons = await fetchLessonsBySubjectId(subjectId);
-                setLessonsBySubject(prev => ({ ...prev, [subjectId]: lessons }));
+                const chapters = await fetchChaptersBySubjectId(subjectId);
+                setChaptersBySubject(prev => ({ ...prev, [subjectId]: chapters }));
             } catch (err) {
-                console.error('Failed to load lessons for subject:', subjectId, err);
-                setLessonsBySubject(prev => ({ ...prev, [subjectId]: 'error' }));
+                console.error('Failed to load chapters for subject:', subjectId, err);
+                setChaptersBySubject(prev => ({ ...prev, [subjectId]: 'error' }));
             }
         }
     };
 
-    const handleAddLessonOpen = (subjectId) => {
-        setNewLesson({ ...newLesson, subjectId });
+    const handleChapterChange = (chapterId) => async () => {
+        if (!lessonsByChapter[chapterId]) {
+            try {
+                const chapterDetails = await fetchChapterDetails(chapterId);
+                setLessonsByChapter(prev => ({ ...prev, [chapterId]: chapterDetails.lessons.$values }));
+            } catch (err) {
+                console.error('Failed to load lessons for chapter:', chapterId, err);
+                setLessonsByChapter(prev => ({ ...prev, [chapterId]: 'error' }));
+            }
+        }
+    };
+
+    const handleAddLessonOpen = (chapterId, subjectId) => {
+        setNewLesson({ ...newLesson, chapterId, subjectId });
         setOpenAddDialog(true);
     };
 
     const handleAddLessonClose = () => {
         setOpenAddDialog(false);
-        setNewLesson({ subjectId: '', name: '', content: '', status: 'Active' });
+        setNewLesson({ subjectId: '', chapterId: '', name: '', content: '', status: 'Active', url: '', displayOrder: 0 });
     };
 
     const handleAddLessonSubmit = async () => {
         try {
+            // Gọi hàm để thêm bài học
             await addLesson(newLesson);
-            setLessonsBySubject(prev => ({
+
+            // Lấy lại danh sách bài học sau khi thêm thành công
+            const chapterDetails = await fetchChapterDetails(newLesson.chapterId);
+
+            // Cập nhật state với bài học vừa thêm
+            setLessonsByChapter(prev => ({
                 ...prev,
-                [newLesson.subjectId]: Array.isArray(prev[newLesson.subjectId])
-                    ? [...prev[newLesson.subjectId], { ...newLesson, id: Date.now() }]
-                    : [{ ...newLesson, id: Date.now() }]
+                [newLesson.chapterId]: chapterDetails.lessons.$values // Sử dụng danh sách bài học mới từ server
             }));
-            handleAddLessonClose();
+
+            handleAddLessonClose(); // Đóng dialog
         } catch (err) {
             console.error('Failed to add lesson:', err);
         }
     };
 
-    // Mở dialog để chỉnh sửa bài học
+
     const handleEditLessonOpen = (lesson) => {
         setEditingLesson(lesson);
         setOpenEditDialog(true);
@@ -81,7 +105,7 @@ const LessonManager = () => {
 
     const handleEditLessonClose = () => {
         setOpenEditDialog(false);
-        setEditingLesson(null); // Reset form
+        setEditingLesson(null);
     };
 
     const handleEditLessonSubmit = async () => {
@@ -90,9 +114,9 @@ const LessonManager = () => {
                 ...editingLesson,
             };
             await editLesson(editingLesson.id, updatedLesson);
-            setLessonsBySubject(prev => ({
+            setLessonsByChapter(prev => ({
                 ...prev,
-                [editingLesson.subjectId]: prev[editingLesson.subjectId].map(lesson =>
+                [editingLesson.chapterId]: prev[editingLesson.chapterId].map(lesson =>
                     lesson.id === editingLesson.id ? updatedLesson : lesson
                 )
             }));
@@ -105,9 +129,9 @@ const LessonManager = () => {
     const handleDeleteLesson = async (lesson) => {
         try {
             await updateLessonStatus(lesson.id, lesson.status === 'Active' ? 'Inactive' : 'Active');
-            setLessonsBySubject(prev => ({
+            setLessonsByChapter(prev => ({
                 ...prev,
-                [lesson.subjectId]: prev[lesson.subjectId].map(l =>
+                [lesson.chapterId]: prev[lesson.chapterId].map(l =>
                     l.id === lesson.id ? { ...l, status: l.status === 'Active' ? 'Inactive' : 'Active' } : l
                 )
             }));
@@ -115,7 +139,86 @@ const LessonManager = () => {
             console.error('Failed to update lesson status:', err);
         }
     };
-    
+
+    const handleAddChapterOpen = (subjectId) => {
+        setNewChapter({ ...newChapter, subjectId });
+        setOpenAddChapterDialog(true);
+    };
+
+    const handleAddChapterClose = () => {
+        setOpenAddChapterDialog(false);
+        setNewChapter({ title: '', status: 'Active', subjectId: '' });
+    };
+
+    const handleAddChapterSubmit = async () => {
+        try {
+            await addChapter(newChapter);
+            // Sau khi thêm thành công, tải lại danh sách chapters
+            const chapters = await fetchChaptersBySubjectId(newChapter.subjectId);
+            setChaptersBySubject(prev => ({ ...prev, [newChapter.subjectId]: chapters }));
+
+            handleAddChapterClose();
+        } catch (error) {
+            console.error('Failed to add chapter:', error);
+        }
+    };
+
+    const handleEditChapterOpen = (chapter) => {
+        setEditingChapter(chapter);
+        setNewChapterTitle(chapter.title); // Set current chapter title
+        setOpenEditChapterDialog(true);
+    };
+
+    const handleEditChapterClose = () => {
+        setOpenEditChapterDialog(false);
+        setEditingChapter(null);
+        setNewChapterTitle(''); // Reset chapter title
+    };
+
+    const handleEditChapterSubmit = async () => {
+        try {
+            const updatedChapter = {
+                title: newChapterTitle,
+                subjectId: editingChapter.subjectId, // Keep the subject ID same
+                status: 'Active'
+
+            };
+            await editChapter(editingChapter.id, updatedChapter); // Call the edit function
+
+            // Optionally, reload the chapters or update local state
+            const chapters = await fetchChaptersBySubjectId(editingChapter.subjectId);
+            setChaptersBySubject(prev => ({ ...prev, [editingChapter.subjectId]: chapters }));
+
+            handleEditChapterClose(); // Close dialog
+        } catch (error) {
+            console.error('Failed to edit chapter:', error);
+        }
+    };
+    const handleChangeChapterStatus = async (chapter) => {
+        let newStatus;
+
+        // Determine the new status based on the current status
+        if (chapter.status === 'Active') {
+            newStatus = 'Inactive';
+        } else if (chapter.status === 'Inactive') {
+            newStatus = 'Draft'; // Cycle to Draft from Inactive
+        } else {
+            newStatus = 'Active'; // Cycle back to Active from Draft
+        }
+
+        try {
+            await updateChapterStatus(chapter.id, newStatus); // Call API to update status
+            setChaptersBySubject(prev => ({
+                ...prev,
+                [chapter.subjectId]: prev[chapter.subjectId].map(ch =>
+                    ch.id === chapter.id ? { ...ch, status: newStatus } : ch // Update status in state
+                )
+            }));
+        } catch (error) {
+            console.error('Error updating chapter status:', error);
+        }
+    };
+
 
     if (loading) {
         return <Box display="flex" justifyContent="center" alignItems="center" height="100vh"><CircularProgress /></Box>;
@@ -147,159 +250,168 @@ const LessonManager = () => {
                                     />
                                 </Box>
                             </Box>
+                            <IconButton color="primary" onClick={(event) => {
+                                event.stopPropagation();
+                                handleAddChapterOpen(subject.id)
+                            }}>
+                                <AddIcon />
+                            </IconButton>
                         </AccordionSummary>
                         <AccordionDetails>
                             <Typography variant="body2" paragraph>{subject.description}</Typography>
                             <Typography variant="subtitle2">Owner: {subject.ownerName}</Typography>
-                            <IconButton color="primary" onClick={() => handleAddLessonOpen(subject.id)}>
-                                <AddIcon />
-                            </IconButton>
-                            <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Lessons:</Typography>
-                            {lessonsBySubject[subject.id] ? (
-                                lessonsBySubject[subject.id] === 'error' ? (
-                                    <Typography color="error">Failed to load lessons. Please try again later.</Typography>
-                                ) : lessonsBySubject[subject.id].length > 0 ? (
+                            <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Chapters:</Typography>
+                            {chaptersBySubject[subject.id] ? (
+                                chaptersBySubject[subject.id] === 'error' ? (
+                                    <Typography color="error">Failed to load chapters. Please try again later.</Typography>
+                                ) : chaptersBySubject[subject.id].length > 0 ? (
                                     <List>
-                                        {lessonsBySubject[subject.id].map((lesson) => (
-                                            <ListItem
-                                                key={lesson.id}
-                                                secondaryAction={
-                                                    <>
-                                                        <IconButton
-                                                            edge="end"
-                                                            aria-label="edit"
-                                                            onClick={() => handleEditLessonOpen(lesson)}
-                                                        >
-                                                            <EditIcon />
-                                                        </IconButton>
-                                                        <IconButton
-                                                            edge="end"
-                                                            aria-label="delete"
-                                                            onClick={() => handleDeleteLesson(lesson)}
-                                                        >
-                                                            <DeleteIcon />
-                                                        </IconButton>
-                                                    </>
-                                                }
-                                            >
-                                                <ListItemText
-                                                    primary={lesson.name}
-                                                    secondary={
-                                                        <>
-                                                            <div>Status: {lesson.content}</div>
-                                                            <Typography variant="caption" color="text.secondary">
-                                                                Content: {lesson.status}
-                                                            </Typography>
-                                                        </>
-                                                    }
-                                                />
-                                            </ListItem>
+                                        {chaptersBySubject[subject.id].map((chapter) => (
+                                            <Accordion key={chapter.id} onChange={handleChapterChange(chapter.id)}>
+                                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                            <Typography variant="h6" sx={{ marginRight: 1 }}>{chapter.title}</Typography>
+                                                            {/* Hiển thị chip trạng thái */}
+                                                            <Chip
+                                                                label={chapter.status}
+                                                                color={
+                                                                    chapter.status === 'Active' ? 'success' :
+                                                                        chapter.status === 'Inactive' ? 'default' :
+                                                                            'warning'
+                                                                }
+                                                                size="small"
+                                                                sx={{ marginLeft: 1 }}
+                                                            />
+                                                        </Box>
+                                                        <Box>
+                                                            <IconButton
+                                                                color="primary"
+                                                                onClick={(event) => {
+                                                                    event.stopPropagation();
+                                                                    handleEditChapterOpen(chapter)
+                                                                }} // Edit chapter
+                                                            >
+                                                                <EditIcon />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                color="primary"
+                                                                onClick={(event) => {
+                                                                    event.stopPropagation(); // Prevent accordion from toggling
+                                                                    handleAddLessonOpen(chapter.id, subject.id);
+                                                                }}
+                                                            >
+                                                                <AddIcon />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                color="secondary"
+                                                                onClick={(event) => {
+                                                                    event.stopPropagation(); // Prevent accordion from toggling
+                                                                    handleChangeChapterStatus(chapter);
+                                                                }}
+                                                            >
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </Box>
+                                                    </Box>
+                                                </AccordionSummary>
+                                                <AccordionDetails>
+                                                    <Typography variant="body2" paragraph>Status: {chapter.status}</Typography>
+                                                    <Typography variant="subtitle2">Lessons:</Typography>
+                                                    {lessonsByChapter[chapter.id] ? (
+                                                        lessonsByChapter[chapter.id] === 'error' ? (
+                                                            <Typography color="error">Failed to load lessons. Please try again later.</Typography>
+                                                        ) : lessonsByChapter[chapter.id].length > 0 ? (
+                                                            <List>
+                                                                {lessonsByChapter[chapter.id].map((lesson) => (
+                                                                    <ListItem
+                                                                        key={lesson.id}
+                                                                        secondaryAction={
+                                                                            <>
+                                                                                <IconButton
+                                                                                    edge="end"
+                                                                                    aria-label="edit"
+                                                                                    onClick={() => handleEditLessonOpen(lesson)}
+                                                                                >
+                                                                                    <EditIcon />
+                                                                                </IconButton>
+                                                                                <IconButton
+                                                                                    edge="end"
+                                                                                    aria-label="delete"
+                                                                                    onClick={() => handleDeleteLesson(lesson)}
+                                                                                >
+                                                                                    <DeleteIcon />
+                                                                                </IconButton>
+                                                                            </>
+                                                                        }
+                                                                    >
+                                                                        <ListItemText
+                                                                            primary={lesson.name}
+                                                                            secondary={
+                                                                                <>
+                                                                                    <Typography variant="body2">{lesson.content}</Typography>
+                                                                                    <Chip
+                                                                                        label={lesson.status}
+                                                                                        color={lesson.status === 'Active' ? 'success' : 'default'}
+                                                                                        size="small"
+                                                                                        style={{ marginTop: 4 }} // Thêm khoảng cách trên nếu cần
+                                                                                    />
+                                                                                </>
+                                                                            }
+                                                                        />
+                                                                    </ListItem>
+                                                                ))}
+                                                            </List>
+                                                        ) : (
+                                                            <Typography color="text.secondary">No lessons available.</Typography>
+                                                        )
+                                                    ) : (
+                                                        <Typography color="text.secondary">Loading lessons...</Typography>
+                                                    )}
+                                                </AccordionDetails>
+                                            </Accordion>
                                         ))}
                                     </List>
                                 ) : (
-                                    <Typography color="text.secondary">No lessons available for this subject.</Typography>
+                                    <Typography color="text.secondary">No chapters available.</Typography>
                                 )
                             ) : (
-                                <CircularProgress size={24} />
+                                <Typography color="text.secondary">Loading chapters...</Typography>
                             )}
                         </AccordionDetails>
                     </Accordion>
                 ))
             )}
+            <AddLessonDialog
+                open={openAddDialog}
+                onClose={handleAddLessonClose}
+                newLesson={newLesson}
+                setNewLesson={setNewLesson}
+                handleAddLessonSubmit={handleAddLessonSubmit}
+            />
 
-            {/* Dialog để thêm bài học */}
-            <Dialog fullScreen open={openAddDialog} onClose={handleAddLessonClose}>
-                <DialogTitle>Add Lesson</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Lesson Name"
-                        type="text"
-                        fullWidth
-                        value={newLesson.name}
-                        onChange={(e) => setNewLesson({ ...newLesson, name: e.target.value })}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Content"
-                        type="text"
-                        fullWidth
-                        multiline
-                        rows={4}
-                        value={newLesson.content}
-                        onChange={(e) => setNewLesson({ ...newLesson, content: e.target.value })}
-                    />
-                    <FormControl fullWidth margin="dense">
-                        <TextField
-                            label="YouTube Video Link"
-                            type="url"
-                            fullWidth
-                            value={newLesson.url || ''}
-                            onChange={(e) => setNewLesson({ ...newLesson, url: e.target.value })}
-                        />
-                        <FormHelperText>Enter a valid YouTube video link.</FormHelperText>
-                    </FormControl>
+            <EditLessonDialog
+                open={openEditDialog}
+                onClose={handleEditLessonClose}
+                editingLesson={editingLesson}
+                setEditingLesson={setEditingLesson}
+                handleEditLessonSubmit={handleEditLessonSubmit}
+            />
 
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleAddLessonClose} color="primary">Cancel</Button>
-                    <Button onClick={handleAddLessonSubmit} color="primary">Add</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Dialog để chỉnh sửa bài học */}
-            <Dialog fullScreen open={openEditDialog} onClose={handleEditLessonClose}>
-                <DialogTitle>Edit Lesson</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Lesson Name"
-                        type="text"
-                        fullWidth
-                        value={editingLesson?.name || ''}
-                        onChange={(e) => setEditingLesson({ ...editingLesson, name: e.target.value })}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Content"
-                        type="text"
-                        fullWidth
-                        multiline
-                        rows={4}
-                        value={editingLesson?.content || ''}
-                        onChange={(e) => setEditingLesson({ ...editingLesson, content: e.target.value })}
-                    />
-                    <FormControl fullWidth margin="dense">
-                        <TextField
-                            label="YouTube Video Link"
-                            type="url"
-                            fullWidth
-                            value={editingLesson?.url || ''}
-                            onChange={(e) => setEditingLesson({ ...editingLesson, url: e.target.value })}
-                        />
-                        <FormHelperText>
-                            {editingLesson?.url ? 'Current video link: ' + editingLesson.url : 'Enter a valid YouTube video link.'}
-                        </FormHelperText>
-                    </FormControl>
-
-                    <FormControl fullWidth margin="dense">
-                        <InputLabel>Status</InputLabel>
-                        <Select
-                            value={editingLesson?.status || ''}
-                            onChange={(e) => setEditingLesson({ ...editingLesson, status: e.target.value })}
-                        >
-                            <MenuItem value="Active">Active</MenuItem>
-                            <MenuItem value="Inactive">Inactive</MenuItem>
-                        </Select>
-                    </FormControl>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleEditLessonClose} color="primary">Cancel</Button>
-                    <Button onClick={handleEditLessonSubmit} color="primary">Save</Button>
-                </DialogActions>
-            </Dialog>
+            <AddChapterDialog
+                open={openAddChapterDialog}
+                onClose={handleAddChapterClose}
+                newChapter={newChapter}
+                setNewChapter={setNewChapter}
+                handleAddChapterSubmit={handleAddChapterSubmit}
+            />
+            <EditChapterDialog
+                open={openEditChapterDialog}
+                onClose={handleEditChapterClose}
+                newChapterTitle={newChapterTitle}
+                setNewChapterTitle={setNewChapterTitle}
+                handleEditChapterSubmit={handleEditChapterSubmit}
+            />
         </Box>
     );
 };

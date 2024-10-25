@@ -207,6 +207,7 @@ namespace BE.Controllers.Expert
             // Lấy danh sách bài học theo subjectId
             var lessons = await _context.Lessons
                 .Where(l => l.SubjectId == id)
+                .Include(l => l.Chapter)
                 .Select(l => new LessonDto
                 {
                     Id = l.Id,
@@ -216,7 +217,8 @@ namespace BE.Controllers.Expert
                     SubjectId = l.SubjectId,
                     Url = l.Url,
                     ChapterId = l.ChapterId,
-                    DisplayOrder = l.DisplayOrder             
+                    DisplayOrder = l.DisplayOrder,
+                    Title = l.Chapter.Title
                 })
                 .ToListAsync();
 
