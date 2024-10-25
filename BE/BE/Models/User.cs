@@ -27,11 +27,15 @@ public partial class User
 
     public string? LastName { get; set; }
 
+    public virtual ICollection<ChapterCompletion> ChapterCompletions { get; } = new List<ChapterCompletion>();
+
     public virtual ICollection<LessonCompletion> LessonCompletions { get; } = new List<LessonCompletion>();
 
     public virtual ICollection<QuizAttempt> QuizAttempts { get; } = new List<QuizAttempt>();
 
     public virtual ICollection<Registration> Registrations { get; } = new List<Registration>();
+
+    public virtual ICollection<SubjectCompletion> SubjectCompletions { get; } = new List<SubjectCompletion>();
 
     public virtual ICollection<Subject> Subjects { get; } = new List<Subject>();
 }

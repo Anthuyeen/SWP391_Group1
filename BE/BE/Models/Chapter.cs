@@ -13,6 +13,8 @@ public partial class Chapter
 
     public string? Status { get; set; }
 
+    public virtual ICollection<ChapterCompletion> ChapterCompletions { get; } = new List<ChapterCompletion>();
+
     public virtual ICollection<Lesson> Lessons { get; } = new List<Lesson>();
 
     public virtual ICollection<Quiz> Quizzes { get; } = new List<Quiz>();

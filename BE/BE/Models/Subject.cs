@@ -23,6 +23,8 @@ public partial class Subject
 
     public virtual Category? Category { get; set; }
 
+    public virtual ICollection<ChapterCompletion> ChapterCompletions { get; } = new List<ChapterCompletion>();
+
     public virtual ICollection<Chapter> Chapters { get; } = new List<Chapter>();
 
     public virtual ICollection<Lesson> Lessons { get; } = new List<Lesson>();
@@ -34,4 +36,6 @@ public partial class Subject
     public virtual ICollection<Quiz> Quizzes { get; } = new List<Quiz>();
 
     public virtual ICollection<Registration> Registrations { get; } = new List<Registration>();
+
+    public virtual ICollection<SubjectCompletion> SubjectCompletions { get; } = new List<SubjectCompletion>();
 }

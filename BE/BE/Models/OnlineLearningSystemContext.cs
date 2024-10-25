@@ -21,6 +21,8 @@ public partial class OnlineLearningSystemContext : DbContext
 
     public virtual DbSet<Chapter> Chapters { get; set; }
 
+    public virtual DbSet<ChapterCompletion> ChapterCompletions { get; set; }
+
     public virtual DbSet<Lesson> Lessons { get; set; }
 
     public virtual DbSet<LessonCompletion> LessonCompletions { get; set; }
@@ -42,6 +44,8 @@ public partial class OnlineLearningSystemContext : DbContext
     public virtual DbSet<Registration> Registrations { get; set; }
 
     public virtual DbSet<Subject> Subjects { get; set; }
+
+    public virtual DbSet<SubjectCompletion> SubjectCompletions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -108,6 +112,42 @@ public partial class OnlineLearningSystemContext : DbContext
                 .HasForeignKey(d => d.SubjectId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__CHAPTER__subject__22751F6C");
+        });
+
+        modelBuilder.Entity<ChapterCompletion>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__CHAPTER___3213E83FBD5D51E9");
+
+            entity.ToTable("CHAPTER_COMPLETION");
+
+            entity.HasIndex(e => new { e.UserId, e.ChapterId }, "UC_UserChapter").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ChapterId).HasColumnName("chapter_id");
+            entity.Property(e => e.CompletionDate)
+                .HasColumnType("datetime")
+                .HasColumnName("completion_date");
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasDefaultValueSql("((1))")
+                .HasColumnName("status");
+            entity.Property(e => e.SubjectId).HasColumnName("subject_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Chapter).WithMany(p => p.ChapterCompletions)
+                .HasForeignKey(d => d.ChapterId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CHAPTER_C__chapt__2A164134");
+
+            entity.HasOne(d => d.Subject).WithMany(p => p.ChapterCompletions)
+                .HasForeignKey(d => d.SubjectId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CHAPTER_C__subje__2B0A656D");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ChapterCompletions)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CHAPTER_C__user___29221CFB");
         });
 
         modelBuilder.Entity<Lesson>(entity =>
@@ -407,6 +447,39 @@ public partial class OnlineLearningSystemContext : DbContext
             entity.HasOne(d => d.Owner).WithMany(p => p.Subjects)
                 .HasForeignKey(d => d.OwnerId)
                 .HasConstraintName("FK__SUBJECT__owner_i__6383C8BA");
+        });
+
+        modelBuilder.Entity<SubjectCompletion>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__SUBJECT___3213E83FE787EF1A");
+
+            entity.ToTable("SUBJECT_COMPLETION");
+
+            entity.HasIndex(e => new { e.UserId, e.SubjectId }, "UC_UserSubject").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CertificateUrl)
+                .HasMaxLength(255)
+                .HasColumnName("certificate_url");
+            entity.Property(e => e.CompletionDate)
+                .HasColumnType("datetime")
+                .HasColumnName("completion_date");
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasDefaultValueSql("((1))")
+                .HasColumnName("status");
+            entity.Property(e => e.SubjectId).HasColumnName("subject_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.Subject).WithMany(p => p.SubjectCompletions)
+                .HasForeignKey(d => d.SubjectId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__SUBJECT_C__subje__30C33EC3");
+
+            entity.HasOne(d => d.User).WithMany(p => p.SubjectCompletions)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__SUBJECT_C__user___2FCF1A8A");
         });
 
         modelBuilder.Entity<User>(entity =>
