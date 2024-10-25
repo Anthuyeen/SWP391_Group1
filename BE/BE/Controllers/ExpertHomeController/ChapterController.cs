@@ -1,4 +1,5 @@
 ﻿using BE.DTOs.ExpertDto;
+using BE.DTOs.UserDto;
 using BE.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -240,6 +241,80 @@ namespace BE.Controllers.ExpertHomeController
                 Status = chapter.Status,
                 SubjectId = chapter.SubjectId
             });
+        }
+
+        [HttpGet("GetChapterProgress/user/{userId}/chapter/{chapterId}")]
+        public async Task<ActionResult<ChapterProgressDto>> GetChapterProgress(int userId, int chapterId)
+        {
+            // Verify user exists
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            // Get chapter with related lessons and quizzes
+            var chapter = await _context.Chapters
+                .Include(c => c.Lessons)
+                .Include(c => c.Quizzes)
+                .FirstOrDefaultAsync(c => c.Id == chapterId);
+
+            if (chapter == null)
+            {
+                return NotFound("Chapter not found");
+            }
+
+            // Get lesson completions for this user
+            var lessonCompletions = await _context.LessonCompletions
+                .Where(lc => lc.UserId == userId &&
+                            chapter.Lessons.Select(l => l.Id).Contains(lc.LessonId))
+                .ToListAsync();
+
+            // Get quiz attempts for this user
+            var quizAttempts = await _context.QuizAttempts
+                .Where(qa => qa.UserId == userId &&
+                            chapter.Quizzes.Select(q => q.Id).Contains(qa.QuizId))
+                .ToListAsync();
+
+            // Create progress DTOs for lessons
+            var lessonProgress = chapter.Lessons.Select(lesson => new LessonProgressDto
+            {
+                LessonId = lesson.Id,
+                LessonName = lesson.Name,
+                IsCompleted = lessonCompletions.Any(lc => lc.LessonId == lesson.Id && lc.UserId == userId)
+            }).ToList();
+
+            // Create progress DTOs for quizzes
+            var quizProgress = chapter.Quizzes.Select(quiz =>
+            {
+                var attempts = quizAttempts.Where(qa => qa.QuizId == quiz.Id).ToList();
+                var bestAttempt = attempts.OrderByDescending(a => a.Score).FirstOrDefault();
+
+                return new QuizProgressDto
+                {
+                    QuizId = quiz.Id,
+                    QuizName = quiz.Name,
+                    IsCompleted = bestAttempt?.IsPassed ?? false,
+                };
+            }).ToList();
+
+            // Calculate overall completion percentage
+            decimal totalItems = chapter.Lessons.Count + chapter.Quizzes.Count;
+            decimal completedItems = lessonProgress.Count(l => l.IsCompleted) + quizProgress.Count(q => q.IsCompleted);
+            decimal completionPercentage = Math.Round(totalItems > 0 ? (completedItems / totalItems) * 100 : 0);
+
+            // Create the final response
+            var response = new ChapterProgressDto
+            {
+                ChapterId = chapter.Id,
+                ChapterTitle = chapter.Title,
+                IsCompleted = completionPercentage == 100,
+                CompletionPercentage = completionPercentage,
+                LessonProgress = lessonProgress,
+                QuizProgress = quizProgress
+            };
+
+            return Ok(response);
         }
 
         private bool ChapterExists(int id)
