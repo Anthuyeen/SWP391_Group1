@@ -377,3 +377,31 @@ export const fetchQuizAttemptById = async (quizAttemptId) => {
       throw error; // Ném lỗi ra ngoài để xử lý ở nơi gọi
   }
 };
+//import quiz
+export const fetchImportQuestions = async (quizId, file) => {
+  const url = `https://localhost:7043/api/Quiz/ImportQuestions/import/${quizId}`;
+
+  // Tạo FormData để chứa file
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+      const response = await fetch(url, {
+          method: 'POST',
+          body: formData
+      });
+
+      if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to import questions: ${errorText}`);
+      }
+
+      // Parse dữ liệu JSON từ phản hồi của API
+      const data = await response.json();
+      return data;
+  } catch (error) {
+      console.error("Error importing questions:", error);
+      throw error; // Ném lỗi để xử lý ở component gọi hàm
+  }
+};
+

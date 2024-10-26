@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchQuestionsByQuizId, editQuestion, addQuestionsToQuiz } from '../../../service/quiz';
+import { fetchQuestionsByQuizId, editQuestion, addQuestionsToQuiz, fetchImportQuestions } from '../../../service/quiz';
 import {
     Container,
     Typography,
@@ -27,6 +27,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import AddIcon from '@mui/icons-material/Add';
 import Tooltip from '@mui/material/Tooltip';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const Question = () => {
     const { quizId } = useParams();
@@ -42,6 +43,7 @@ const Question = () => {
     });
     const navigate = useNavigate();
     const [editingQuestion, setEditingQuestion] = useState(null);
+    const [file, setFile] = useState(null);
 
     useEffect(() => {
         const loadQuestions = async () => {
@@ -201,6 +203,27 @@ const Question = () => {
         setNewQuestion((prev) => ({ ...prev, answers: updatedAnswers }));
     };
 
+    const handleImportClick = () => {
+        document.getElementById("import-input").click();
+    };
+
+    const handleFileChange = async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            try {
+                await fetchImportQuestions(quizId, file);
+                const data = await fetchQuestionsByQuizId(quizId); // Refresh questions
+                setQuestions(data.questions);
+                console.log('Questions imported successfully');
+                window.location.reload();
+
+            } catch (error) {
+                console.error('Error importing questions:', error);
+            }
+        }
+    };
+    
+
     return (
         <Container sx={{ mt: 4 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -221,6 +244,18 @@ const Question = () => {
                     <IconButton onClick={handleAddQuestionOpen}>
                         <AddIcon />
                     </IconButton>
+                    <input
+    accept=".xlsx, .xls"
+    style={{ display: 'none' }}
+    id="import-file"
+    type="file"
+    onChange={handleFileChange}
+/>
+<label htmlFor="import-file">
+    <IconButton color="primary" component="span">
+        <CloudUploadIcon />
+    </IconButton>
+</label>
                 </Box>
             </Box>
 
