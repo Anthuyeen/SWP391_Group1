@@ -14,7 +14,7 @@
     {
         public int LessonId { get; set; }
         public string LessonName { get; set; }
-        public bool IsCompleted { get; set; }
+        public bool IsCompletedLesson { get; set; }
     }
 
     public class QuizProgressDto

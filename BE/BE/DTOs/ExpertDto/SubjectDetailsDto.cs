@@ -15,6 +15,7 @@
         public List<DimensionSummaryDto> Dimensions { get; set; }
         public List<QuizSummaryDto> Quizzes { get; set; }
         public List<PricePackageSummaryDto> PricePackages { get; set; }      
+        public List<ChapterSummaryDto> Chapters { get; set; }
     }
 
     public class LessonSummaryDto
@@ -23,7 +24,7 @@
         public string Name { get; set; }
         public string Status { get; set; }
         public string? Url { get; set; }
-
+        public int? ChapterId { get; set; }
     }
 
     public class DimensionSummaryDto
@@ -48,5 +49,13 @@
         public decimal ListPrice { get; set; }
         public decimal SalePrice { get; set; }
         public int DurationMonths { get; set; }
+    }
+
+    public class ChapterSummaryDto
+    {
+        public int Id { get; set; }
+        public int SubjectId { get; set; }
+        public string Title { get; set; } = null!;
+        public string? Status { get; set; }
     }
 }

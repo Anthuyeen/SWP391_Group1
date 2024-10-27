@@ -3,7 +3,9 @@ import { Box, Typography, List, ListItem, ListItemText, Button, Paper } from '@m
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useParams } from 'react-router-dom';
 import { fetchSubjectById } from '../../../../service/subject';
-import { fetchLessonCompletion } from '../../../../service/lesson'; // Import hàm ghi nhận hoàn thành
+import { fetchLessonCompletion } from '../../../../service/lesson';
+import { fetchCompletedLessons } from '../../../../service/chapter';
+
 import ReactPlayer from 'react-player';
 import Navbar from '../../../../layouts/navbar';
 import Footer from '../../../../layouts/footer';
@@ -14,6 +16,7 @@ const LessonLearn = () => {
   const [subject, setSubject] = useState(null);
   const [currentLesson, setCurrentLesson] = useState(null);
   const [selectedLessonId, setSelectedLessonId] = useState(null);
+  const [completedLessons, setCompletedLessons] = useState([]);
 
   useEffect(() => {
     const getSubjectData = async () => {
@@ -24,6 +27,8 @@ const LessonLearn = () => {
           setCurrentLesson(data.lessons.$values[0]);
           setSelectedLessonId(data.lessons.$values[0].id);
         }
+        // loadCompletedLessons();
+
       } catch (error) {
         console.error("Failed to fetch subject data:", error);
       }
@@ -31,11 +36,55 @@ const LessonLearn = () => {
     getSubjectData();
   }, [courseId]);
 
+  // const loadCompletedLessons = async () => {
+  //   try {
+  //     const userId = localStorage.getItem('id');
+  //     const chapters = subject.chapters.$values; // Giả sử subject đã được load
+  //     const completedLessonsPromises = chapters.map(async (chapter) => {
+  //       const data = await fetchCompletedLessons(chapter.id, userId);
+  //       return data.$values.filter(item => item.isCompleted).map(item => item.id); // Chỉ lấy id của các bài học đã hoàn thành
+  //     });
+
+  //     const completedResults = await Promise.all(completedLessonsPromises);
+  //     const allCompletedLessons = completedResults.flat(); // Gộp tất cả các ID lại thành một mảng duy nhất
+  //     setCompletedLessons(allCompletedLessons);
+  //     console.log("All completed lessons:", allCompletedLessons); // Kiểm tra danh sách hoàn thành
+  //   } catch (error) {
+  //     console.error("Failed to fetch completed lessons:", error);
+  //   }
+  // };
+
+  useEffect(() => {
+    const loadCompletedLessons = async () => {
+        if (!subject) return; // Kiểm tra xem subject đã được load hay chưa
+        try {
+            const userId = localStorage.getItem('id');
+            const chapters = subject.chapters.$values;
+            const completedLessonsPromises = chapters.map(async (chapter) => {
+                const data = await fetchCompletedLessons(chapter.id, userId);
+                return data.$values.filter(item => item.isCompleted).map(item => item.id);
+            });
+
+            const completedResults = await Promise.all(completedLessonsPromises);
+            const allCompletedLessons = completedResults.flat();
+            setCompletedLessons(allCompletedLessons);
+            console.log("All completed lessons:", allCompletedLessons);
+        } catch (error) {
+            console.error("Failed to fetch completed lessons:", error);
+        }
+    };
+
+    loadCompletedLessons();
+}, [subject]); // Gọi khi subject thay đổi
+
   if (!subject) {
     return <Typography>Loading...</Typography>;
   }
 
-  const lessons = subject.lessons.$values;
+  const chapters = subject.chapters.$values.map((chapter) => ({
+    ...chapter,
+    lessons: subject.lessons.$values.filter((lesson) => lesson.chapterId === chapter.id),
+  }));
 
   const handleLessonClick = (lesson) => {
     setCurrentLesson(lesson);
@@ -43,18 +92,18 @@ const LessonLearn = () => {
   };
 
   const handlePrevLesson = () => {
-    const currentIndex = lessons.findIndex(lesson => lesson.id === currentLesson.id);
+    const currentIndex = chapters.flatMap(c => c.lessons).findIndex(lesson => lesson.id === currentLesson.id);
     if (currentIndex > 0) {
-      const prevLesson = lessons[currentIndex - 1];
+      const prevLesson = chapters.flatMap(c => c.lessons)[currentIndex - 1];
       setCurrentLesson(prevLesson);
       setSelectedLessonId(prevLesson.id);
     }
   };
 
   const handleNextLesson = () => {
-    const currentIndex = lessons.findIndex(lesson => lesson.id === currentLesson.id);
-    if (currentIndex < lessons.length - 1) {
-      const nextLesson = lessons[currentIndex + 1];
+    const currentIndex = chapters.flatMap(c => c.lessons).findIndex(lesson => lesson.id === currentLesson.id);
+    if (currentIndex < chapters.flatMap(c => c.lessons).length - 1) {
+      const nextLesson = chapters.flatMap(c => c.lessons)[currentIndex + 1];
       setCurrentLesson(nextLesson);
       setSelectedLessonId(nextLesson.id);
     }
@@ -62,7 +111,7 @@ const LessonLearn = () => {
 
   const handleVideoEnd = async () => {
     try {
-      const userId = localStorage.getItem('id'); // Lấy userId từ localStorage
+      const userId = localStorage.getItem('id');
       await fetchLessonCompletion(userId, currentLesson.id);
       console.log("Lesson completed!");
     } catch (error) {
@@ -84,17 +133,17 @@ const LessonLearn = () => {
                   width="100%"
                   height="500px"
                   controls
-                  onEnded={handleVideoEnd} // Gọi hàm khi video kết thúc
+                  onEnded={handleVideoEnd}
                 />
               ) : (
                 <Typography>No video available</Typography>
               )}
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Button variant="outlined" startIcon={<PlayArrowIcon />} onClick={handlePrevLesson} disabled={currentLesson.id === lessons[0].id}>
+              <Button variant="outlined" startIcon={<PlayArrowIcon />} onClick={handlePrevLesson} disabled={currentLesson.id === chapters.flatMap(c => c.lessons)[0].id}>
                 Bài trước
               </Button>
-              <Button variant="contained" endIcon={<PlayArrowIcon />} onClick={handleNextLesson} disabled={currentLesson.id === lessons[lessons.length - 1].id}>
+              <Button variant="contained" endIcon={<PlayArrowIcon />} onClick={handleNextLesson} disabled={currentLesson.id === chapters.flatMap(c => c.lessons).slice(-1)[0].id}>
                 Bài tiếp theo
               </Button>
             </Box>
@@ -104,44 +153,34 @@ const LessonLearn = () => {
           <Paper elevation={3} sx={{ p: 2, height: '100%', overflowY: 'auto' }}>
             <Typography variant="h6" gutterBottom>Nội dung khóa học</Typography>
             <List>
-              {lessons.map((lesson) => (
-                <React.Fragment key={lesson.id}>
-                 <ListItem
-  button
-  onClick={() => handleLessonClick(lesson)}
-  sx={{
-    bgcolor: selectedLessonId === lesson.id ? 'orange' : 'transparent',
-    '&:hover': {
-      bgcolor: '#ffd54f',
-    },
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between' // Đẩy icon sang bên phải
-  }}
->
-  {/* Tên bài học */}
-  <ListItemText
-    primary={`${lesson.id}. ${lesson.name}`}
-    secondary={lesson.status}
-  />
-  
-  {/* Icon dấu tích xanh nếu lesson đã hoàn thành */}
-  {lesson.status === "true" && (
-    <CheckCircleIcon style={{ color: 'green' }} />
-  )}
-</ListItem>
-                  {lesson.subLessons && (
-                    <List component="div" disablePadding>
-                      {lesson.subLessons.map((subLesson) => (
-                        <ListItem key={subLesson.id} button sx={{ pl: 4 }}>
-                          <ListItemText
-                            primary={`${lesson.id}.${subLesson.id}. ${subLesson.title}`}
-                            secondary={subLesson.duration}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  )}
+              {chapters.map((chapter) => (
+                <React.Fragment key={chapter.id}>
+                  <Typography variant="h6" gutterBottom>{chapter.title}</Typography>
+                  {chapter.lessons.map((lesson) => (
+                    <ListItem
+                      button
+                      key={lesson.id}
+                      onClick={() => handleLessonClick(lesson)}
+                      sx={{
+                        bgcolor: selectedLessonId === lesson.id ? 'orange' : 'transparent',
+                        '&:hover': { bgcolor: '#ffd54f' },
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <ListItemText
+                        primary={`${lesson.id}. ${lesson.name}`}
+                      />
+                      {completedLessons.includes(lesson.id) ? (
+                        <CheckCircleIcon style={{ color: 'green' }} /> // Dấu tích xanh nếu bài học đã hoàn thành
+                      ) : (
+                        <CheckCircleIcon style={{ color: 'gray' }} /> // Dấu tích xám nếu chưa hoàn thành
+                      )}
+                    </ListItem>
+
+
+                  ))}
                 </React.Fragment>
               ))}
             </List>
@@ -154,5 +193,3 @@ const LessonLearn = () => {
 };
 
 export default LessonLearn;
-
-

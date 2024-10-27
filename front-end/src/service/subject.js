@@ -213,3 +213,26 @@ export const uploadImage = async (file) => {
     throw error;
   }
 };
+
+//get progress subject
+export const fetchSubjectProgress = async (userId, subjectId) => {
+  try {
+      const response = await fetch(`https://localhost:7043/api/Subject/GetSubjectProgress/GetSubjectProgress/user/${userId}/subject/${subjectId}`, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}` // nếu cần token để xác thực
+          }
+      });
+
+      if (!response.ok) {
+          throw new Error('Failed to fetch subject progress');
+      }
+
+      const data = await response.json();
+      return data;
+  } catch (error) {
+      console.error('Error fetching subject progress:', error);
+      throw error;
+  }
+};

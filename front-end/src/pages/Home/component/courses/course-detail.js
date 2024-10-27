@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef    } from 'react';
 import { useParams } from 'react-router-dom';
 import {
     Typography,
@@ -20,11 +20,10 @@ import {
     InputAdornment
 } from '@mui/material';
 import { ExpandMore, PlayCircleOutline, Article } from '@mui/icons-material';
-import { fetchSubjectById } from '../../../../service/subject';
+import { fetchSubjectById, fetchSubjectProgress } from '../../../../service/subject';
 import { fetchRegistrationStatus } from '../../../../service/enroll'; // Import hàm kiểm tra đăng ký
 import Navbar from '../../../../layouts/navbar';
 import Footer from '../../../../layouts/footer';
-import SearchIcon from '@mui/icons-material/Search';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import CloseIcon from '@mui/icons-material/Close';
@@ -34,6 +33,8 @@ import { fetchRegisterSubject } from '../../../../service/enroll'; // Import hà
 import { useNavigate } from 'react-router-dom';
 import QuizIcon from '@mui/icons-material/Quiz';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { CheckCircle, CheckCircleOutline } from '@mui/icons-material';
+import { fetchChapterProgress, fetchCompletedLessons } from '../../../../service/chapter';
 const CourseOverview = () => {
     const { courseId } = useParams();
     const [course, setCourse] = useState(null);
@@ -47,39 +48,115 @@ const CourseOverview = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
     const [registrationInfo, setRegistrationInfo] = useState(null);
     const [isRegistered, setIsRegistered] = useState(false); // Thêm state để kiểm tra đã đăng ký
+    const [progress, setProgress] = useState(null);
+    const [chapterProgress, setChapterProgress] = useState({});
+    const [completedLessons, setCompletedLessons] = useState({});
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const loadCourse = async () => {
+    const hasFetchedData = useRef(false); // Sử dụng useRef để theo dõi trạng thái đã fetch
+
+    const loadCourse = useCallback(async () => {
+        try {
+            const data = await fetchSubjectById(courseId);
+            setCourse(data);
+        } catch (err) {
+            setError('Error loading course');
+        }
+    }, [courseId]);
+
+    const loadChapterProgress = useCallback(async () => {
+        const userId = localStorage.getItem('id');
+        if (userId && course) {
+            const progressPromises = course.chapters.$values.map(chapter =>
+                fetchChapterProgress(userId, chapter.id)
+            );
+            const progressResults = await Promise.all(progressPromises);
+            const progressMap = progressResults.reduce((acc, progress, index) => {
+                acc[course.chapters.$values[index].id] = progress.isComplete;
+                return acc;
+            }, {});
+            setChapterProgress(progressMap);
+        }
+    }, [course]);
+
+    const loadLessonProgress = useCallback(async () => {
+        const userId = localStorage.getItem('id');
+        if (!userId) {
+            console.error("User ID is undefined. Please ensure the user is logged in.");
+            return;
+        }
+
+        if (userId && course) {
+            const completedLessonsPromises = course.chapters.$values.map(async (chapter) => {
+                const lessons = await fetchCompletedLessons(chapter.id, userId);
+                return { chapterId: chapter.id, lessons: lessons.$values };
+            });
+            const completedResults = await Promise.all(completedLessonsPromises);
+
+            const lessonsMap = completedResults.reduce((acc, { chapterId, lessons }) => {
+                acc[chapterId] = lessons.reduce((lessonAcc, lesson) => {
+                    lessonAcc[lesson.id] = lesson.isCompleted;
+                    return lessonAcc;
+                }, {});
+                return acc;
+            }, {});
+
+            setCompletedLessons(lessonsMap);
+        }
+    }, [course]);
+
+    const checkProgress = useCallback(async () => {
+        const userId = localStorage.getItem('id');
+        if (userId) {
             try {
-                const data = await fetchSubjectById(courseId);
-                setCourse(data);
+                const progressData = await fetchSubjectProgress(userId, courseId);
+                setProgress(progressData.isComplete);
             } catch (err) {
-                setError('Error loading course');
+                console.error('Error fetching subject progress:', err);
             }
-        };
-        loadCourse();
-        checkRegistration();
-    }, [courseId, isLoggedIn]);
-    const checkRegistration = async () => {
+        }
+    }, [courseId]);
+
+    const checkRegistration = useCallback(async () => {
         if (isLoggedIn) {
-            const accId = localStorage.getItem('id'); // Lấy accId từ localStorage
+            const accId = localStorage.getItem('id');
             try {
                 const status = await fetchRegistrationStatus(accId, courseId);
                 if (status === "Bạn đã đăng ký môn học này") {
-                    setIsRegistered(true); // Người dùng đã đăng ký
+                    setIsRegistered(true);
                 } else if (status === "Pending") {
-                    setIsRegistered(false); // Người dùng chưa đăng ký
-                    setRegistrationInfo("Bạn chưa thanh toán khóa học này"); // Lưu thông báo
+                    setIsRegistered(false);
+                    setRegistrationInfo("Bạn chưa thanh toán khóa học này");
                 } else {
-                    setIsRegistered(false); // Người dùng chưa đăng ký
-                    setRegistrationInfo(status); // Lưu giá tiền môn học
+                    setIsRegistered(false);
+                    setRegistrationInfo(status);
                 }
             } catch (err) {
                 console.error('Lỗi kiểm tra trạng thái đăng ký:', err);
             }
         }
-    };
+    }, [courseId, isLoggedIn]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!hasFetchedData.current) { // Chỉ gọi khi chưa fetch
+                await loadCourse();
+                await checkRegistration();
+                await checkProgress();
+
+                if (course) {
+                    await Promise.all([
+                        loadChapterProgress(),
+                        loadLessonProgress()
+                    ]);
+                }
+                hasFetchedData.current = true; // Đánh dấu là đã fetch
+            }
+        };
+
+        fetchData();
+    }, [courseId, isLoggedIn, course]);
+
     const handleOpenLogin = () => {
         setEmail('');
         setPassword('');
@@ -163,7 +240,21 @@ const CourseOverview = () => {
         const userId = localStorage.getItem('id'); // Lấy userId từ localStorage
         navigate(`/quiz-attempt/${userId}`); // Điều hướng đến trang quiz-attempt với userId
     };
+    // Tạo đối tượng groupedLessons để nhóm lessons theo ChapterId
+    const groupedLessons = course?.lessons?.$values.reduce((acc, lesson) => {
+        const chapterId = lesson.chapterId;
+        if (!acc[chapterId]) acc[chapterId] = [];
+        acc[chapterId].push(lesson);
+        return acc;
+    }, {});
 
+    // Tính tổng số chương
+    const totalChapters = course?.chapters?.$values.length || 0;
+    // Tính tổng số bài học
+    const totalLessons = Object.values(groupedLessons || {}).reduce(
+        (acc, lessons) => acc + lessons.length,
+        0
+    );
     if (error) return <div>{error}</div>;
     if (!course) return <div>Loading...</div>;
 
@@ -172,7 +263,21 @@ const CourseOverview = () => {
             <Navbar />
             <Box sx={{ maxWidth: 800, margin: 'auto', padding: 2, mb: 10 }}>
                 <Typography variant="h4" gutterBottom>
-                    {course.name}
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {course.name}
+                        {isRegistered && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: 2 }}>
+                                {progress ? (
+                                    <CheckCircle sx={{ color: 'green', fontSize: 20 }} />
+                                ) : (
+                                    <CheckCircleOutline sx={{ color: 'gray', fontSize: 20 }} />
+                                )}
+                                <Typography variant="body1" sx={{ marginLeft: 1 }}>
+                                    {progress ? 'Khóa học đã hoàn thành' : 'Khóa học chưa hoàn thành'}
+                                </Typography>
+                            </Box>
+                        )}
+                    </Box>
                 </Typography>
                 {isRegistered ? (
                     <Button
@@ -197,7 +302,6 @@ const CourseOverview = () => {
                         Đăng ký
                     </Button>
                 )}
-
                 <Typography variant="body1" paragraph>
                     {course.description}
                 </Typography>
@@ -205,44 +309,40 @@ const CourseOverview = () => {
                 <Typography variant="h6" gutterBottom>
                     Nội dung khóa học
                 </Typography>
-                <Typography variant="body2" gutterBottom>
-                    {`${course.dimensions?.$values.length || 0} chương • ${course.lessons?.$values.length || 0} bài học`}
+                {/* Hiển thị tổng số chương và bài học */}
+                <Typography variant="body1" gutterBottom>
+                    {`${totalChapters} Chương | ${totalLessons} Bài học`}
                 </Typography>
-
-                {/* {course.dimensions?.$values.map((chapter, index) => (
+                {course.chapters?.$values.map((chapter, index) => (
                     <Accordion key={index}>
                         <AccordionSummary expandIcon={<ExpandMore />}>
-                            <Typography>{`${index + 1}. ${chapter.name}`}</Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                {chapterProgress[chapter.id] ? ( // Kiểm tra tiến độ
+                                    <CheckCircle sx={{ color: 'green', fontSize: 20, marginRight: 1 }} />
+                                ) : (
+                                    <CheckCircleOutline sx={{ color: 'gray', fontSize: 20, marginRight: 1 }} />
+                                )}
+                                <Typography>{`Chương ${index + 1}: ${chapter.title}`}</Typography>
+                            </Box>
                         </AccordionSummary>
                         <AccordionDetails>
                             <List>
-                                {course.lessons?.$values.map((lesson, lessonIndex) => (
+                                {groupedLessons[chapter.id]?.map((lesson, lessonIndex) => (
                                     <ListItem key={lessonIndex}>
                                         <ListItemIcon>
-                                            {lesson.status === 'Active' ? <PlayCircleOutline /> : <Article />}
+                                            {completedLessons[chapter.id]?.[lesson.id] ? (
+                                                <CheckCircle sx={{ color: 'green' }} />
+                                            ) : (
+                                                <CheckCircleOutline sx={{ color: 'gray' }} />
+                                            )}
                                         </ListItemIcon>
-                                        <ListItemText primary={lesson.name} />
+                                        <ListItemText primary={`Bài ${lessonIndex + 1}: ${lesson.name}`} />
                                     </ListItem>
                                 ))}
                             </List>
                         </AccordionDetails>
                     </Accordion>
-                ))} */}
-
-                <Accordion>
-                    <AccordionDetails>
-                        <List>
-                            {course.lessons?.$values.map((lesson, lessonIndex) => (
-                                <ListItem key={lessonIndex}>
-                                    <ListItemIcon>
-                                        {lesson.status === 'Active' ? <PlayCircleOutline /> : <Article />}
-                                    </ListItemIcon>
-                                    <ListItemText primary={lesson.name} />
-                                </ListItem>
-                            ))}
-                        </List>
-                    </AccordionDetails>
-                </Accordion>
+                ))}
                 <Typography variant="h6" gutterBottom>
                     Các bài kiểm tra
                     <IconButton

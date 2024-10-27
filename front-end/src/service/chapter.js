@@ -137,3 +137,53 @@ export const updateChapterStatus = async (chapterId, newStatus) => {
       throw error; // Ném lỗi để xử lý bên ngoài
   }
 };
+// progress chapter
+// service/chapter.js
+
+export const fetchChapterProgress = async (userId, chapterId) => {
+  const url = `https://localhost:7043/api/Chapter/GetChapterProgress/user/${userId}/chapter/${chapterId}`;
+  
+  try {
+      const response = await fetch(url, {
+          method: 'GET', // Hoặc phương thức khác nếu cần
+          headers: {
+              'Content-Type': 'application/json',
+              // Thêm token hoặc thông tin xác thực nếu cần
+          }
+      });
+
+      // Kiểm tra phản hồi từ API
+      if (!response.ok) {
+          throw new Error('Lỗi khi tải dữ liệu');
+      }
+
+      const data = await response.json(); // Chuyển đổi phản hồi thành JSON
+      return data; // Trả về dữ liệu
+  } catch (error) {
+      console.error('Lỗi trong fetchChapterProgress:', error);
+      throw error; // Ném lỗi để xử lý ở nơi khác
+  }
+};
+//check lesson complete
+export const fetchCompletedLessons = async (chapterId, userId) => {
+  const url = `https://localhost:7043/api/Chapter/ViewCompletedLessons/${chapterId}/${userId}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching completed lessons:', error);
+    throw error;
+  }
+};

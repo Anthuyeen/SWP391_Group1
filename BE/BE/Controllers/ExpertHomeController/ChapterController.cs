@@ -281,7 +281,7 @@ namespace BE.Controllers.ExpertHomeController
             {
                 LessonId = lesson.Id,
                 LessonName = lesson.Name,
-                IsCompleted = lessonCompletions.Any(lc => lc.LessonId == lesson.Id && lc.UserId == userId)
+                IsCompletedLesson = lessonCompletions.Any(lc => lc.LessonId == lesson.Id && lc.UserId == userId)
             }).ToList();
 
             // Create progress DTOs for quizzes
@@ -300,7 +300,7 @@ namespace BE.Controllers.ExpertHomeController
 
             // Calculate overall completion percentage
             decimal totalItems = chapter.Lessons.Count + chapter.Quizzes.Count;
-            decimal completedItems = lessonProgress.Count(l => l.IsCompleted) + quizProgress.Count(q => q.IsCompleted);
+            decimal completedItems = lessonProgress.Count(l => l.IsCompletedLesson) + quizProgress.Count(q => q.IsCompleted);
             decimal completionPercentage = Math.Round(totalItems > 0 ? (completedItems / totalItems) * 100 : 0);
 
             // Create the final response

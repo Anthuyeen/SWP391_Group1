@@ -207,7 +207,6 @@ namespace BE.Controllers.Expert
 
             return Ok(subjects);
         }
-
         [HttpGet("GetSubjectById/{id}")]
         public async Task<ActionResult<SubjectDetailsDto>> GetSubjectById(int id)
         {
@@ -217,6 +216,7 @@ namespace BE.Controllers.Expert
                 .Include(s => s.Lessons)
                 .Include(s => s.Quizzes)
                 .Include(s => s.PricePackages)
+                .Include(s => s.Chapters) // Thêm include cho chapters
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (subject == null)
@@ -240,9 +240,10 @@ namespace BE.Controllers.Expert
                     Id = l.Id,
                     Name = l.Name,
                     Status = l.Status,
-                    Url = l.Url
+                    Url = l.Url,
+                    ChapterId = l.ChapterId
                 }).ToList(),
-              
+
                 Quizzes = subject.Quizzes.Select(q => new QuizSummaryDto
                 {
                     Id = q.Id,
@@ -257,11 +258,21 @@ namespace BE.Controllers.Expert
                     ListPrice = p.ListPrice,
                     SalePrice = p.SalePrice,
                     DurationMonths = p.DurationMonths
+                }).ToList(),
+
+                // Thêm danh sách chapters
+                Chapters = subject.Chapters.Select(c => new ChapterSummaryDto
+                {
+                    Id = c.Id,
+                    Title = c.Title,
+                    Status = c.Status,
+                    SubjectId = c.SubjectId
                 }).ToList()
             };
 
             return Ok(subjectDetails);
         }
+
 
         [HttpGet("GetSubjectProgress/user/{userId}/subject/{subjectId}")]
         public async Task<ActionResult<SubjectProgressDto>> GetSubjectProgress(int userId, int subjectId)
