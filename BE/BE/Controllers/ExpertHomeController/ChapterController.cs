@@ -317,6 +317,46 @@ namespace BE.Controllers.ExpertHomeController
             return Ok(response);
         }
 
+        [HttpGet("ViewCompletedLessons/{chapterId}/{userId}")]
+        public async Task<ActionResult<IEnumerable<SimpleLessonCompletionDto>>> ViewCompletedLessons(int chapterId, int userId)
+        {
+            // Kiểm tra chapter tồn tại
+            var chapter = await _context.Chapters
+                .Include(c => c.Lessons)
+                .FirstOrDefaultAsync(c => c.Id == chapterId);
+
+            if (chapter == null)
+            {
+                return NotFound("Chapter not found.");
+            }
+
+            // Kiểm tra user tồn tại
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Lấy lesson completions cho user
+            var completedLessonIds = await _context.LessonCompletions
+                .Where(lc => lc.UserId == userId && lc.Status)
+                .Select(lc => lc.LessonId)
+                .ToListAsync();
+
+            // Tạo danh sách lesson với thông tin completion đơn giản
+            var lessons = chapter.Lessons
+                .OrderBy(l => l.DisplayOrder)
+                .Select(lesson => new SimpleLessonCompletionDto
+                {
+                    Id = lesson.Id,
+                    Name = lesson.Name,
+                    IsCompleted = completedLessonIds.Contains(lesson.Id)
+                })
+                .ToList();
+
+            return Ok(lessons);
+        }
+
         private bool ChapterExists(int id)
         {
             return _context.Chapters.Any(e => e.Id == id);
