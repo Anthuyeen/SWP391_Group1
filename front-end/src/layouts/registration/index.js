@@ -22,7 +22,7 @@ const Register = () => {
             alert('Đăng ký thành công!');
             navigate('/'); // Điều hướng về trang chủ
         } catch (error) {
-            const errorMessage = error.message; // Lấy thông điệp lỗi từ Error object
+            const errorMessage = error; // Lấy thông điệp lỗi từ Error object
             setEmailError(errorMessage); // Hiển thị lỗi chính xác từ API lên giao diện
         }
     };
