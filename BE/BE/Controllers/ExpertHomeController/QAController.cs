@@ -88,6 +88,8 @@ namespace BE.Controllers.Expert
                 DurationMinutes = quiz.DurationMinutes,
                 PassRate = quiz.PassRate,
                 Type = quiz.Type,
+                ChapterId = quiz.ChapterId,
+                SubjectId = quiz.SubjectId,
                 Questions = quiz.Questions.Select(q => new QuestionDto
                 {
                     Id = q.Id,

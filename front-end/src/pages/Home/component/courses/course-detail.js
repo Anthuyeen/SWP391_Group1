@@ -1,24 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef    } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-    Typography,
-    Box,
-    Button,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    IconButton,
-    Grid,
-    TextField,
-    InputAdornment
-} from '@mui/material';
+import { Typography, Box, Button, Accordion, AccordionSummary, AccordionDetails, List, ListItem, ListItemIcon, ListItemText, Dialog, DialogTitle, DialogContent, IconButton, Grid, TextField, InputAdornment } from '@mui/material';
 import { ExpandMore, PlayCircleOutline, Article } from '@mui/icons-material';
 import { fetchSubjectById, fetchSubjectProgress } from '../../../../service/subject';
 import { fetchRegistrationStatus } from '../../../../service/enroll'; // Import hàm kiểm tra đăng ký
@@ -261,7 +243,7 @@ const CourseOverview = () => {
     return (
         <>
             <Navbar />
-            <Box sx={{ maxWidth: 800, margin: 'auto', padding: 2, mb: 10 }}>
+            <Box sx={{ maxWidth: 800, margin: 'auto', padding: 2, mb: 10, minHeight: 'calc(100vh - 100px)'}}>
                 <Typography variant="h4" gutterBottom>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         {course.name}
@@ -305,7 +287,6 @@ const CourseOverview = () => {
                 <Typography variant="body1" paragraph>
                     {course.description}
                 </Typography>
-
                 <Typography variant="h6" gutterBottom>
                     Nội dung khóa học
                 </Typography>
@@ -353,7 +334,6 @@ const CourseOverview = () => {
                         <ArrowForwardIcon />
                     </IconButton>
                 </Typography>
-
                 {course.quizzes?.$values.length > 0 ? (
                     <List>
                         {course.quizzes.$values.map((quiz, index) => (

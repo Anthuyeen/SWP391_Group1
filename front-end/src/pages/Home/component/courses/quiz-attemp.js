@@ -1,47 +1,3 @@
-// import React, { useEffect, useState } from 'react';
-// import { fetchQuizAttemptsByUserId } from './../../../../service/quiz'; // Import hàm fetch
-// import { Typography, Paper, List, ListItem, ListItemText } from '@mui/material';
-
-// const QuizAttempt = () => {
-//     const [quizAttempts, setQuizAttempts] = useState([]);
-//     const userId = localStorage.getItem('id'); // Lấy userId từ localStorage
-
-//     useEffect(() => {
-//         const getQuizAttempts = async () => {
-//             try {
-//                 const data = await fetchQuizAttemptsByUserId(userId);
-//                 setQuizAttempts(data); // Lưu trữ dữ liệu vào state
-//             } catch (error) {
-//                 console.error('Failed to fetch quiz attempts:', error);
-//             }
-//         };
-
-//         getQuizAttempts(); // Gọi hàm fetch khi component mount
-//     }, [userId]);
-
-//     return (
-//         <Paper sx={{ padding: 2 }}>
-//             <Typography variant="h5" gutterBottom>
-//                 Các lần làm bài kiểm tra
-//             </Typography>
-//             <List>
-//                 {quizAttempts.map((attempt) => (
-//                     <ListItem key={attempt.id}>
-//                         <ListItemText
-//                             primary={`Lần thử: ${attempt.attemptNumber}`}
-//                             secondary={`Điểm: ${attempt.score}, Thời gian bắt đầu: ${new Date(attempt.startTime).toLocaleString()}`}
-//                         />
-//                     </ListItem>
-//                 ))}
-//             </List>
-//         </Paper>
-//     );
-// };
-
-// export default QuizAttempt;
-
-
-
 import React, { useEffect, useState } from 'react';
 import { fetchQuizAttemptsByUserId } from './../../../../service/quiz'; // Import hàm fetch
 import { Typography, Paper, List, ListItem, ListItemText } from '@mui/material';
@@ -73,7 +29,7 @@ const QuizAttempt = () => {
     return (
         <>
             <Navbar />
-            <Paper sx={{ padding: 2 }}>
+            <Paper sx={{ padding: 2, minHeight: 'calc(100vh - 100px)' }}>
                 <Typography variant="h5" gutterBottom>
                     Các lần làm bài kiểm tra
                 </Typography>

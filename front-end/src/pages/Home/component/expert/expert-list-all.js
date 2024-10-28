@@ -34,7 +34,7 @@ const ListAllExpert = () => {
     return (
         <>
             <Navbar />
-            <Grid container spacing={2} sx={{ padding: 8 }}>
+            <Grid container spacing={2} sx={{ padding: 8, minHeight: 'calc(100vh - 100px)' }}>
                 {experts.map((expert) => (
                     <Grid item xs={12} sm={6} md={3} key={expert.id}>
                         <Card sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>

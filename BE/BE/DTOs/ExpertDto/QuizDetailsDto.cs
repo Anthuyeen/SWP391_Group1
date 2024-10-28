@@ -7,6 +7,9 @@
         public int DurationMinutes { get; set; }
         public  decimal PassRate { get; set; }
         public string Type { get; set; }
+        public int? ChapterId { get; set; }
+        public int? SubjectId { get; set; }
+
         public List<QuestionDto> Questions { get; set; }
     }
 

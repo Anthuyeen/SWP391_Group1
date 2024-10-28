@@ -187,3 +187,26 @@ export const fetchCompletedLessons = async (chapterId, userId) => {
     throw error;
   }
 };
+//chapter complete
+export const fetchChapterCompletion = async ({ userId, chapterId, subjectId, completionDate, status }) => {
+  try {
+      const response = await fetch("https://localhost:7043/api/ChapterCompletion", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId, chapterId, subjectId, completionDate, status }),
+      });
+      if (response.status === 409) {
+          // Ném ra lỗi với mã 409 nếu người dùng đã hoàn thành chương
+          const message = await response.text(); // Đọc nội dung của phản hồi
+          throw new Error(message); // Ném ra lỗi với thông điệp từ server
+      }
+      if (!response.ok) throw new Error("Failed to complete chapter");
+      return await response.json();
+  } catch (error) {
+      console.error("Error completing chapter:", error);
+      throw error; // Ném lỗi ra ngoài để xử lý ở nơi gọi
+  }
+};
+

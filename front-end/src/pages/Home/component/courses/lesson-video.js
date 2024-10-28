@@ -36,24 +36,6 @@ const LessonLearn = () => {
     getSubjectData();
   }, [courseId]);
 
-  // const loadCompletedLessons = async () => {
-  //   try {
-  //     const userId = localStorage.getItem('id');
-  //     const chapters = subject.chapters.$values; // Giả sử subject đã được load
-  //     const completedLessonsPromises = chapters.map(async (chapter) => {
-  //       const data = await fetchCompletedLessons(chapter.id, userId);
-  //       return data.$values.filter(item => item.isCompleted).map(item => item.id); // Chỉ lấy id của các bài học đã hoàn thành
-  //     });
-
-  //     const completedResults = await Promise.all(completedLessonsPromises);
-  //     const allCompletedLessons = completedResults.flat(); // Gộp tất cả các ID lại thành một mảng duy nhất
-  //     setCompletedLessons(allCompletedLessons);
-  //     console.log("All completed lessons:", allCompletedLessons); // Kiểm tra danh sách hoàn thành
-  //   } catch (error) {
-  //     console.error("Failed to fetch completed lessons:", error);
-  //   }
-  // };
-
   useEffect(() => {
     const loadCompletedLessons = async () => {
         if (!subject) return; // Kiểm tra xem subject đã được load hay chưa

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Checkbox, Typography, Box, Grid } from '@mui/material';
-import { fetchQuizDetails, submitQuiz } from './../../../../service/quiz'; // Hàm fetch nằm ở file khác
+import { fetchQuizDetails, submitQuiz } from './../../../../service/quiz';
 import Navbar from '../../../../layouts/navbar';
 import Footer from '../../../../layouts/footer';
+import { fetchChapterCompletion } from './../../../../service/chapter';
+
 const TakeQuiz = () => {
     const { quizId } = useParams(); // Lấy quizId từ URL
     const navigate = useNavigate(); // Hook để điều hướng
@@ -11,7 +13,6 @@ const TakeQuiz = () => {
     const [showQuestions, setShowQuestions] = useState(false);
     const [timeLeft, setTimeLeft] = useState(null); // State cho thời gian đếm ngược
     const [selectedAnswers, setSelectedAnswers] = useState([]); // Lưu câu trả lời của người dùng
-
     const userId = localStorage.getItem('id'); // Giả định userId, bạn có thể lấy từ context hoặc state
 
     useEffect(() => {
@@ -61,15 +62,46 @@ const TakeQuiz = () => {
         const startTime = new Date().toISOString(); // Thời gian bắt đầu làm bài
         try {
             const response = await submitQuiz(quizId, userId, startTime, selectedAnswers);
+            
             if (response) {
+                if (response.isPassed) { // Nếu người dùng vượt qua bài kiểm tra
+                    // Gọi API hoàn thành chương
+                    const completionData = {
+                        userId,
+                        chapterId: quizData.chapterId, // Lấy chapterId từ dữ liệu quiz
+                        subjectId: quizData.subjectId, // Lấy subjectId từ dữ liệu quiz
+                        completionDate: new Date().toISOString(),
+                        status: true
+                    };
+                    
+                    // Kiểm tra nếu người dùng đã hoàn thành khóa học
+                    try {
+                        await fetchChapterCompletion(completionData);
+                    } catch (error) {
+                        // Kiểm tra lỗi và xử lý trường hợp 409
+                        if (error.message === "User already completed course") {
+                            // Nếu nhận được thông báo này, quay lại trang trước mà không làm gì cả
+                            console.log("Người dùng đã hoàn thành khóa học. Quay lại trang trước.");
+                            navigate(-1); // Quay lại trang trước đó
+                            return; // Dừng thực thi hàm
+                        } else {
+                            // Nếu có lỗi khác, thông báo cho người dùng
+                            console.error("Error completing chapter:", error);
+                            alert("Có lỗi xảy ra khi hoàn thành chương!");
+                        }
+                    }
+                }
                 navigate(-1); // Quay lại trang trước đó
             }
         } catch (error) {
-            console.error('Error submitting quiz:', error);
-            alert('Có lỗi xảy ra khi nộp bài!');
+            console.error("Error submitting quiz:", error);
+            alert("Có lỗi xảy ra khi nộp bài!");
         }
     };
-
+    
+    
+    
+    
     // Hàm hiển thị thời gian đếm ngược
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);
@@ -80,7 +112,7 @@ const TakeQuiz = () => {
     return (
         <>
             <Navbar />
-            <Box sx={{ p: 3 }}>
+            <Box sx={{ p: 3, minHeight: 'calc(100vh - 100px)' }}>
                 {quizData ? (
                     <>
                         <Typography variant="h4">{quizData.name}</Typography>
@@ -147,5 +179,4 @@ const TakeQuiz = () => {
         </>
     );
 };
-
 export default TakeQuiz;
