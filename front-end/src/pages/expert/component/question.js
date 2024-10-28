@@ -266,7 +266,7 @@ const Question = () => {
                 onChange={(e) => handleQuizChange('durationMinutes', e.target.value)}
                 InputProps={{
                     readOnly: !isEditing,
-                    disableUnderline: true,
+                    disableUnderline: false,
                 }}
                 sx={{ mb: 2 }}
             />
