@@ -75,7 +75,7 @@ const QuizManage = () => {
 
   const loadQuizzes = async () => {
     try {
-      const expertId = localStorage.getItem("id");
+      const expertId = localStorage.getItem("expertid");
       if (expertId) {
         const data = await fetchQuizzesByExpert(expertId);
         setQuizzes(data);
