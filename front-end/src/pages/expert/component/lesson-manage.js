@@ -104,7 +104,7 @@ const LessonManager = () => {
     };
 
     const handleEditLessonClose = () => {
-        setOpenEditDialog(true);
+        setOpenEditDialog(false);
         setEditingLesson(null);
     };
 
