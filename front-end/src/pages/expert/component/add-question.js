@@ -10,7 +10,7 @@ const AddQuestion = () => {
     const [newQuestion, setNewQuestion] = useState({
         content: '',
         mediaUrl: '',
-        status: 'DeActive', // Mặc định trạng thái là DeActive
+        status: 'Active', // Mặc định trạng thái là Active
         answers: [{ content: '', isCorrect: false }],
     });
 
