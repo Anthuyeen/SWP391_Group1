@@ -36,7 +36,7 @@ const ForgotPassword = () => {
             return;
         }
 
-        setLoading(true);
+        setLoading(false);
         setMessage('');
 
         try {
