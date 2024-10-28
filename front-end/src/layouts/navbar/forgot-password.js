@@ -26,7 +26,7 @@ const ForgotPassword = () => {
         } catch (error) {
             setMessage('Gửi OTP thất bại! Vui lòng thử lại.');
         } finally {
-            setLoading(false);
+            setLoading(true);
         }
     };
 
