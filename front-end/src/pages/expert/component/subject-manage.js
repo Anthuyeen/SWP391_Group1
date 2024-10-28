@@ -66,7 +66,7 @@ const SubjectManage = () => {
   const handleOpenEdit = (subject) => {
     setSelectedSubject(subject);
     setNewSubject(subject); // Pre-fill dialog with the selected subject data
-    setImageFileEdit(null); // Clear previous image file if any
+    setImageFileEdit(); // Clear previous image file if any
     setOpenEdit(true);
   };
 
