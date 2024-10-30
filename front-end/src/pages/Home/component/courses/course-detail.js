@@ -53,13 +53,17 @@ const CourseOverview = () => {
                 fetchChapterProgress(userId, chapter.id)
             );
             const progressResults = await Promise.all(progressPromises);
-            const progressMap = progressResults.reduce((acc, progress, index) => {
-                acc[course.chapters.$values[index].id] = progress.isComplete;
+            
+            // Điều chỉnh lại để lưu đúng trạng thái isCompleted của chương
+            const progressMap = progressResults.reduce((acc, progress) => {
+                acc[progress.chapterId] = progress.isCompleted; // Sử dụng isCompleted từ dữ liệu trả về API
                 return acc;
             }, {});
+            
             setChapterProgress(progressMap);
         }
     }, [course]);
+    
 
     const loadLessonProgress = useCallback(async () => {
         const userId = localStorage.getItem('id');
@@ -301,7 +305,7 @@ const CourseOverview = () => {
                                 {chapterProgress[chapter.id] ? ( // Kiểm tra tiến độ
                                     <CheckCircle sx={{ color: 'green', fontSize: 20, marginRight: 1 }} />
                                 ) : (
-                                    <CheckCircleOutline sx={{ color: 'gray', fontSize: 20, marginRight: 1 }} />
+                                    <CheckCircleOutline sx={{ color: 'red', fontSize: 20, marginRight: 1 }} />
                                 )}
                                 <Typography>{`Chương ${index + 1}: ${chapter.title}`}</Typography>
                             </Box>
