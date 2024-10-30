@@ -71,17 +71,36 @@ namespace BE.Controllers.UserHomeController
             return Ok(completions);
         }
 
+        //[HttpGet("{userId}/{subjectId}")]
+        //public async Task<ActionResult<SubjectCompletion>> GetSpecificSubjectCompletion(int userId, int subjectId)
+        //{
+        //    var completion = await _context.SubjectCompletions
+        //        .Include(sc => sc.Subject)
+        //        .FirstOrDefaultAsync(sc => sc.UserId == userId && sc.SubjectId == subjectId);
+
+        //    if (completion == null)
+        //        return NotFound();
+
+        //    return Ok(completion);
+        //}
         [HttpGet("{userId}/{subjectId}")]
-        public async Task<ActionResult<SubjectCompletion>> GetSpecificSubjectCompletion(int userId, int subjectId)
+        public async Task<ActionResult> GetSpecificSubjectCompletion(int userId, int subjectId)
         {
             var completion = await _context.SubjectCompletions
                 .Include(sc => sc.Subject)
                 .FirstOrDefaultAsync(sc => sc.UserId == userId && sc.SubjectId == subjectId);
 
             if (completion == null)
-                return NotFound();
+            {
+                return Ok(new { IsCompleted = false });
+            }
 
-            return Ok(completion);
+            return Ok(new
+            {
+                completion,
+                IsCompleted = true
+            });
         }
+
     }
 }
