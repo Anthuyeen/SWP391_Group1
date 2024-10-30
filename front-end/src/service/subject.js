@@ -217,7 +217,7 @@ export const uploadImage = async (file) => {
 //get progress subject
 export const fetchSubjectProgress = async (userId, subjectId) => {
   try {
-      const response = await fetch(`https://localhost:7043/api/Subject/GetSubjectProgress/GetSubjectProgress/user/${userId}/subject/${subjectId}`, {
+      const response = await fetch(`https://localhost:7043/api/SubjectCompletion/${userId}/${subjectId}`, {
           method: 'GET',
           headers: {
               'Content-Type': 'application/json',
