@@ -96,7 +96,7 @@ const CourseOverview = () => {
         if (userId) {
             try {
                 const progressData = await fetchSubjectProgress(userId, courseId);
-                setProgress(progressData.isComplete);
+                setProgress(progressData.isCompleted);
             } catch (err) {
                 console.error('Error fetching subject progress:', err);
             }
