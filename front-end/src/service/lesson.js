@@ -148,5 +148,61 @@ export const fetchLessonCompletionList = async (subjectId, userId) => {
       return null;
     }
   };
-  
-  
+//get all lesson
+export const fetchAllLessons = async () => {
+  try {
+    const response = await fetch('https://localhost:7043/api/Lesson/ListAllLesson/ListAllLesson', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        // Thêm các headers khác nếu cần, ví dụ như Authorization
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching lessons:', error);
+    throw error;
+  }
+};
+//get lesson by subjectid
+export const fetchLessonsBySubject = async (subjectId) => {
+  try {
+      const response = await fetch(`https://localhost:7043/api/Lesson/GetLessonsBySubject/GetLessonsBySubject/${subjectId}`);
+      if (!response.ok) {
+          throw new Error(`Error fetching lessons: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data.$values; // Trả về mảng các lesson từ $values
+  } catch (error) {
+      console.error(error);
+      throw error; // Ném lại lỗi để xử lý bên ngoài
+  }
+};
+//approve lesson
+// service/lesson.js
+
+export const fetchUpdateLessonStatus = async (lessonId, status) => {
+  try {
+      const response = await fetch(`https://localhost:7043/api/Lesson/UpdateLessonStatus/${lessonId}/status?status=${status}`, {
+          method: 'PUT', // Phương thức PUT để cập nhật
+          headers: {
+              'Content-Type': 'application/json', // Đặt Content-Type nếu cần thiết
+          },
+      });
+
+      if (!response.ok) {
+          throw new Error(`Error updating lesson status: ${response.statusText}`);
+      }
+
+      return await response.json(); // Trả về dữ liệu sau khi cập nhật
+  } catch (error) {
+      console.error('Error fetching update lesson status:', error);
+      throw error; // Ném lại lỗi để có thể xử lý ở nơi gọi hàm
+  }
+};

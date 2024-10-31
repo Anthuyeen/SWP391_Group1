@@ -190,6 +190,36 @@ namespace BE.Controllers.Expert
             return Ok(await GetLessonById(lessonId));
         }
 
+        [HttpGet("GetLessonsBySubject/{subjectId}")]
+        public async Task<ActionResult<IEnumerable<LessonDto>>> GetLessonsBySubject(int subjectId)
+        {
+            // Kiểm tra xem subjectId có tồn tại hay không
+            if (!await _context.Subjects.AnyAsync(s => s.Id == subjectId))
+            {
+                return NotFound("Subject not found.");
+            }
+
+            // Lấy danh sách Lesson theo subjectId
+            var lessons = await _context.Lessons
+                .Where(l => l.SubjectId == subjectId)
+                .Select(l => new LessonDto
+                {
+                    Id = l.Id,
+                    Name = l.Name,
+                    Content = l.Content,
+                    Status = l.Status,
+                    SubjectId = l.SubjectId,
+                    SubjectName = l.Subject.Name,
+                    Url = l.Url,
+                    ChapterId = l.ChapterId,
+                    DisplayOrder = l.DisplayOrder,
+                })
+                .ToListAsync();
+
+            return Ok(lessons);
+        }
+
+
         private bool LessonExists(int id)
         {
             return _context.Lessons.Any(e => e.Id == id);

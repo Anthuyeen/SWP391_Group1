@@ -98,7 +98,6 @@ export const createSubject = async (subjectData) => {
 
 
 //edit subject
-// Hàm editSubject trong subject.js
 export const editSubject = async (id, subjectData) => {
 const response = await fetch(`https://localhost:7043/api/Subject/EditSubject/EditSubject/${id}`, {
   method: 'PUT', // Hoặc POST tùy thuộc vào API
@@ -234,5 +233,27 @@ export const fetchSubjectProgress = async (userId, subjectId) => {
   } catch (error) {
       console.error('Error fetching subject progress:', error);
       throw error;
+  }
+};
+// approve subject
+export const updateSubjectStatus = async (subjectId, status) => {
+  try {
+    const response = await fetch(`https://localhost:7043/api/Subject/UpdateSubjectStatus/${subjectId}/status?status=${status}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        // Thêm các headers khác nếu cần, ví dụ như Authorization
+      },
+    });
+
+    if (response.status === 200) {
+      console.log("Subject status updated successfully.");
+      return { success: true };
+    } else {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error('Error updating subject status:', error);
+    throw error;
   }
 };
