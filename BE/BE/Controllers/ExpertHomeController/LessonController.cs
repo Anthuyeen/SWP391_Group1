@@ -66,7 +66,6 @@ namespace BE.Controllers.Expert
             lesson.SubjectId = editLessonDto.SubjectId;
             lesson.Name = editLessonDto.Name;
             lesson.Content = editLessonDto.Content;
-            lesson.Status = editLessonDto.Status;
             lesson.Url = editLessonDto.Url;
             lesson.ChapterId = editLessonDto.ChapterId;
             lesson.DisplayOrder = editLessonDto.DisplayOrder;
@@ -113,7 +112,7 @@ namespace BE.Controllers.Expert
                 SubjectId = editLessonDto.SubjectId,
                 Name = editLessonDto.Name,
                 Content = editLessonDto.Content,
-                Status = editLessonDto.Status,
+                Status = "Draft",
                 Url = editLessonDto.Url,
                 ChapterId = editLessonDto.ChapterId,
                 DisplayOrder = editLessonDto.DisplayOrder
@@ -150,7 +149,7 @@ namespace BE.Controllers.Expert
         }
 
         [HttpPut("{lessonId}/status")]
-        public async Task<ActionResult> UpdateLessonStatus(int lessonId)
+        public async Task<ActionResult> UpdateLessonStatus(int lessonId, string status)
         {
             var lesson = await _context.Lessons.FindAsync(lessonId);
             if (lesson == null)
@@ -158,7 +157,19 @@ namespace BE.Controllers.Expert
                 return NotFound();
             }
 
-            lesson.Status = lesson.Status == "Active" ? "Inactive" : "Active";
+            // Validate status
+            status = status?.Trim();
+            if (string.IsNullOrEmpty(status))
+            {
+                return BadRequest("Status cannot be null or empty");
+            }
+
+            if (!validStatuses.Contains(status, StringComparer.OrdinalIgnoreCase))
+            {
+                return BadRequest($"Invalid status. Allowed values are: {string.Join(", ", validStatuses)}");
+            }
+
+            lesson.Status = status;
 
             try
             {
@@ -178,7 +189,7 @@ namespace BE.Controllers.Expert
 
             return Ok(await GetLessonById(lessonId));
         }
-      
+
         private bool LessonExists(int id)
         {
             return _context.Lessons.Any(e => e.Id == id);
