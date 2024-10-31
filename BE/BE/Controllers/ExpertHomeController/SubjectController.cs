@@ -77,7 +77,6 @@ namespace BE.Controllers.Expert
             subject.CategoryId = editSubjectDto.CategoryId;
             subject.IsFeatured = editSubjectDto.IsFeatured;
             subject.OwnerId = editSubjectDto.OwnerId;
-            subject.Status = editSubjectDto.Status;
             subject.Description = editSubjectDto.Description;
 
             try
@@ -129,7 +128,7 @@ namespace BE.Controllers.Expert
                 CategoryId = editSubjectDto.CategoryId,
                 IsFeatured = editSubjectDto.IsFeatured,
                 OwnerId = editSubjectDto.OwnerId,
-                Status = editSubjectDto.Status,
+                Status = "Draft",
                 Description = editSubjectDto.Description
             };
 
@@ -353,6 +352,48 @@ namespace BE.Controllers.Expert
             };
 
             return Ok(response);
+        }
+
+        [HttpPut("{subjectId}/status")]
+        public async Task<ActionResult> UpdateLessonStatus(int subjectId, string status)
+        {
+            var subject = await _context.Subjects.FindAsync(subjectId);
+            if (subject == null)
+            {
+                return NotFound();
+            }
+
+            // Validate status
+            status = status?.Trim();
+            if (string.IsNullOrEmpty(status))
+            {
+                return BadRequest("Status cannot be null or empty");
+            }
+
+            if (!validStatuses.Contains(status, StringComparer.OrdinalIgnoreCase))
+            {
+                return BadRequest($"Invalid status. Allowed values are: {string.Join(", ", validStatuses)}");
+            }
+
+            subject.Status = status;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!SubjectExists(subjectId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok();
         }
     }
 }
