@@ -355,7 +355,7 @@ namespace BE.Controllers.Expert
         }
 
         [HttpPut("{subjectId}/status")]
-        public async Task<ActionResult> UpdateLessonStatus(int subjectId, string status)
+        public async Task<ActionResult> UpdateSubjectStatus(int subjectId, string status)
         {
             var subject = await _context.Subjects.FindAsync(subjectId);
             if (subject == null)
