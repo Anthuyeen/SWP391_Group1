@@ -25,6 +25,8 @@ import LessonLearn from './pages/Home/component/courses/lesson-video';
 import TakeQuiz from './pages/Home/component/courses/take-quiz';
 import QuizAttemp from './pages/Home/component/courses/quiz-attemp';
 import QuizAttemptDetail from './pages/Home/component/courses/quiz-attemp-deail';
+import ApproveSubject from './pages/moderator/components/approve-subject';
+import ModeratorDash from './pages/moderator';
 function App() {
   return (
     <Routes>
@@ -57,6 +59,11 @@ function App() {
         <Route path="user-profile" element={<ManageProfile />} />
         <Route path="question/:quizId" element={<Question />} />
         <Route path="add-question/:quizId" element={<AddQuestion />} />
+      </Route>
+      {/**Moderator */}
+      <Route path="/moderator/home" element={<ProtectedRoute requiredRole="Moderator"><ModeratorDash /></ProtectedRoute>}>
+        <Route path="approve-subject" element={<ApproveSubject />} />
+        <Route path="user-profile" element={<ManageProfile />} />
       </Route>
     </Routes>
 

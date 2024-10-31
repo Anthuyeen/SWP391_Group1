@@ -110,6 +110,8 @@ const Navbar = () => {
                     navigate('/');
                 } else if (role === 'Teacher') {
                     navigate('/expert/home');
+                } else if(role === 'Moderator'){
+                    navigate('/moderator/home')
                 }
 
                 handleCloseLogin();
