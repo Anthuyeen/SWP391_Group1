@@ -257,3 +257,42 @@ export const updateSubjectStatus = async (subjectId, status) => {
     throw error;
   }
 };
+//subject complete
+export const fetchSubjectCompletion = async (userId, subjectId) => {
+  const url = `https://localhost:7043/api/SubjectCompletion`;
+  
+  // Lấy ngày hiện tại
+  const completionDate = new Date().toISOString(); // Chuyển đổi thành chuỗi ISO
+
+  const body = JSON.stringify({ 
+      userId, 
+      subjectId, 
+      completionDate // Thêm trường completionDate vào payload
+  });
+
+  try {
+      const response = await fetch(url, {
+          method: 'POST', // Hoặc 'GET' nếu API của bạn hỗ trợ
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}` // Nếu bạn cần token xác thực
+          },
+          body: body
+      });
+
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Kiểm tra và gán giá trị mặc định cho status và Certificate
+      const status = data.status === true; // Đảm bảo status là boolean
+      const certificate = typeof data.Certificate === 'string' ? data.Certificate : '';
+
+      return { status, certificate }; // Trả về đối tượng với status và certificate
+  } catch (error) {
+      console.error('Error fetching subject completion:', error);
+      return { status: false, certificate: '' }; // Trả về giá trị mặc định nếu có lỗi
+  }
+};
