@@ -81,11 +81,14 @@ const CourseDisplay = () => {
                 Khóa học miễn phí
             </Typography>
             <Grid container spacing={2}>
-                {courses.slice(0,4).map((course) => (
-                    <Grid item key={course.id} xs={12} sm={6} md={4} lg={3}>
-                        <CourseCard course={course} />
-                    </Grid>
-                ))}
+                {courses
+                    .filter(course => course.status === 'Active') // Chỉ hiển thị những course có status là "Active"
+                    .slice(0, 4)
+                    .map((course) => (
+                        <Grid item key={course.id} xs={12} sm={6} md={4} lg={3}>
+                            <CourseCard course={course} />
+                        </Grid>
+                    ))}
             </Grid>
         </Container>
     );

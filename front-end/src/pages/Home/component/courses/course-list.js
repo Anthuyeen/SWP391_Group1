@@ -36,27 +36,29 @@ const CourseList = () => {
                         Các khóa học
                     </Typography>
                     <Grid container spacing={3}>
-                        {courses.map(course => (
-                            <Grid item xs={12} sm={6} md={4} key={course.id}>
-                                <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                    <CardMedia
-                                        component="img"
-                                        height="140"
-                                        image={course.thumbnail || 'https://via.placeholder.com/300x140?text=No+Image'}
-                                        alt={course.name}
-                                        sx={{ objectFit: 'cover' }}
-                                    />
-                                    <CardContent sx={{ flexGrow: 1 }}>
-                                        <Typography variant="h6" component="h2" gutterBottom>
-                                            {course.name}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            {course.description}
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))}
+                        {courses
+                            .filter(course => course.status === 'Active') // Chỉ hiển thị những course có status là "Active"
+                            .map(course => (
+                                <Grid item xs={12} sm={6} md={4} key={course.id}>
+                                    <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                        <CardMedia
+                                            component="img"
+                                            height="140"
+                                            image={course.thumbnail || 'https://via.placeholder.com/300x140?text=No+Image'}
+                                            alt={course.name}
+                                            sx={{ objectFit: 'cover' }}
+                                        />
+                                        <CardContent sx={{ flexGrow: 1 }}>
+                                            <Typography variant="h6" component="h2" gutterBottom>
+                                                {course.name}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                {course.description}
+                                            </Typography>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))}
                     </Grid>
                 </Container>
             </Box>

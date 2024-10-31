@@ -45,7 +45,7 @@ const AddLessonDialog = ({ open, onClose, newLesson, setNewLesson, handleAddLess
                     onChange={(e) => setNewLesson({ ...newLesson, url: e.target.value })}
                     required
                 />
-                <TextField
+                {/* <TextField
                     margin="dense"
                     label="Display Order"
                     type="number"
@@ -53,8 +53,8 @@ const AddLessonDialog = ({ open, onClose, newLesson, setNewLesson, handleAddLess
                     value={newLesson.displayOrder}
                     onChange={(e) => setNewLesson({ ...newLesson, displayOrder: parseInt(e.target.value) })}
                     required
-                />
-                <FormControl fullWidth margin="dense">
+                /> */}
+                {/* <FormControl fullWidth margin="dense">
                     <InputLabel id="status-label">Status</InputLabel>
                     <Select
                         labelId="status-label"
@@ -65,7 +65,7 @@ const AddLessonDialog = ({ open, onClose, newLesson, setNewLesson, handleAddLess
                         <MenuItem value="Inactive">Inactive</MenuItem>
                     </Select>
                     <FormHelperText>Select the lesson status</FormHelperText>
-                </FormControl>
+                </FormControl> */}
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="primary">Cancel</Button>

@@ -47,7 +47,7 @@ const EditLessonDialog = ({ open, onClose, editingLesson, setEditingLesson, hand
                             onChange={(e) => setEditingLesson({ ...editingLesson, url: e.target.value })}
                             required
                         />
-                        <TextField
+                        {/* <TextField
                             margin="dense"
                             label="Display Order"
                             type="number"
@@ -55,8 +55,8 @@ const EditLessonDialog = ({ open, onClose, editingLesson, setEditingLesson, hand
                             value={editingLesson.displayOrder}
                             onChange={(e) => setEditingLesson({ ...editingLesson, displayOrder: parseInt(e.target.value) })}
                             required
-                        />
-                        <FormControl fullWidth margin="dense">
+                        /> */}
+                        {/* <FormControl fullWidth margin="dense">
                             <InputLabel id="edit-status-label">Status</InputLabel>
                             <Select
                                 labelId="edit-status-label"
@@ -67,7 +67,7 @@ const EditLessonDialog = ({ open, onClose, editingLesson, setEditingLesson, hand
                                 <MenuItem value="Inactive">Inactive</MenuItem>
                             </Select>
                             <FormHelperText>Select the lesson status</FormHelperText>
-                        </FormControl>
+                        </FormControl> */}
                     </>
                 )}
             </DialogContent>

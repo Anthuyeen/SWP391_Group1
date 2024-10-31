@@ -194,6 +194,7 @@ const SubjectManage = () => {
             <TableCell>Featured</TableCell>
             {/* <TableCell>Owner ID</TableCell> */}
             <TableCell>Description</TableCell>
+            <TableCell>Status</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -217,6 +218,7 @@ const SubjectManage = () => {
       <TableCell>{subject.categoryName}</TableCell>
       <TableCell>{subject.isFeatured ? 'Yes' : 'No'}</TableCell>
       <TableCell>{subject.description}</TableCell>
+      <TableCell>{subject.status}</TableCell>
       <TableCell>
         <IconButton onClick={() => handleOpenEdit(subject)}>
           <EditIcon />

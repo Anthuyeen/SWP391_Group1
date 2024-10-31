@@ -80,11 +80,14 @@ const ExpertDisplay = () => {
                 Danh sách chuyên gia
             </Typography>
             <Grid container spacing={2}>
-                {experts.slice(0,4).map((expert) => (
-                    <Grid item key={expert.id} xs={12} sm={6} md={4} lg={3}>
-                        <ExpertCard expert={expert} /> {/* Sử dụng ExpertCard cho từng chuyên gia */}
-                    </Grid>
-                ))}
+                {experts
+                    .filter(expert => expert.status === 'Active') // Chỉ hiển thị những expert có status là "Active"
+                    .slice(0, 4)
+                    .map((expert) => (
+                        <Grid item key={expert.id} xs={12} sm={6} md={4} lg={3}>
+                            <ExpertCard expert={expert} /> {/* Sử dụng ExpertCard cho từng chuyên gia */}
+                        </Grid>
+                    ))}
             </Grid>
         </Container>
     );

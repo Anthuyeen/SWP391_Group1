@@ -25,36 +25,39 @@ export const ChapterList = ({ chapters, groupedLessons, chapterProgress, complet
 
     return (
         <>
-            {chapters?.map((chapter, index) => (
-                <Accordion key={chapter.id}>
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            {chapterProgress[chapter.id] ? (
-                                <CheckCircle sx={{ color: 'green', fontSize: 20, marginRight: 1 }} />
-                            ) : (
-                                <CheckCircleOutline sx={{ color: 'red', fontSize: 20, marginRight: 1 }} />
-                            )}
-                            <Typography>{`Chương ${index + 1}: ${chapter.title}`}</Typography>
-                        </Box>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <List>
-                            {groupedLessons[chapter.id]?.map((lesson, lessonIndex) => (
-                                <ListItem key={lesson.id}>
-                                    <ListItemIcon>
-                                        {isLessonCompleted(chapter.id, lesson.id) ? (
-                                            <CheckCircle sx={{ color: 'green' }} />
-                                        ) : (
-                                            <CheckCircleOutline sx={{ color: 'gray' }} />
-                                        )}
-                                    </ListItemIcon>
-                                    <ListItemText primary={`Bài ${lessonIndex + 1}: ${lesson.name}`} />
-                                </ListItem>
-                            ))}
-                        </List>
-                    </AccordionDetails>
-                </Accordion>
-            ))}
+            {chapters
+                .map((chapter, index) => (
+                    <Accordion key={chapter.id}>
+                        <AccordionSummary expandIcon={<ExpandMore />}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                {chapterProgress[chapter.id] ? (
+                                    <CheckCircle sx={{ color: 'green', fontSize: 20, marginRight: 1 }} />
+                                ) : (
+                                    <CheckCircleOutline sx={{ color: 'red', fontSize: 20, marginRight: 1 }} />
+                                )}
+                                <Typography>{`Chương ${index + 1}: ${chapter.title}`}</Typography>
+                            </Box>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <List>
+                                {groupedLessons[chapter.id]
+                                    ?.filter(lesson => lesson.status === 'Active') // Chỉ hiển thị bài học có status là "active"
+                                    .map((lesson, lessonIndex) => (
+                                        <ListItem key={lesson.id}>
+                                            <ListItemIcon>
+                                                {isLessonCompleted(chapter.id, lesson.id) ? (
+                                                    <CheckCircle sx={{ color: 'green' }} />
+                                                ) : (
+                                                    <CheckCircleOutline sx={{ color: 'gray' }} />
+                                                )}
+                                            </ListItemIcon>
+                                            <ListItemText primary={`Bài ${lessonIndex + 1}: ${lesson.name}`} />
+                                        </ListItem>
+                                    ))}
+                            </List>
+                        </AccordionDetails>
+                    </Accordion>
+                ))}
         </>
     );
 };
