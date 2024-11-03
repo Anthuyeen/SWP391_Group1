@@ -29,6 +29,9 @@ import ApproveSubject from './pages/moderator/components/approve-subject';
 import ModeratorDash from './pages/moderator';
 import LessonApprove from './pages/moderator/components/leson-approve';
 import ModeratorManage from './pages/admin/component/moderator-manage';
+import PostManage from './pages/moderator/components/post-manage';
+import PostDetailModerator from './pages/moderator/components/post-detail';
+import AddPost from './pages/moderator/components/add-post';
 function App() {
   return (
     <Routes>
@@ -69,6 +72,9 @@ function App() {
         <Route path="approve-lesson" element={<LessonApprove />} />
         <Route path="lesson-approve/:subjectId" element={<LessonApprove />} />
         <Route path="user-profile" element={<ManageProfile />} />
+        <Route path="post-manage" element={<PostManage />} />
+        <Route path="post-for-moderator/:id" element={<PostDetailModerator />} />
+        <Route path="add-post" element={<AddPost />} />
       </Route>
     </Routes>
 

@@ -6,6 +6,8 @@ import { fetchUserById } from '../../../service/profile-manage'; // Cập nhật
 const sidebarOptions = [
     { id: 1, label: 'Approve subject', path: '/moderator/home/approve-subject' },
     { id: 2, label: 'Approve Lesson', path: '/moderator/home/approve-lesson' },
+    { id: 3, label: 'Post management', path: '/moderator/home/post-manage' },
+
 ];
 
 const AdminPage = () => {
