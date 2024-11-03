@@ -1,102 +1,123 @@
 import React, { useState } from 'react';
-import { TextField, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
-import { fetchRegister } from '../../service/authAPI'; // Import hàm fetch từ file khác
+import { TextField, Button, MenuItem, Select, InputLabel, FormControl, Grid, Paper, Typography } from '@mui/material';
+import { fetchRegister } from '../../service/authAPI';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../navbar/index';
+import Footer from '../footer/index';
 
 const Register = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [gender, setGender] = useState('');
-    const [emailError, setEmailError] = useState(''); // Thêm state để lưu thông báo lỗi email
-    const navigate = useNavigate(); // Khởi tạo useNavigate
+    const [emailError, setEmailError] = useState('');
+    const navigate = useNavigate();
 
     const handleGenderChange = (event) => {
         setGender(event.target.value);
     };
-    
+
     const onSubmit = async (data) => {
-        setEmailError(''); // Reset thông báo lỗi email khi bắt đầu gửi form
+        setEmailError('');
         try {
-            data.gender = gender; // Gán giá trị gender
+            data.gender = gender;
             await fetchRegister(data);
             alert('Đăng ký thành công!');
-            navigate('/'); // Điều hướng về trang chủ
+            navigate('/');
         } catch (error) {
-            const errorMessage = error.message; // Lấy thông điệp lỗi từ Error object
-            setEmailError(errorMessage); // Hiển thị lỗi chính xác từ API lên giao diện
+            const errorMessage = error.message;
+            setEmailError(errorMessage);
         }
     };
 
-
     return (
-        <form onSubmit={handleSubmit(onSubmit)} style={{ maxWidth: 400, margin: 'auto' }}>
-            <TextField
-                label="Email"
-                fullWidth
-                margin="normal"
-                {...register('email', { required: 'Email là bắt buộc', pattern: /^\S+@\S+$/i })}
-                error={!!errors.email || !!emailError} // Kiểm tra lỗi từ react-hook-form hoặc emailError
-                helperText={errors.email?.message || emailError} // Hiển thị thông báo lỗi từ API hoặc validation
-                FormHelperTextProps={{
-                    sx: { color: !!emailError ? 'error.main' : undefined } // Đặt màu cho helperText nếu có lỗi
-                }}
-            />
-
-            <TextField
-                label="Password"
-                type="password"
-                fullWidth
-                margin="normal"
-                {...register('password', { required: 'Mật khẩu là bắt buộc', minLength: { value: 6, message: 'Mật khẩu phải ít nhất 6 ký tự' } })}
-                error={!!errors.password}
-                helperText={errors.password?.message}
-            />
-            <TextField
-                label="First Name"
-                fullWidth
-                margin="normal"
-                {...register('fName', { required: 'First Name là bắt buộc' })}
-                error={!!errors.fName}
-                helperText={errors.fName?.message}
-            />
-            <TextField
-                label="Middle Name"
-                fullWidth
-                margin="normal"
-                {...register('mName')}
-            />
-            <TextField
-                label="Last Name"
-                fullWidth
-                margin="normal"
-                {...register('lName', { required: 'Last Name là bắt buộc' })}
-                error={!!errors.lName}
-                helperText={errors.lName?.message}
-            />
-            <TextField
-                label="Phone"
-                fullWidth
-                margin="normal"
-                {...register('phone', { required: 'Phone là bắt buộc', pattern: /^[0-9]+$/i })}
-                error={!!errors.phone}
-                helperText={errors.phone?.message}
-            />
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Gender</InputLabel>
-                <Select
-                    value={gender}
-                    onChange={handleGenderChange}
-                    label="Gender"
-                    required
-                >
-                    <MenuItem value="Male">Nam</MenuItem>
-                    <MenuItem value="Female">Nữ</MenuItem>
-                </Select>
-            </FormControl>
-            <Button variant="contained" color="primary" type="submit" fullWidth>
-                Đăng ký
-            </Button>
-        </form>
+        <>
+            <Navbar />
+            <Grid container justifyContent="center" style={{ padding: '2rem' }}>
+                <Grid item xs={12} sm={8} md={6}>
+                    <Paper elevation={3} style={{ padding: '2rem', borderRadius: '8px' }}>
+                        <Typography variant="h4" align="center" gutterBottom>
+                            Đăng Ký
+                        </Typography>
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <TextField
+                                label="Email"
+                                fullWidth
+                                margin="normal"
+                                {...register('email', { required: 'Email là bắt buộc', pattern: /^\S+@\S+$/i })}
+                                error={!!errors.email || !!emailError}
+                                helperText={errors.email?.message || emailError}
+                                FormHelperTextProps={{
+                                    sx: { color: !!emailError ? 'error.main' : undefined }
+                                }}
+                            />
+                            <TextField
+                                label="Mật khẩu"
+                                type="password"
+                                fullWidth
+                                margin="normal"
+                                {...register('password', { required: 'Mật khẩu là bắt buộc', minLength: { value: 6, message: 'Mật khẩu phải ít nhất 6 ký tự' } })}
+                                error={!!errors.password}
+                                helperText={errors.password?.message}
+                            />
+                            <TextField
+                                label="Họ"
+                                fullWidth
+                                margin="normal"
+                                {...register('fName', { required: 'Họ là bắt buộc' })}
+                                error={!!errors.fName}
+                                helperText={errors.fName?.message}
+                            />
+                            <TextField
+                                label="Tên đệm"
+                                fullWidth
+                                margin="normal"
+                                {...register('mName')}
+                            />
+                            <TextField
+                                label="Tên"
+                                fullWidth
+                                margin="normal"
+                                {...register('lName', { required: 'Tên là bắt buộc' })}
+                                error={!!errors.lName}
+                                helperText={errors.lName?.message}
+                            />
+                            <TextField
+                                label="Số điện thoại"
+                                fullWidth
+                                margin="normal"
+                                {...register('phone', { required: 'Số điện thoại là bắt buộc', pattern: /^[0-9]+$/i })}
+                                error={!!errors.phone}
+                                helperText={errors.phone?.message}
+                            />
+                            <FormControl fullWidth margin="normal">
+                                <InputLabel>Giới tính</InputLabel>
+                                <Select
+                                    value={gender}
+                                    onChange={handleGenderChange}
+                                    label="Giới tính"
+                                    required
+                                >
+                                    <MenuItem value="Male">Nam</MenuItem>
+                                    <MenuItem value="Female">Nữ</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <Button 
+                                variant="contained" 
+                                color="primary" 
+                                type="submit" 
+                                fullWidth 
+                                style={{ marginTop: '1rem' }}
+                                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#1976d2')}
+                                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '')}
+                            >
+                                Đăng ký
+                            </Button>
+                        </form>
+                    </Paper>
+                </Grid>
+            </Grid>
+            <Footer />
+        </>
     );
 };
 

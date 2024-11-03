@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { fetchUsers, addUser, setActiveExpert } from '../../../service/employee-fetch';
-import { uploadImage } from '../../../service/subject'
+import { fetchListAllModerators, fetchAddModerator, setActiveExpert } from '../../../service/employee-fetch';
+import { uploadImage } from '../../../service/subject';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Select, MenuItem, FormControl, InputLabel, FormHelperText, Avatar } from '@mui/material';
 
-const Employee = () => {
+const ModeratorManage = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,17 +18,18 @@ const Employee = () => {
         mobile: '',
         gender: '',
         avatar: '',
-        role: 'Teacher',
+        role: 'Moderator',
         status: 'Active',
     });
 
     useEffect(() => {
         const loadUsers = async () => {
             try {
-                const data = await fetchUsers();
-                setUsers(data);
+                const data = await fetchListAllModerators();
+                const moderators = data.filter(user => user.role === 'Moderator');
+                setUsers(moderators);
             } catch (e) {
-                setError('Unable to fetch users');
+                setError('Unable to fetch moderators');
             }
             setLoading(false);
         };
@@ -50,8 +51,8 @@ const Employee = () => {
             password: '',
             mobile: '',
             gender: '',
-            avatar: '', // Reset avatar
-            role: 'Teacher',
+            avatar: '',
+            role: 'Moderator',
             status: 'Active',
         });
         setFormErrors({});
@@ -66,7 +67,7 @@ const Employee = () => {
         const file = e.target.files[0];
         if (file) {
             try {
-                const uploadedImage = await uploadImage(file); // Assuming the service handles the upload
+                const uploadedImage = await uploadImage(file);
                 setNewUser((prev) => ({ ...prev, avatar: uploadedImage.url }));
             } catch (err) {
                 console.error("Image upload failed", err);
@@ -77,20 +78,11 @@ const Employee = () => {
     const validateForm = () => {
         let errors = {};
 
-        // Validate email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(newUser.email)) {
             errors.email = 'Email không hợp lệ';
         }
 
-        // Validate password
-        // const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
-        // if (!passwordRegex.test(newUser.password)) {
-        //     errors.password =
-        //         'Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa và số';
-        // }
-
-        // Check required fields
         if (!newUser.firstName) errors.firstName = 'Họ là bắt buộc';
         if (!newUser.lastName) errors.lastName = 'Tên là bắt buộc';
         if (!newUser.mobile) errors.mobile = 'Số điện thoại là bắt buộc';
@@ -103,9 +95,9 @@ const Employee = () => {
 
     const handleSubmit = async () => {
         if (validateForm()) {
-            const result = await addUser(newUser);
+            const result = await fetchAddModerator(newUser);
             if (result) {
-                setUsers((prev) => [...prev, result]); // Add new user to list
+                setUsers((prev) => [...prev, result]);
                 handleClose();
             }
         }
@@ -131,7 +123,7 @@ const Employee = () => {
                 style={{ backgroundColor: '#ff5722', marginBottom: '1rem' }}
                 onClick={handleClickOpen}
             >
-                Thêm User
+                Thêm Moderator
             </Button>
 
             <TableContainer component={Paper}>
@@ -143,7 +135,6 @@ const Employee = () => {
                             <TableCell>Email</TableCell>
                             <TableCell>Điện thoại</TableCell>
                             <TableCell>Giới tính</TableCell>
-                            <TableCell>Vai trò</TableCell>
                             <TableCell>Trạng thái</TableCell>
                         </TableRow>
                     </TableHead>
@@ -161,7 +152,6 @@ const Employee = () => {
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>{user.mobile}</TableCell>
                                 <TableCell>{user.gender === 'Male' ? 'Nam' : 'Nữ'}</TableCell>
-                                <TableCell>{user.role}</TableCell>
                                 <TableCell>
                                     <Button
                                         variant="contained"
@@ -174,12 +164,11 @@ const Employee = () => {
                             </TableRow>
                         ))}
                     </TableBody>
-
                 </Table>
             </TableContainer>
 
             <Dialog fullScreen open={open} onClose={handleClose}>
-                <DialogTitle>Thêm User</DialogTitle>
+                <DialogTitle>Thêm Moderator</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
@@ -237,8 +226,6 @@ const Employee = () => {
                         value={newUser.password}
                         onChange={handleInputChange}
                         style={{ marginBottom: '1rem' }}
-                        error={!!formErrors.password}
-                        helperText={formErrors.password}
                     />
                     <TextField
                         margin="dense"
@@ -267,7 +254,6 @@ const Employee = () => {
                         {formErrors.gender && <FormHelperText error>{formErrors.gender}</FormHelperText>}
                     </FormControl>
 
-                    {/* Avatar Upload */}
                     <Button variant="contained" component="label" fullWidth>
                         Chọn ảnh
                         <input
@@ -291,4 +277,4 @@ const Employee = () => {
     );
 };
 
-export default Employee;
+export default ModeratorManage;

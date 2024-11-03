@@ -28,6 +28,7 @@ import QuizAttemptDetail from './pages/Home/component/courses/quiz-attemp-deail'
 import ApproveSubject from './pages/moderator/components/approve-subject';
 import ModeratorDash from './pages/moderator';
 import LessonApprove from './pages/moderator/components/leson-approve';
+import ModeratorManage from './pages/admin/component/moderator-manage';
 function App() {
   return (
     <Routes>
@@ -51,6 +52,7 @@ function App() {
       <Route path="/admin/home/" element={<ProtectedRoute requiredRole="Admin"><AdminHome /></ProtectedRoute>}>
         <Route path="employee-profile" element={<Employee />} />
         <Route path="user-profile" element={<ManageProfile />} />
+        <Route path="moderator-profile" element={<ModeratorManage />} />
       </Route>
       {/**Expert */}
       <Route path="/Expert/Home" element={<ProtectedRoute requiredRole="Teacher"><ExpertHome /></ProtectedRoute>}>

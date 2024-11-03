@@ -163,5 +163,69 @@ namespace BE.Controllers.AdminHomeController
                 return BadRequest($"An error occurred while fetching the expert: {ex.Message}");
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> AddModerator(ModeratorAdđto moderator)
+        {
+            try
+            {
+                if (_userService.CheckEmailExits(moderator.Email))
+                {
+                    return BadRequest("This email already exist");
+                }
+
+                var e = new User()
+                {
+                    FirstName = moderator.FirstName,
+                    MidName = moderator.MidName,
+                    LastName = moderator.LastName,
+                    Avatar = moderator.Avatar,
+                    Email = moderator.Email,
+                    Gender = moderator.Gender,
+                    Role = "Moderator",
+                    Mobile = moderator.Mobile,
+                    Status = "Active",
+                    Password = moderator.Password,
+                };
+                await _context.Users.AddAsync(e);
+                await _context.SaveChangesAsync();
+                var ex = _context.Users.FirstOrDefault(e => e.Email == moderator.Email);
+                return Ok(ex);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ListAllModerator()
+        {
+            try
+            {
+                var experts = await _context.Users
+                    .Where(u => u.Role == "Moderator")
+                    .Select(u => new UserAdminDto
+                    {
+                        Id = u.Id,
+                        FirstName = u.FirstName,
+                        MidName = u.MidName,
+                        LastName = u.LastName,
+                        Email = u.Email,
+                        Mobile = u.Mobile,
+                        Gender = u.Gender,
+                        Avatar = u.Avatar,
+                        Role = u.Role,
+                        Status = u.Status
+                    })
+                    .ToListAsync();
+
+                return Ok(experts);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while fetching experts: {ex.Message}");
+            }
+        }
     }
 }

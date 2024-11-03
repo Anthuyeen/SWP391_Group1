@@ -5,6 +5,8 @@ import { fetchUserById } from '../../../service/profile-manage'; // Cập nhật
 
 const sidebarOptions = [
     { id: 5, label: 'Expert Manager', path: '/admin/home/employee-profile' },
+    { id: 5, label: 'Moderator Manager', path: '/admin/home/moderator-profile' },
+
 ];
 
 const AdminPage = () => {

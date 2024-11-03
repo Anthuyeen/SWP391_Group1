@@ -110,7 +110,7 @@ const Navbar = () => {
                     navigate('/');
                 } else if (role === 'Teacher') {
                     navigate('/expert/home');
-                } else if(role === 'Moderator'){
+                } else if (role === 'Moderator') {
                     navigate('/moderator/home')
                 }
 
@@ -291,17 +291,28 @@ const Navbar = () => {
                                 }}
                             />
                         </Grid>
-                        <Grid item>
-                            <Typography
-                                variant="body2"
-                                color="primary"
-                                sx={{ textAlign: 'center', cursor: 'pointer' }}
-                                onClick={() => navigate('/forgotpassword')}
-                            >
-                                Quên mật khẩu?
-                            </Typography>
+                        <Grid container justifyContent="center" spacing={2} sx={{ marginTop: '1rem' }}>
+                            <Grid item>
+                                <Typography
+                                    variant="body2"
+                                    color="primary"
+                                    sx={{ textAlign: 'center', cursor: 'pointer' }}
+                                    onClick={() => navigate('/forgotpassword')}
+                                >
+                                    Quên mật khẩu? 
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Typography
+                                    variant="body2"
+                                    color="primary"
+                                    sx={{ textAlign: 'center', cursor: 'pointer' }}
+                                    onClick={() => navigate('/register')}
+                                >
+                                    Đăng ký
+                                </Typography>
+                            </Grid>
                         </Grid>
-
                         <Grid item>
                             <Button
                                 variant="contained"
@@ -319,5 +330,4 @@ const Navbar = () => {
         </ThemeProvider>
     );
 };
-
 export default Navbar;
