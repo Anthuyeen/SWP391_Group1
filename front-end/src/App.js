@@ -32,6 +32,7 @@ import ModeratorManage from './pages/admin/component/moderator-manage';
 import PostManage from './pages/moderator/components/post-manage';
 import PostDetailModerator from './pages/moderator/components/post-detail';
 import AddPost from './pages/moderator/components/add-post';
+import EditPost from './pages/moderator/components/edit-post';
 function App() {
   return (
     <Routes>
@@ -75,6 +76,7 @@ function App() {
         <Route path="post-manage" element={<PostManage />} />
         <Route path="post-for-moderator/:id" element={<PostDetailModerator />} />
         <Route path="add-post" element={<AddPost />} />
+        <Route path="edit-post/:id" element={<EditPost />} />
       </Route>
     </Routes>
 

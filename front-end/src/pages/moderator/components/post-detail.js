@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'; // Thư viện để lấy params từ URL
-import { fetchPostById } from './../../../service/post'; // Đường dẫn đến file fetch của bạn
-import { Card, CardContent, CardMedia, Typography, CircularProgress, Box, Grid } from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { fetchPostById } from './../../../service/post';
+import { Card, CardContent, CardMedia, Typography, CircularProgress, Box } from '@mui/material';
 
 const PostDetail = () => {
-    const { id } = useParams(); // Lấy ID từ URL params
+    const { id } = useParams();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -12,17 +12,32 @@ const PostDetail = () => {
     useEffect(() => {
         const loadPost = async () => {
             try {
-                const data = await fetchPostById(id); // Gọi hàm để lấy bài viết theo ID
-                setPost(data); // Lưu dữ liệu vào state
+                const data = await fetchPostById(id);
+                const images = data.images?.$values.map(image => ({
+                    type: 'image',
+                    displayOrder: image.displayOrder,
+                    content: image.url,
+                })) || [];
+
+                const contents = data.contents?.$values.map(content => ({
+                    type: 'content',
+                    displayOrder: content.displayOrder,
+                    content: content.content,
+                })) || [];
+
+                // Hợp nhất và sắp xếp theo displayOrder
+                const combined = [...images, ...contents].sort((a, b) => a.displayOrder - b.displayOrder);
+
+                setPost({ ...data, combined }); // Lưu dữ liệu hợp nhất vào state
             } catch (err) {
-                setError(err.message); // Lưu thông báo lỗi nếu có
+                setError(err.message);
             } finally {
-                setLoading(false); // Đánh dấu đã tải xong
+                setLoading(false);
             }
         };
 
         loadPost();
-    }, [id]); // Chạy lại khi ID thay đổi
+    }, [id]);
 
     if (loading) {
         return <CircularProgress />;
@@ -32,7 +47,6 @@ const PostDetail = () => {
         return <Typography color="error">{error}</Typography>;
     }
 
-    // Nếu không có bài viết
     if (!post) {
         return <Typography>Không tìm thấy bài viết.</Typography>;
     }
@@ -40,14 +54,6 @@ const PostDetail = () => {
     return (
         <Box sx={{ padding: 2 }}>
             <Card>
-                {post.images.$values.length > 0 && (
-                    <CardMedia
-                        component="img"
-                        alt={post.title}
-                        height="300" // Đặt chiều cao cho hình ảnh
-                        image={post.images.$values[0].url} // Sử dụng hình ảnh đầu tiên
-                    />
-                )}
                 <CardContent>
                     <Typography variant="h4" component="div" gutterBottom>
                         {post.title}
@@ -61,10 +67,24 @@ const PostDetail = () => {
                     <Typography variant="body2" color="text.secondary" paragraph>
                         Nội dung:
                     </Typography>
-                    {post.contents.$values.map((content) => (
-                        <Typography key={content.id} variant="body2" paragraph>
-                            {content.content}
-                        </Typography>
+                    {post.combined.map((item, index) => (
+                        item.type === 'image' ? (
+                            <CardMedia
+                                key={index}
+                                component="img"
+                                alt={post.title}
+                                height="300"
+                                image={item.content}
+                                sx={{ mb: 2 }}
+                            />
+                        ) : (
+                            <Typography
+                                key={index}
+                                variant="body2"
+                                paragraph
+                                dangerouslySetInnerHTML={{ __html: item.content }}
+                            />
+                        )
                     ))}
                 </CardContent>
             </Card>

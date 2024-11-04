@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'; // Import kiểu giao diện Quill
 import { fetchAddPost, fetchAllCategories } from './../../../service/post';
 import { uploadImage } from '../../../service/subject';
 import {
@@ -12,10 +14,10 @@ import {
     Typography,
     Box,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; // Thay đổi ở đây
+import { useNavigate } from 'react-router-dom';
 
 const AddPost = () => {
-    const navigate = useNavigate(); // Thay đổi ở đây
+    const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [briefInfo, setBriefInfo] = useState('');
     const [categoryId, setCategoryId] = useState('');
@@ -23,14 +25,12 @@ const AddPost = () => {
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
     const [error, setError] = useState(null);
-    
+
     // State cho nội dung và hình ảnh
-    const [contents, setContents] = useState([]);
+    const [contents, setContents] = useState([{ id: 1, content: '', displayOrder: 1 }]);
     const [images, setImages] = useState([]);
-    
-    // Biến để theo dõi thứ tự hiện tại
-    const [currentDisplayOrder, setCurrentDisplayOrder] = useState(1);
-    
+    const [currentDisplayOrder, setCurrentDisplayOrder] = useState(2);
+
     useEffect(() => {
         const loadCategories = async () => {
             try {
@@ -49,7 +49,7 @@ const AddPost = () => {
 
     const handleAddContent = () => {
         setContents([...contents, { id: contents.length + 1, content: '', displayOrder: currentDisplayOrder }]);
-        setCurrentDisplayOrder(currentDisplayOrder + 1); // Tăng thứ tự hiển thị
+        setCurrentDisplayOrder(currentDisplayOrder + 1);
     };
 
     const handleContentChange = (index, value) => {
@@ -64,10 +64,10 @@ const AddPost = () => {
 
         for (const file of files) {
             try {
-                const uploadedImage = await uploadImage(file); 
+                const uploadedImage = await uploadImage(file);
                 if (uploadedImage.url) {
                     newImages.push({ id: newImages.length + 1, url: uploadedImage.url, displayOrder: currentDisplayOrder });
-                    setCurrentDisplayOrder(currentDisplayOrder + 1); // Tăng thứ tự hiển thị
+                    setCurrentDisplayOrder(currentDisplayOrder + 1);
                 }
             } catch (error) {
                 console.error('Error uploading image:', error);
@@ -84,12 +84,12 @@ const AddPost = () => {
         }
 
         const postData = {
-            title: title,                    
-            briefInfo: briefInfo,                      
-            categoryId: Number(categoryId), 
-            isFeatured: isFeatured,                   
-            status: 'Published',            
-            images: images.map(image => ({  
+            title: title,
+            briefInfo: briefInfo,
+            categoryId: Number(categoryId),
+            isFeatured: isFeatured,
+            status: 'Published',
+            images: images.map(image => ({
                 id: image.id,
                 url: image.url,
                 displayOrder: image.displayOrder
@@ -101,11 +101,9 @@ const AddPost = () => {
             })),
         };
 
-        console.log("Posting data:", JSON.stringify(postData, null, 2));
-
         try {
             await fetchAddPost(postData);
-            navigate(-1); // Thay đổi ở đây
+            navigate(-1);
         } catch (err) {
             setError(err.message);
         }
@@ -167,17 +165,29 @@ const AddPost = () => {
             </Box>
 
             {contents.map((content, index) => (
-                <TextField
-                    key={content.id}
-                    label={`Nội dung ${content.displayOrder}`}
-                    value={content.content}
-                    onChange={(e) => handleContentChange(index, e.target.value)}
-                    fullWidth
-                    multiline
-                    rows={4}
-                    margin="normal"
-                    variant="outlined"
-                />
+                <div key={content.id} style={{ marginBottom: '20px' }}>
+                    <Typography variant="h6">Nội dung {content.displayOrder}</Typography>
+                    <ReactQuill
+                        value={content.content}
+                        onChange={(value) => handleContentChange(index, value)}
+                        placeholder={`Nhập nội dung ${content.displayOrder}`}
+                        modules={{
+                            toolbar: [
+                                [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+                                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                ['link', 'image'],
+                                ['clean'], // Remove formatting button
+                                [{ 'align': [] }], 
+                            ],
+                        }}
+                        formats={[
+                            'header', 'font', 'size',
+                            'bold', 'italic', 'underline', 'strike', 'blockquote',
+                            'list', 'bullet', 'link', 'image', 'clean'
+                        ]}
+                    />
+                </div>
             ))}
             <Button variant="outlined" color="primary" onClick={handleAddContent}>
                 Thêm nội dung

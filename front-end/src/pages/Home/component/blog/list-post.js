@@ -64,6 +64,7 @@ const ListPost = () => {
             post.title.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setFilteredPosts(filtered.slice(0,5));
+        // setFilteredPosts(filtered.slice(0,5));
     }, [searchTerm, posts]);
 
     if (loading) return <Box>Đang tải...</Box>;

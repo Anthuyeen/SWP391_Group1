@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { fetchAllPosts } from './../../../service/post'; // Điều chỉnh đường dẫn đến file fetch của bạn
-import { Card, CardContent, CardMedia, Typography, Grid, CircularProgress, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; // Nhập useNavigate từ react-router-dom
+import { fetchAllPosts, fetchDeletePost } from './../../../service/post';
+import { Card, CardContent, CardMedia, Typography, Grid, CircularProgress, Button, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit'; // Nhập EditIcon
+import { useNavigate } from 'react-router-dom';
 
 const PostManage = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Khởi tạo useNavigate
+    const [openDialog, setOpenDialog] = useState(false);
+    const [postToDelete, setPostToDelete] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadPosts = async () => {
@@ -25,11 +29,39 @@ const PostManage = () => {
     }, []);
 
     const handlePostClick = (id) => {
-        navigate(`/moderator/home/post-for-moderator/${id}`); // Điều hướng đến PostDetail với ID bài viết
+        navigate(`/moderator/home/post-for-moderator/${id}`);
     };
 
     const handleAddPostClick = () => {
-        navigate('/moderator/home/add-post'); // Điều hướng đến trang thêm bài viết
+        navigate('/moderator/home/add-post');
+    };
+
+    const handleOpenDialog = (postId) => {
+        setPostToDelete(postId);
+        setOpenDialog(true);
+    };
+
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setPostToDelete(null);
+    };
+
+    const confirmDeletePost = async () => {
+        if (postToDelete) {
+            try {
+                await fetchDeletePost(postToDelete);
+                setPosts(posts.filter(post => post.id !== postToDelete));
+                handleCloseDialog();
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                setError('Failed to delete the post.');
+                handleCloseDialog();
+            }
+        }
+    };
+
+    const handleEditPostClick = (id) => {
+        navigate(`/moderator/home/edit-post/${id}`); // Điều hướng đến trang chỉnh sửa bài viết
     };
 
     if (loading) {
@@ -46,7 +78,7 @@ const PostManage = () => {
                 variant="contained" 
                 color="primary" 
                 onClick={handleAddPostClick} 
-                style={{ marginBottom: '16px', backgroundColor: 'orange', color: 'white' }} // Thay đổi màu sắc
+                style={{ marginBottom: '16px', backgroundColor: '#ff5722', color: 'white' }}
             >
                 Add Post
             </Button>
@@ -59,7 +91,7 @@ const PostManage = () => {
                                     component="img"
                                     alt={post.title}
                                     height="140"
-                                    image={post.images.$values[0].url} // Sử dụng hình ảnh đầu tiên
+                                    image={post.images.$values[0].url}
                                 />
                             )}
                             <CardContent>
@@ -75,11 +107,35 @@ const PostManage = () => {
                                 <Typography variant="body2" color="text.secondary">
                                     Trạng thái: {post.status}
                                 </Typography>
+                                <IconButton onClick={(e) => { e.stopPropagation(); handleEditPostClick(post.id); }} color="primary">
+                                    <EditIcon />
+                                </IconButton>
+                                <IconButton onClick={(e) => { e.stopPropagation(); handleOpenDialog(post.id); }} color="error">
+                                    <DeleteIcon />
+                                </IconButton>
                             </CardContent>
                         </Card>
                     </Grid>
                 ))}
             </Grid>
+
+            {/* Dialog xác nhận xóa */}
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+                <DialogTitle>Xác nhận xóa</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Bạn có chắc chắn muốn xóa bài viết này không?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Hủy
+                    </Button>
+                    <Button onClick={confirmDeletePost} color="error">
+                        Xóa
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };
