@@ -26,7 +26,8 @@ namespace BE.Controllers.UserHomeController
                     var subprice = _learningSystemContext.PricePackages.FirstOrDefault(x => x.SubjectId == subid);
                     return Ok(subprice.SalePrice);
 
-                }else if(reg.Status == "Pending")
+                }
+                else if (reg.Status == "Pending")
                 {
                     return Ok("Pending");
                 }
@@ -55,7 +56,7 @@ namespace BE.Controllers.UserHomeController
                         PackageId = pp.Id,
                         RegistrationTime = DateTime.Now,
                         TotalCost = pp.SalePrice,
-                        Status = "Pending",
+                        Status = pp.SalePrice > 0 ? "Pending" : "Approved",
                         ValidFrom = DateTime.Now,
                         ValidTo = DateTime.Now.AddMonths(pp.DurationMonths)
                     };
@@ -68,14 +69,13 @@ namespace BE.Controllers.UserHomeController
                     return Ok(reg);
                 }
                 else { return BadRequest(); }
-
-
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
+
         [HttpPut]
         public async Task<IActionResult> PayForRegisteredSubject(int accid, int regid)
         {
