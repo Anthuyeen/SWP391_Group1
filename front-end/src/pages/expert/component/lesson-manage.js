@@ -5,7 +5,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import { fetchSubjectsByOwner } from '../../../service/subject';
-import { fetchLessonsBySubjectId, addLesson, editLesson, updateLessonStatus } from '../../../service/lesson';
+import { fetchLessonsBySubjectId, addLesson, editLesson, updateLessonStatus, updateLessonStatusForExpert } from '../../../service/lesson';
 import { fetchChaptersBySubjectId, fetchChapterDetails, addChapter, editChapter, updateChapterStatus } from '../../../service/chapter';
 import AddLessonDialog from './lesson-manage-component/add-lesson-dialog';
 import EditLessonDialog from './lesson-manage-component/edit-lesson-dialog';
@@ -219,6 +219,34 @@ const LessonManager = () => {
         }
     };
 
+    const handleStatusToggle = async (lessonId, currentStatus, chapterId) => {
+        let newStatus;
+    
+        // Xác định trạng thái mới
+        if (currentStatus === 'Active') {
+            newStatus = 'Inactive';
+        } else if (currentStatus === 'Inactive') {
+            newStatus = 'Active';
+        } else {
+            // Nếu trạng thái là 'draft', không làm gì
+            return; 
+        }
+    
+        try {
+            // Gọi hàm cập nhật trạng thái với id và trạng thái mới
+            const response = await updateLessonStatusForExpert(lessonId, newStatus);
+            console.log('Update successful:', response); // Ghi log phản hồi thành công nếu cần
+
+            setLessonsByChapter(prev => ({
+                ...prev,
+                [chapterId]: prev[chapterId].map(lesson =>
+                    lesson.id === lessonId ? { ...lesson, status: newStatus } : lesson
+                )
+            }));
+        } catch (error) {
+            console.error('Failed to toggle lesson status:', error);
+        }
+    };
 
     if (loading) {
         return <Box display="flex" justifyContent="center" alignItems="center" height="100vh"><CircularProgress /></Box>;
@@ -335,13 +363,16 @@ const LessonManager = () => {
                                                                                 >
                                                                                     <EditIcon />
                                                                                 </IconButton>
-                                                                                <IconButton
-                                                                                    edge="end"
-                                                                                    aria-label="delete"
-                                                                                    onClick={() => handleDeleteLesson(lesson)}
-                                                                                >
-                                                                                    <DeleteIcon />
-                                                                                </IconButton>
+                                                                                {lesson.status !== 'Draft' && (
+                                                                                    <IconButton
+                                                                                        edge="end"
+                                                                                        aria-label="delete"
+                                                                                        // onClick={() => handleDeleteLesson(lesson)}
+                                                                                        onClick={() => handleStatusToggle(lesson.id, lesson.status, lesson.chapterId)}
+                                                                                    >
+                                                                                        <DeleteIcon />
+                                                                                    </IconButton>
+                                                                                )}
                                                                             </>
                                                                         }
                                                                     >
@@ -410,7 +441,7 @@ const LessonManager = () => {
                 onClose={handleEditChapterClose}
                 newChapterTitle={newChapterTitle}
                 setNewChapterTitle={setNewChapterTitle}
-                handleEditChapterSubmit={handleEditChapterSubmit}
+                handleEditChapterSubmit={handleEditChapterSubmit} 
             />
         </Box>
     );

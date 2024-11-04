@@ -206,3 +206,24 @@ export const fetchUpdateLessonStatus = async (lessonId, status) => {
       throw error; // Ném lại lỗi để có thể xử lý ở nơi gọi hàm
   }
 };
+export const updateLessonStatusForExpert = async (lessonId, status) => {
+  try {
+      const response = await fetch(`https://localhost:7043/api/Lesson/UpdateLessonStatus/${lessonId}/status?status=${status}`, {
+          method: 'PUT', // Hoặc 'PATCH' tùy thuộc vào API
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status }) // Gửi status dưới dạng JSON
+      });
+
+      if (!response.ok) {
+          throw new Error('Failed to update lesson status');
+      }
+
+      const data = await response.json();
+      return data;
+  } catch (error) {
+      console.error('Error updating lesson status:', error);
+      throw error;
+  }
+};
