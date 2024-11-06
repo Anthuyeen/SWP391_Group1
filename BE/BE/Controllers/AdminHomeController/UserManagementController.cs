@@ -165,7 +165,7 @@ namespace BE.Controllers.AdminHomeController
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddModerator(ModeratorAdđto moderator)
+        public async Task<IActionResult> AddModerator(ModeratorAddDto moderator)
         {
             try
             {

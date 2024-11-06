@@ -1,6 +1,6 @@
 ﻿namespace BE.DTOs.UserDto
 {
-    public class ModeratorAdđto
+    public class ModeratorAddDto
         {
             public string? FirstName { get; set; }
             public string? MidName { get; set; }
