@@ -34,22 +34,7 @@ export const fetchLogin = async (email, password) => {
 //     return response.json();
 // };
 
-export const fetchRegister = async (userData) => {
-    const response = await fetch('https://localhost:7043/api/Authentication/Register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-    });
 
-    if (!response.ok) {
-        const errorText = await response.text(); // Lấy thông báo lỗi từ response
-        throw new Error(errorText); // Ném lỗi với thông báo chi tiết
-    }
-
-    return response.json();
-};
 
 //send otp to mail
 export const sendOtpEmail = async (email) => {
