@@ -1,157 +1,3 @@
-// import React, { useEffect, useState } from 'react';
-// import { useParams, useNavigate } from 'react-router-dom';
-// import { fetchPostById, fetchEditPost } from './../../../service/post'; // Nhập hàm fetchUpdatePost
-// import { Card, CardContent, CardMedia, Typography, CircularProgress, Box, TextField, Button } from '@mui/material';
-
-// const EditPost = () => {
-//     const { id } = useParams();
-//     const navigate = useNavigate();
-//     const [post, setPost] = useState(null);
-//     const [loading, setLoading] = useState(true);
-//     const [error, setError] = useState(null);
-//     const [formData, setFormData] = useState({
-//         title: '',
-//         briefInfo: '',
-//         contents: [],
-//         images: []
-//     });
-
-//     useEffect(() => {
-//         const loadPost = async () => {
-//             try {
-//                 const data = await fetchPostById(id);
-//                 const images = data.images?.$values.map(image => ({
-//                     type: 'image',
-//                     displayOrder: image.displayOrder,
-//                     content: image.url,
-//                 })) || [];
-
-//                 const contents = data.contents?.$values.map(content => ({
-//                     type: 'content',
-//                     displayOrder: content.displayOrder,
-//                     content: content.content,
-//                 })) || [];
-
-//                 // Hợp nhất và sắp xếp theo displayOrder
-//                 const combined = [...images, ...contents].sort((a, b) => a.displayOrder - b.displayOrder);
-
-//                 setPost(data);
-//                 setFormData({
-//                     title: data.title,
-//                     briefInfo: data.briefInfo,
-//                     contents: contents.map(c => c.content),
-//                     images: images.map(i => i.content)
-//                 });
-//             } catch (err) {
-//                 setError(err.message);
-//             } finally {
-//                 setLoading(false);
-//             }
-//         };
-
-//         loadPost();
-//     }, [id]);
-
-//     const handleChange = (e) => {
-//         const { name, value } = e.target;
-//         setFormData((prev) => ({
-//             ...prev,
-//             [name]: value
-//         }));
-//     };
-
-//     const handleContentChange = (index, value) => {
-//         const updatedContents = [...formData.contents];
-//         updatedContents[index] = value;
-//         setFormData((prev) => ({
-//             ...prev,
-//             contents: updatedContents
-//         }));
-//     };
-
-//     const handleSave = async () => {
-//         try {
-//             await fetchEditPost(id, { ...formData }); // Gọi hàm cập nhật
-//             navigate(`/moderator/home/post-for-moderator/${id}`); // Quay lại trang chi tiết bài viết
-//         } catch (err) {
-//             console.error(err);
-//             setError('Không thể cập nhật bài viết.');
-//         }
-//     };
-
-//     if (loading) {
-//         return <CircularProgress />;
-//     }
-
-//     if (error) {
-//         return <Typography color="error">{error}</Typography>;
-//     }
-
-//     if (!post) {
-//         return <Typography>Không tìm thấy bài viết.</Typography>;
-//     }
-
-//     return (
-//         <Box sx={{ padding: 2 }}>
-//             <Card>
-//                 <CardContent>
-//                     <Typography variant="h4" component="div" gutterBottom>
-//                         Chỉnh sửa bài viết
-//                     </Typography>
-//                     <TextField
-//                         label="Tiêu đề"
-//                         name="title"
-//                         value={formData.title}
-//                         onChange={handleChange}
-//                         fullWidth
-//                         margin="normal"
-//                     />
-//                     <TextField
-//                         label="Mô tả ngắn"
-//                         name="briefInfo"
-//                         value={formData.briefInfo}
-//                         onChange={handleChange}
-//                         fullWidth
-//                         margin="normal"
-//                     />
-//                     <Typography variant="body2" color="text.secondary" paragraph>
-//                         Nội dung:
-//                     </Typography>
-//                     {formData.contents.map((content, index) => (
-//                         <TextField
-//                             key={index}
-//                             value={content}
-//                             onChange={(e) => handleContentChange(index, e.target.value)}
-//                             fullWidth
-//                             margin="normal"
-//                             multiline
-//                             rows={4}
-//                         />
-//                     ))}
-//                     <Typography variant="body2" color="text.secondary" paragraph>
-//                         Hình ảnh:
-//                     </Typography>
-//                     {formData.images.map((image, index) => (
-//                         <CardMedia
-//                             key={index}
-//                             component="img"
-//                             alt={post.title}
-//                             height="300"
-//                             image={image}
-//                             sx={{ mb: 2 }}
-//                         />
-//                     ))}
-//                     <Button variant="contained" color="primary" onClick={handleSave} sx={{ mt: 2 }}>
-//                         Lưu
-//                     </Button>
-//                 </CardContent>
-//             </Card>
-//         </Box>
-//     );
-// };
-
-// export default EditPost;
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchPostById, fetchEditPost, fetchAllCategories } from './../../../service/post';
@@ -159,7 +5,10 @@ import { Card, CardContent, CardMedia, Typography, CircularProgress, Box, TextFi
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { uploadImage } from './../../../service/subject'; // Đảm bảo import hàm uploadImage
-
+import AddIcon from '@mui/icons-material/Add';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
 const EditPost = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -177,17 +26,26 @@ const EditPost = () => {
     });
     const [categories, setCategories] = useState([]);
 
+    const getMaxDisplayOrder = (images, contents) => {
+        const imageOrders = images.map(img => Number(img.displayOrder) || 0);
+        const contentOrders = contents.map(content => Number(content.displayOrder) || 0);
+        const allOrders = [...imageOrders, ...contentOrders];
+        return allOrders.length > 0 ? Math.max(...allOrders) : 0;
+    };
+
     useEffect(() => {
         const loadPost = async () => {
             try {
                 const data = await fetchPostById(id);
                 const images = data.images?.$values.map(image => ({
-                    displayOrder: image.displayOrder,
-                    url: image.url, // Chuyển đổi thành 'url' thay vì 'content'
+                    id: Number(image.id), // Đảm bảo id là number
+                    displayOrder: Number(image.displayOrder),
+                    url: image.url,
                 })) || [];
 
                 const contents = data.contents?.$values.map(content => ({
-                    displayOrder: content.displayOrder,
+                    id: Number(content.id), // Đảm bảo id là number
+                    displayOrder: Number(content.displayOrder),
                     content: content.content,
                 })) || [];
 
@@ -199,7 +57,7 @@ const EditPost = () => {
                     images: images,
                     categoryId: data.categoryId || '',
                     isFeatured: data.isFeatured || false,
-                    status: 'Published' // Đặt lại giá trị status
+                    status: 'Published'
                 });
             } catch (err) {
                 setError(err.message);
@@ -272,36 +130,56 @@ const EditPost = () => {
 
     const handleDeleteImage = (index) => {
         const updatedImages = formData.images.filter((_, i) => i !== index);
-        setFormData((prev) => ({
+        setFormData(prev => ({
             ...prev,
             images: updatedImages
         }));
     };
+
     const handleImageUpload = async (event) => {
         const files = event.target.files;
-        const newImages = []; // Tạo một mảng mới để chứa các ảnh mới
-    
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            try {
-                const uploadedImage = await uploadImage(file);
-                newImages.push({ displayOrder: formData.images.length + newImages.length + 1, url: uploadedImage.url }); // Đảm bảo số thứ tự tăng dần
-            } catch (err) {
-                console.error('Error uploading image:', err);
-                setError('Lỗi khi tải ảnh lên.');
+        if (!files || files.length === 0) return;
+
+        try {
+            // Lấy displayOrder lớn nhất từ cả ảnh và content
+            const currentMaxOrder = Math.max(
+                ...formData.images.map(img => Number(img.displayOrder) || 0),
+                ...formData.contents.map(content => Number(content.displayOrder) || 0)
+            );
+
+            // Lưu lại state hiện tại của images
+            const currentImages = [...formData.images];
+
+            // Xử lý từng file ảnh mới
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                try {
+                    const uploadedImage = await uploadImage(file);
+                    // Thêm ảnh mới vào mảng currentImages với id là 0 thay vì null
+                    currentImages.push({
+                        id: 0, // Đánh dấu là ảnh mới với id = 0
+                        displayOrder: currentMaxOrder + i + 1,
+                        url: uploadedImage.url
+                    });
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                }
             }
+
+            // Cập nhật state với tất cả ảnh (cả cũ và mới)
+            setFormData(prev => ({
+                ...prev,
+                images: currentImages.sort((a, b) =>
+                    (Number(a.displayOrder) || 0) - (Number(b.displayOrder) || 0)
+                )
+            }));
+        } catch (err) {
+            console.error('Error in image upload process:', err);
+            setError('Lỗi khi tải ảnh lên.');
         }
-    
-        // Cập nhật lại formData mà không xóa ảnh đã có
-        setFormData((prev) => ({
-            ...prev,
-            images: [...prev.images, ...newImages] // Ghép các ảnh mới vào ảnh đã có
-        }));
     };
-    
 
     const handleSave = async () => {
-        // Kiểm tra xem các trường bắt buộc đã được thiết lập
         const isValid = formData.images.every(image => image.url) && formData.status;
 
         if (!isValid) {
@@ -309,13 +187,61 @@ const EditPost = () => {
             return;
         }
 
+        // Chuẩn bị dữ liệu gửi lên server
+        const updatedPost = {
+            ...post,
+            title: formData.title,
+            briefInfo: formData.briefInfo,
+            categoryId: formData.categoryId,
+            isFeatured: formData.isFeatured,
+            status: formData.status,
+            contents: formData.contents.map(content => ({
+                ...content,
+                id: Number(content.id) || 0
+            })),
+            images: formData.images.map(image => ({
+                ...image,
+                id: Number(image.id) || 0
+            }))
+        };
+
         try {
-            await fetchEditPost(id, { ...formData });
+            await fetchEditPost(id, updatedPost);
             navigate(`/moderator/home/post-for-moderator/${id}`);
         } catch (err) {
             console.error(err);
             setError('Không thể cập nhật bài viết.');
         }
+    };
+
+    const handleAddContent = () => {
+        // Lấy displayOrder lớn nhất từ cả ảnh và content hiện có
+        const maxOrder = getMaxDisplayOrder(formData.images, formData.contents);
+
+        const newContent = {
+            displayOrder: maxOrder + 1,
+            content: ''
+        };
+
+        setFormData(prev => ({
+            ...prev,
+            contents: [...prev.contents, newContent]
+        }));
+    };
+
+    const handleAddImage = (imageUrl) => {
+        // Lấy displayOrder lớn nhất từ cả ảnh và content hiện có
+        const maxOrder = getMaxDisplayOrder(formData.images, formData.contents);
+
+        const newImage = {
+            displayOrder: maxOrder + 1,
+            url: imageUrl
+        };
+
+        setFormData(prev => ({
+            ...prev,
+            images: [...prev.images, newImage]
+        }));
     };
 
     if (loading) {
@@ -384,7 +310,7 @@ const EditPost = () => {
                     {formData.contents.map((content, index) => (
                         <div key={index} style={{ marginBottom: '20px' }}>
                             <Typography variant="body2" color="text.secondary">
-                                Order: 
+                                Order:
                                 <TextField
                                     type="number"
                                     value={content.displayOrder}
@@ -401,14 +327,27 @@ const EditPost = () => {
                             />
                         </div>
                     ))}
-                    <Typography variant="body2" color="text.secondary" paragraph>
-                        Hình ảnh:
-                    </Typography>
-                    <input type="file" multiple onChange={handleImageUpload} />
+                    {/* <Button variant="contained" onClick={handleAddContent}>Thêm Nội Dung</Button>
+                    <Button variant="contained" component="label">Thêm Ảnh
+                        <input type="file" multiple hidden onChange={handleImageUpload} />
+                    </Button> */}
+                    <Tooltip title="Thêm Nội Dung">
+                        <IconButton onClick={handleAddContent}>
+                            <AddIcon />
+                        </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Thêm Ảnh">
+                        <IconButton component="label">
+                            <CloudUploadIcon />
+                            <input type="file" multiple hidden onChange={handleImageUpload} />
+                        </IconButton>
+                    </Tooltip>
+
                     {formData.images.map((image, index) => (
                         <div key={index} style={{ marginBottom: '20px' }}>
                             <Typography variant="body2" color="text.secondary">
-                                Order: 
+                                Order:
                                 <TextField
                                     type="number"
                                     value={image.displayOrder}
