@@ -24,7 +24,23 @@ export const fetchAllPosts = async () => {
     }
 };
 //fetch post by id
+export const fetchPostById = async (id) => {
+    try {
+        const response = await fetch(`https://localhost:7043/api/Post/GetPost/GetPost/${id}`);
 
+        // Kiểm tra xem phản hồi có thành công hay không
+        if (!response.ok) {
+            throw new Error('Lỗi khi tải bài viết: ' + response.statusText);
+        }
+
+        // Chuyển đổi phản hồi thành JSON
+        const data = await response.json();
+        return data; // Trả về dữ liệu bài viết
+    } catch (error) {
+        console.error('Có lỗi xảy ra:', error);
+        throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+    }
+};
 //add post
 export const fetchAddPost = async (postData) => {
     const url = "https://localhost:7043/api/Post/AddPost/AddPost";
