@@ -188,45 +188,7 @@ namespace BE.Controllers.Expert
 
             return Ok(await GetQuizById(quizId));
         }
-
-        //[HttpDelete("DeleteQuiz/{id}")]
-        //public async Task<IActionResult> DeleteQuiz(int id)
-        //{
-        //    using var transaction = await _context.Database.BeginTransactionAsync();
-
-        //    try
-        //    {
-        //        var quiz = await _context.Quizzes
-        //            .Include(q => q.Questions)
-        //            .ThenInclude(q => q.AnswerOptions)
-        //            .FirstOrDefaultAsync(q => q.Id == id);
-
-        //        if (quiz == null)
-        //        {
-        //            return NotFound("Quiz not found.");
-        //        }
-
-        //        foreach (var question in quiz.Questions)
-        //        {
-        //            _context.AnswerOptions.RemoveRange(question.AnswerOptions);
-        //        }
-
-        //        _context.Questions.RemoveRange(quiz.Questions);
-
-        //        _context.Quizzes.Remove(quiz);
-
-        //        await _context.SaveChangesAsync();
-        //        await transaction.CommitAsync();
-
-        //        return NoContent();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await transaction.RollbackAsync();
-        //        return StatusCode(500, $"An error occurred while deleting the quiz: {ex.Message}");
-        //    }
-        //}
-
+      
         [HttpGet("GetQuizzesByExpert/{expertId}")]
         public async Task<ActionResult<IEnumerable<QuizDto>>> GetQuizzesByExpert(int expertId)
         {
