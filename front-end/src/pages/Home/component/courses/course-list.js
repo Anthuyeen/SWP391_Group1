@@ -11,9 +11,11 @@ import {
 } from '@mui/material';
 import Navbar from '../../../../layouts/navbar';
 import Footer from '../../../../layouts/footer';
+import { useNavigate } from 'react-router-dom';
 
 const CourseList = () => {
     const [courses, setCourses] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadCourses = async () => {
@@ -26,6 +28,10 @@ const CourseList = () => {
         };
         loadCourses();
     }, []);
+
+    const handleCourseClick = (courseId) => {
+        navigate(`/course/${courseId}`);
+    };
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -46,7 +52,9 @@ const CourseList = () => {
                                             height="140"
                                             image={course.thumbnail || 'https://via.placeholder.com/300x140?text=No+Image'}
                                             alt={course.name}
-                                            sx={{ objectFit: 'cover' }}
+                                            sx={{ objectFit: 'cover', cursor: 'pointer' }}
+                                            onClick={() => handleCourseClick(course.id)}
+
                                         />
                                         <CardContent sx={{ flexGrow: 1 }}>
                                             <Typography variant="h6" component="h2" gutterBottom>

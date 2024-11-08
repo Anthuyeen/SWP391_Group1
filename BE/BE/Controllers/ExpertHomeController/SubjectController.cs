@@ -247,7 +247,8 @@ namespace BE.Controllers.Expert
                 {
                     Id = q.Id,
                     Name = q.Name,
-                    DurationMinutes = q.DurationMinutes
+                    DurationMinutes = q.DurationMinutes,
+                    Status = q.Status,
                 }).ToList(),
 
                 PricePackages = subject.PricePackages.Select(p => new PricePackageSummaryDto

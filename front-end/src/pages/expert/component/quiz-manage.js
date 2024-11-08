@@ -1,37 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  MenuItem,
-  IconButton,
-  Select,
-  InputLabel,
-  FormControl,
-  Box,
-} from "@mui/material";
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogActions, DialogContent, DialogTitle, TextField, MenuItem, IconButton, Select, InputLabel, FormControl, Box, } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoIcon from "@mui/icons-material/Info";
 import { red } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
-import {
-  fetchQuizzesByExpert,
-  addQuiz,
-  editQuiz,
-  deleteQuiz,
-} from "../../../service/quiz";
-import { fetchSubjectsByExpert } from "../../../service/quiz";
+import { fetchQuizzesByExpert, addQuiz, editQuiz, } from "../../../service/quiz";
+import { fetchSubjectsByExpert, fetchEditQuizStatus } from "../../../service/quiz";
 import { fetchChaptersBySubjectId } from "../../../service/chapter";
 
 const QuizManage = () => {
@@ -137,14 +112,16 @@ const QuizManage = () => {
     closeModal();
   };
 
-  const handleDelete = async (id) => {
+  const handleStatusToggle = async (quiz) => {
     try {
-      await deleteQuiz(id);
-      await loadQuizzes();
+      const newStatus = quiz.status === "Published" ? "Draft" : "Published";
+      await fetchEditQuizStatus(quiz.id, newStatus);
+      await loadQuizzes(); // Tải lại danh sách quiz sau khi đổi trạng thái
     } catch (error) {
-      console.error("Failed to delete quiz", error.message);
+      console.error("Failed to update quiz status", error);
     }
   };
+
 
   return (
     <Box sx={{ padding: 3 }}>
@@ -185,7 +162,10 @@ const QuizManage = () => {
                   <IconButton onClick={() => openModal(q)}>
                     <EditIcon />
                   </IconButton>
-                  <IconButton sx={{ color: red[500] }} onClick={() => handleDelete(q.id)}>
+                  <IconButton
+                    sx={{ color: q.status === "Draft" ? red[500] : "gray" }}
+                    onClick={() => handleStatusToggle(q)}
+                  >
                     <DeleteIcon />
                   </IconButton>
                   <IconButton

@@ -404,4 +404,24 @@ export const fetchImportQuestions = async (quizId, file) => {
       throw error; // Ném lỗi để xử lý ở component gọi hàm
   }
 };
+//set status quiz
+export const fetchEditQuizStatus = async (quizId, status) => {
+  try {
+      const response = await fetch(`https://localhost:7043/api/Quiz/EditQuizStatus/${quizId}/status`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      });
 
+      if (!response.ok) {
+          throw new Error(`Failed to edit quiz status: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data;
+  } catch (error) {
+      console.error('Error:', error);
+      throw error;
+  }
+};

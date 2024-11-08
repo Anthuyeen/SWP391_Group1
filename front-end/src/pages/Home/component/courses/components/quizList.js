@@ -8,6 +8,7 @@ export const QuizList = ({ quizzes, navigate }) => {
     const handleQuizDetailNavigate = (quizId) => {
         navigate(`/quiz/${quizId}`);
     };
+    const publishedQuizzes = quizzes?.filter(quiz => quiz.status === "Published") || [];
 
     return (
         <>
@@ -21,9 +22,9 @@ export const QuizList = ({ quizzes, navigate }) => {
                     <ArrowForwardIcon />
                 </IconButton>
             </Typography>
-            {quizzes?.length > 0 ? (
+            {publishedQuizzes.length > 0 ?(
                 <List>
-                    {quizzes.map((quiz, index) => (
+                    {publishedQuizzes.map((quiz, index) => (
                         <ListItem key={index} secondaryAction={
                             <IconButton
                                 edge="end"
