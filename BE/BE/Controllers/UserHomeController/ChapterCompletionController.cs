@@ -16,25 +16,7 @@ namespace BE.Controllers.UserHomeController
         {
             _context = context;
         }
-
-        // POST: api/ChapterCompletion
-        //[HttpPost]
-        //public async Task<IActionResult> CompleteChapter(CompleteChapterDto completeChapterDto)
-        //{
-        //    var chapterCompletion = new ChapterCompletion
-        //    {
-        //        UserId = completeChapterDto.UserId,
-        //        ChapterId = completeChapterDto.ChapterId,
-        //        SubjectId = completeChapterDto.SubjectId,
-        //        CompletionDate = completeChapterDto.CompletionDate,
-        //        Status = completeChapterDto.Status
-        //    };
-
-        //    _context.ChapterCompletions.Add(chapterCompletion);
-        //    await _context.SaveChangesAsync();
-
-        //    return Ok(chapterCompletion);
-        //}
+       
         [HttpPost]
         public async Task<IActionResult> CompleteChapter(CompleteChapterDto completeChapterDto)
         {
