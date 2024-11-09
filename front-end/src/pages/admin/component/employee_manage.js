@@ -50,7 +50,7 @@ const Employee = () => {
             password: '',
             mobile: '',
             gender: '',
-            avatar: '', // Reset avatar
+            avatar: '',
             role: 'Teacher',
             status: 'Active',
         });
@@ -82,13 +82,6 @@ const Employee = () => {
         if (!emailRegex.test(newUser.email)) {
             errors.email = 'Email không hợp lệ';
         }
-
-        // Validate password
-        // const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
-        // if (!passwordRegex.test(newUser.password)) {
-        //     errors.password =
-        //         'Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa và số';
-        // }
 
         // Check required fields
         if (!newUser.firstName) errors.firstName = 'Họ là bắt buộc';
