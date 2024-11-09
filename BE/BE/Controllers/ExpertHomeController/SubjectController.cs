@@ -12,7 +12,7 @@ namespace BE.Controllers.Expert
     public class SubjectController : ControllerBase
     {
         private readonly OnlineLearningSystemContext _context;
-        private readonly List<string> validStatuses = new() { "Active", "Inactive", "Draft" };
+        private readonly List<string> validStatuses = new() { "Active", "Inactive", "Draft", "Denied" };
 
         public SubjectController(OnlineLearningSystemContext context)
         {
