@@ -3,7 +3,6 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, T
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { fetchAllSubjects } from '../../../service/subject';
 import { fetchSubjectsByOwner } from '../../../service/subject';
 import { fetchCategories } from '../../../service/subject';
 import { createSubject } from '../../../service/subject';
@@ -26,6 +25,14 @@ const SubjectManage = () => {
     ownerId: localStorage.getItem('id'), // Fetch from local storage
     description: ''
   });
+  const [pricePackages, setPricePackages] = useState([{
+    name: '',
+    durationMonths: 0,
+    listPrice: 0,
+    salePrice: 0,
+    description: '',
+    status: 'Active'
+  }]);
   const [categories, setCategories] = useState([]);
   const ownerId = localStorage.getItem('id'); // Lấy ID của người dùng từ localStorage
   const [errors, setErrors] = useState({
@@ -89,28 +96,28 @@ const SubjectManage = () => {
   const handleCreateSubject = async () => {
     // Kiểm tra lỗi
     let validationErrors = {};
-
+  
     if (!newSubject.name.trim()) {
       validationErrors.name = "Name is required.";
     }
-
+  
     if (!imageFile) {
       validationErrors.thumbnail = "Thumbnail is required.";
     }
-
+  
     if (!newSubject.categoryId) {
       validationErrors.categoryId = "Category is required.";
     }
-
+  
     if (!newSubject.description.trim()) {
       validationErrors.description = "Description is required.";
     }
-
+  
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-
+  
     try {
       // Upload image trước khi tạo subject
       const uploadedImage = await uploadImage(imageFile); // Gọi hàm upload ảnh
@@ -118,43 +125,42 @@ const SubjectManage = () => {
         ...newSubject,
         thumbnail: uploadedImage.url, // URL trả về từ API uploadImage
         status: 'Active',
+        pricePackages: pricePackages // Thêm pricePackages vào request
       };
-
+  
       const createdSubject = await createSubject(subjectToCreate);
-
+  
       // Cập nhật danh sách subjects bằng cách thêm subject mới
       setSubjects((prevSubjects) => [...prevSubjects, createdSubject]);
-
+  
       // Đóng dialog sau khi tạo thành công
       window.location.reload();
-
+  
       handleCloseCreate();
     } catch (error) {
       console.error('Error creating subject:', error);
       setErrors({ apiError: error.message });
     }
   };
-
-
-
+  
 
   const handleEditSubject = async () => {
     if (!newSubject.name || !newSubject.categoryId || !newSubject.description) {
       alert("All fields must be filled!");
       return;
     }
-  
+
     try {
       let updatedSubject = { ...newSubject };
-  
+
       // Nếu có ảnh mới, upload ảnh
       if (imageFileEdit) {
         const uploadedImage = await uploadImage(imageFileEdit); // Gọi hàm upload ảnh
         updatedSubject.thumbnail = uploadedImage.url; // Cập nhật URL ảnh
       }
-  
+
       await editSubject(selectedSubject.id, updatedSubject);
-  
+
       // Cập nhật danh sách subjects sau khi chỉnh sửa
       setSubjects(subjects.map((subject) =>
         subject.id === selectedSubject.id ? { ...subject, ...updatedSubject } : subject
@@ -165,8 +171,6 @@ const SubjectManage = () => {
       alert('There was an error editing the subject. Please try again.');
     }
   };
-  
-
 
   const handleDeleteSubject = async () => {
     try {
@@ -187,7 +191,7 @@ const SubjectManage = () => {
       <Table>
         <TableHead>
           <TableRow>
-          <TableCell>ID</TableCell>
+            <TableCell>ID</TableCell>
             <TableCell>Name</TableCell>
             <TableCell>Thumbnail</TableCell>
             <TableCell>Category</TableCell>
@@ -199,44 +203,38 @@ const SubjectManage = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-  {subjects.map((subject, index) => (
-    <TableRow key={index}>
-      {/* ID ảo tự tăng từ 1 */}
-      <TableCell>{index + 1}</TableCell> 
-      <TableCell>{subject.name}</TableCell>
-      <TableCell>
-        {subject.thumbnail ? (
-          <img 
-            src={subject.thumbnail} 
-            alt={subject.name} 
-            style={{ width: '200px', height: '110px', objectFit: 'cover' }} 
-          />
-        ) : (
-          'No Image'
-        )}
-      </TableCell>
-      <TableCell>{subject.categoryName}</TableCell>
-      <TableCell>{subject.isFeatured ? 'Yes' : 'No'}</TableCell>
-      <TableCell>{subject.description}</TableCell>
-      <TableCell>{subject.status}</TableCell>
-      <TableCell>
-        <IconButton onClick={() => handleOpenEdit(subject)}>
-          <EditIcon />
-        </IconButton>
-        <IconButton onClick={() => handleOpenDelete(subject)}>
-          <DeleteIcon />
-        </IconButton>
-      </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
-
-
-
-
-
+          {subjects.map((subject, index) => (
+            <TableRow key={index}>
+              {/* ID ảo tự tăng từ 1 */}
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>{subject.name}</TableCell>
+              <TableCell>
+                {subject.thumbnail ? (
+                  <img
+                    src={subject.thumbnail}
+                    alt={subject.name}
+                    style={{ width: '200px', height: '110px', objectFit: 'cover' }}
+                  />
+                ) : (
+                  'No Image'
+                )}
+              </TableCell>
+              <TableCell>{subject.categoryName}</TableCell>
+              <TableCell>{subject.isFeatured ? 'Yes' : 'No'}</TableCell>
+              <TableCell>{subject.description}</TableCell>
+              <TableCell>{subject.status}</TableCell>
+              <TableCell>
+                <IconButton onClick={() => handleOpenEdit(subject)}>
+                  <EditIcon />
+                </IconButton>
+                <IconButton onClick={() => handleOpenDelete(subject)}>
+                  <DeleteIcon />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
       </Table>
-
       {/* Create Subject Dialog */}
       <Dialog fullScreen open={openCreate} onClose={handleCloseCreate}>
         <DialogTitle>Create New Subject</DialogTitle>
@@ -284,6 +282,90 @@ const SubjectManage = () => {
             error={!!errors.description}
             helperText={errors.description}
           />
+          {/* Price Package fields */}
+          <h3>Price Packages</h3>
+          {pricePackages.map((pkg, index) => (
+            <div key={index}>
+              <TextField
+                margin="dense"
+                label={`Package Name ${index + 1}`}
+                name={`name-${index}`}
+                fullWidth
+                value={pkg.name}
+                onChange={(e) => {
+                  const newPackages = [...pricePackages];
+                  newPackages[index].name = e.target.value;
+                  setPricePackages(newPackages);
+                }}
+              />
+              <TextField
+                margin="dense"
+                label={`Duration (Months) ${index + 1}`}
+                name={`durationMonths-${index}`}
+                type="number"
+                fullWidth
+                value={pkg.durationMonths}
+                onChange={(e) => {
+                  const newPackages = [...pricePackages];
+                  newPackages[index].durationMonths = e.target.value;
+                  setPricePackages(newPackages);
+                }}
+              />
+              <TextField
+                margin="dense"
+                label={`List Price ${index + 1}`}
+                name={`listPrice-${index}`}
+                type="number"
+                fullWidth
+                value={pkg.listPrice}
+                onChange={(e) => {
+                  const newPackages = [...pricePackages];
+                  newPackages[index].listPrice = e.target.value;
+                  setPricePackages(newPackages);
+                }}
+              />
+              <TextField
+                margin="dense"
+                label={`Sale Price ${index + 1}`}
+                name={`salePrice-${index}`}
+                type="number"
+                fullWidth
+                value={pkg.salePrice}
+                onChange={(e) => {
+                  const newPackages = [...pricePackages];
+                  newPackages[index].salePrice = e.target.value;
+                  setPricePackages(newPackages);
+                }}
+              />
+              <TextField
+                margin="dense"
+                label={`Description ${index + 1}`}
+                name={`description-${index}`}
+                fullWidth
+                value={pkg.description}
+                onChange={(e) => {
+                  const newPackages = [...pricePackages];
+                  newPackages[index].description = e.target.value;
+                  setPricePackages(newPackages);
+                }}
+              />
+              
+            </div>
+          ))}
+          <Button
+            onClick={() => setPricePackages([...pricePackages, {
+              name: '',
+              durationMonths: 0,
+              listPrice: 0,
+              salePrice: 0,
+              description: '',
+              status: 'Active'
+            }])}
+            color="primary"
+          >
+            Add Price Package
+          </Button>
+
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseCreate} color="secondary">Cancel</Button>
@@ -334,8 +416,6 @@ const SubjectManage = () => {
           <Button onClick={handleEditSubject} color="primary">Edit</Button> {/* Thay đổi nhãn thành "Edit" */}
         </DialogActions>
       </Dialog>
-
-
       {/* Delete Confirmation Dialog */}
       <Dialog open={openDelete} onClose={handleCloseDelete}>
         <DialogTitle>Confirm Deletion</DialogTitle>

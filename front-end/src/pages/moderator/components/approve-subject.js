@@ -131,7 +131,7 @@ const ApproveSubject = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredSubjects.slice(0, 5).map((subject) => (
+                        {filteredSubjects.map((subject) => (
                             <TableRow key={subject.id} onClick={() => handleRowClick(subject.id)} style={{ cursor: 'pointer' }}>
                                 <TableCell>{subject.name}</TableCell>
                                 <TableCell>{subject.categoryName}</TableCell>
