@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { TextField, Typography, Container, Button, Box } from '@mui/material';
+import { TextField, Typography, Container, Button, Box, InputAdornment, IconButton } from '@mui/material';
 import { fetchUserById, updateUser } from '../../../service/profile-manage'; // Cập nhật đường dẫn
 import { uploadImage } from '../../../service/subject'
-
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const ManageProfile = () => {
     const [user, setUser] = useState(null);
@@ -10,6 +11,7 @@ const ManageProfile = () => {
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const userId = localStorage.getItem("id");
 
@@ -64,6 +66,10 @@ const ManageProfile = () => {
                 setError('Không thể tải ảnh lên.');
             }
         }
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword((prevState) => !prevState); // Chuyển trạng thái ẩn/hiện mật khẩu
     };
 
     if (loading) return <Typography variant="body1">Đang tải...</Typography>;
@@ -150,6 +156,27 @@ const ManageProfile = () => {
                             onChange={handleChange}
                             InputProps={{
                                 readOnly: !isEditing,
+                            }}
+                        />
+                        <TextField
+                            label="Mật khẩu"
+                            name="password"
+                            type={showPassword ? 'text' : 'password'} // Điều chỉnh kiểu input
+                            value={user.password || ''}
+                            fullWidth
+                            margin="normal"
+                            onChange={handleChange}
+                            InputProps={{
+                                readOnly: !isEditing,
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            onClick={togglePasswordVisibility}
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
                             }}
                         />
                         <Box display="flex" alignItems="center" justifyContent="flex-end">

@@ -37,7 +37,8 @@ namespace BE.Controllers.UserHomeController
                 Email = user.Email,
                 Mobile = user.Mobile,
                 Gender = user.Gender,
-                Avatar = user.Avatar
+                Avatar = user.Avatar,
+                Password = user.Password
             };
 
             return Ok(userDto);
