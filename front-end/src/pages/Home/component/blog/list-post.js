@@ -73,7 +73,7 @@ const ListPost = () => {
     return (
         <>
             <Navbar />
-            <Box sx={{ maxWidth: 'lg', mx: 'auto', mt: 4, px: 2 }}>
+            <Box sx={{ maxWidth: 'lg', mx: 'auto', mt: 4, px: 2, minHeight: 'calc(100vh - 100px)' }}>
                 <Autocomplete
                     freeSolo
                     options={posts.map((post) => post.title)}

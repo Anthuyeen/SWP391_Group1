@@ -48,7 +48,7 @@ const PostDetail = () => {
     return (
         <>
             <Navbar />
-            <Box sx={{ maxWidth: 'lg', mx: 'auto', mt: 4, px: 2 }}>
+            <Box sx={{ maxWidth: 'lg', mx: 'auto', mt: 4, px: 2, minHeight: 'calc(100vh - 100px)' }}>
                 <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
                     {post.title}
                 </Typography>

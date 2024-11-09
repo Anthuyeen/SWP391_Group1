@@ -56,7 +56,7 @@ const ExpertDetail = () => {
     return (
         <>
             <Navbar />
-            <Container maxWidth="md" sx={{ mt: 4 }}>
+            <Container maxWidth="md" sx={{ mt: 4, minHeight: 'calc(100vh - 100px)' }}>
                 <Typography variant="h4" gutterBottom>Expert Detail</Typography>
 
                 <Grid container spacing={2} alignItems="center">
