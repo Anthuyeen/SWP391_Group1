@@ -96,10 +96,19 @@ const LessonLearn = () => {
       const userId = localStorage.getItem('id');
       await fetchLessonCompletion(userId, currentLesson.id);
       console.log("Lesson completed!");
+  
+      // Cập nhật lại danh sách bài học đã hoàn thành
+      setCompletedLessons((prevCompletedLessons) => {
+        // Nếu bài học đã có trong danh sách thì không thêm vào nữa
+        if (!prevCompletedLessons.includes(currentLesson.id)) {
+          return [...prevCompletedLessons, currentLesson.id];
+        }
+        return prevCompletedLessons;
+      });
     } catch (error) {
       console.error("Error recording lesson completion:", error);
     }
-  };
+  };  
 
   return (
     <>

@@ -82,6 +82,7 @@ export const useCourseData = (courseId, isLoggedIn) => {
                 if (status) {
                     console.log("Subject completed successfully:", certificate);
                     // Có thể thêm logic để cập nhật trạng thái hoàn thành ở đây nếu cần
+                    setProgress(true);
                 } else {
                     console.error("Failed to complete subject");
                 }
