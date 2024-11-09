@@ -60,7 +60,7 @@ const PostDetail = () => {
                         <Card key={index} sx={{ mb: 2, borderRadius: 2, overflow: 'hidden' }}>
                             <CardMedia
                                 component="img"
-                                height="300"
+                                sx={{ width: '100%', height: 'auto' }}
                                 image={item.content}
                                 alt={post.title}
                             />
