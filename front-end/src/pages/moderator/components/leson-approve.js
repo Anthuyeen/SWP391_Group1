@@ -61,13 +61,13 @@ const LessonApprove = () => {
             const matchesStatus = status ? lesson.status === status : true;
             return matchesSearchTerm && matchesStatus;
         });
-        setFilteredLessons(filtered);
+        setFilteredLessons(sortLessonsByStatus(filtered));
     };
 
     const handleLessonStatusChange = async (id, newStatus) => {
         try {
             await fetchUpdateLessonStatus(id, newStatus);
-            
+
             // Cập nhật cả lessons và filteredLessons
             const updatedLessons = lessons.map((lesson) =>
                 lesson.id === id ? { ...lesson, status: newStatus } : lesson
@@ -77,7 +77,14 @@ const LessonApprove = () => {
             console.error('Error updating lesson status:', error);
         }
     };
-    
+
+    const sortLessonsByStatus = (lessons) => {
+        const statusOrder = ['Draft', 'Denied', 'Inactive', 'Active']; // Đặt thứ tự mong muốn
+        return lessons.sort((a, b) => {
+            return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+        });
+    };
+
     if (loading) {
         return <CircularProgress />;
     }
@@ -107,6 +114,7 @@ const LessonApprove = () => {
                         <MenuItem value="Active">Active</MenuItem>
                         <MenuItem value="Draft">Draft</MenuItem>
                         <MenuItem value="Inactive">Inactive</MenuItem>
+                        <MenuItem value="Denied">Denied</MenuItem>
                     </Select>
                 </FormControl>
             </div>
@@ -121,7 +129,7 @@ const LessonApprove = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredLessons.slice(0, 5).map((lesson) => (
+                        {filteredLessons.map((lesson) => (
                             <TableRow key={lesson.id}>
                                 <TableCell>{lesson.name}</TableCell>
                                 <TableCell>{lesson.content}</TableCell>
@@ -135,6 +143,7 @@ const LessonApprove = () => {
                                             <MenuItem value="Active">Active</MenuItem>
                                             <MenuItem value="Draft">Draft</MenuItem>
                                             <MenuItem value="Inactive">Inactive</MenuItem>
+                                            <MenuItem value="Denied">Denied</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </TableCell>

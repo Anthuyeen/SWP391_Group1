@@ -15,14 +15,14 @@ import { QuizList } from './components/quizList';
 const CourseOverview = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
-    
+
     // Custom hook xử lý authentication
-    const { 
-        isLoggedIn, 
-        openLogin, 
-        handleOpenLogin, 
+    const {
+        isLoggedIn,
+        openLogin,
+        handleOpenLogin,
         handleCloseLogin,
-        handleLogin 
+        handleLogin
     } = useAuth();
 
     // Custom hook xử lý course data
@@ -41,17 +41,19 @@ const CourseOverview = () => {
     if (error) return <div>{error}</div>;
     if (!course) return <div>Loading...</div>;
 
-    const totalChapters = course.chapters?.$values.length || 0;
-    const totalLessons = Object.values(groupedLessons || {}).reduce(
-        (acc, lessons) => acc + lessons.length,
-        0
-    );
+    const totalActiveChapters = (course.chapters?.$values || [])
+        .filter(chapter => chapter.status === "Active")
+        .length;
+
+    const totalActiveLessons = Object.values(groupedLessons || {})
+        .reduce((acc, lessons) => acc + lessons.filter(lesson => lesson.status === "Active").length, 0);
+
 
     return (
         <>
             <Navbar />
             <Box sx={{ maxWidth: 800, margin: 'auto', padding: 2, mb: 10, minHeight: 'calc(100vh - 100px)' }}>
-                <CourseHeader 
+                <CourseHeader
                     course={course}
                     isRegistered={isRegistered}
                     progress={progress}
@@ -67,30 +69,30 @@ const CourseOverview = () => {
                 <Typography variant="h6" gutterBottom>
                     Nội dung khóa học
                 </Typography>
-                
+
                 <Typography variant="body1" gutterBottom>
-                    {`${totalChapters} Chương | ${totalLessons} Bài học`}
+                    {`${totalActiveChapters} Chương | ${totalActiveLessons} Bài học`}
                 </Typography>
 
-                <ChapterList 
+                <ChapterList
                     chapters={course.chapters?.$values}
                     groupedLessons={groupedLessons}
                     chapterProgress={chapterProgress}
                     completedLessons={completedLessons}
                 />
 
-                <QuizList 
+                <QuizList
                     quizzes={course.quizzes?.$values}
                     navigate={navigate}
                 />
             </Box>
-            
-            <LoginDialog 
+
+            <LoginDialog
                 open={openLogin}
                 onClose={handleCloseLogin}
                 onLogin={handleLogin}
             />
-            
+
             <Footer />
         </>
     );

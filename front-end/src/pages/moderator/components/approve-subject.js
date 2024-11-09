@@ -44,25 +44,30 @@ const ApproveSubject = () => {
     if (loading) {
         return <CircularProgress />;
     }
-
-    const filteredSubjects = subjects.filter(subject => 
+    const filteredSubjects = subjects
+    .filter(subject =>
         subject.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (filterStatus === '' || subject.status === filterStatus)
-    );
+    )
+    .sort((a, b) => {
+        const statusOrder = ['Draft', 'Denied', 'Inactive', 'Active'];
+        return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+    });
 
     const clearSearch = () => {
         setSearchTerm('');
     };
 
-    const handleStatusChange = async (id, newStatus) => {
+    const handleStatusChange = async (id, newStatus, event) => {
+        event.preventDefault(); 
         const subjectToUpdate = subjects.find((subject) => subject.id === id);
-        
+
         if (subjectToUpdate) {
-            const subjectData = { 
+            const subjectData = {
                 ...subjectToUpdate,
                 status: newStatus,
             };
-    
+
             try {
                 await updateSubjectStatus(id, newStatus);
                 setSubjects((prevSubjects) =>
@@ -112,11 +117,12 @@ const ApproveSubject = () => {
                             <MenuItem value="Active">Active</MenuItem>
                             <MenuItem value="Draft">Draft</MenuItem>
                             <MenuItem value="Inactive">Inactive</MenuItem>
+                            <MenuItem value="Denied">Denied</MenuItem>
                         </Select>
                     </FormControl>
                 </Grid>
             </Grid>
-            
+
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
@@ -143,16 +149,17 @@ const ApproveSubject = () => {
                                         <img src={subject.thumbnail} alt={subject.name} width="50" />
                                     )}
                                 </TableCell>
-                                <TableCell>
+                                <TableCell onClick={(e) => e.stopPropagation()}>
                                     <FormControl variant="outlined" size="small">
                                         <InputLabel>Trạng thái</InputLabel>
                                         <Select
                                             value={subject.status}
-                                            onChange={(e) => handleStatusChange(subject.id, e.target.value)}
+                                            onChange={(e) => handleStatusChange(subject.id, e.target.value, e)}
                                         >
                                             <MenuItem value="Active">Active</MenuItem>
                                             <MenuItem value="Draft">Draft</MenuItem>
                                             <MenuItem value="Inactive">Inactive</MenuItem>
+                                            <MenuItem value="Denied">Denied</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </TableCell>

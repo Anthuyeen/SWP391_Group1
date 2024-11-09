@@ -93,16 +93,11 @@ const Navbar = () => {
                 const role = decodedToken.role;
                 const expirationTime = decodedToken.exp * 1000;
                 const nameAcc = decodedToken.Name;
-                const fname = decodedToken.FirstName;
-                const mname = decodedToken.MidName;
-                const lname = decodedToken.LastName;
-
 
                 localStorage.setItem('expirationTime', expirationTime.toString());
                 localStorage.setItem('role', role);
                 localStorage.setItem('id', userId);
                 localStorage.setItem('name', nameAcc);
-                localStorage.setItem('FullName', fname + " " + mname + " " + lname)
                 // Cập nhật trực tiếp trạng thái đăng nhập và tên người dùng
                 setIsLoggedIn(true);
                 setUserName(nameAcc);
