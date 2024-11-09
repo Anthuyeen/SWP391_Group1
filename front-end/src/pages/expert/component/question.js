@@ -222,7 +222,6 @@ const Question = () => {
             }
         }
     };
-    
 
     return (
         <Container sx={{ mt: 4 }}>
@@ -231,6 +230,7 @@ const Question = () => {
                     variant="standard"
                     value={quiz.name}
                     onChange={(e) => handleQuizChange('name', e.target.value)}
+                    fullWidth
                     InputProps={{
                         readOnly: !isEditing,
                         disableUnderline: true,
@@ -245,17 +245,17 @@ const Question = () => {
                         <AddIcon />
                     </IconButton>
                     <input
-    accept=".xlsx, .xls"
-    style={{ display: 'none' }}
-    id="import-file"
-    type="file"
-    onChange={handleFileChange}
-/>
-<label htmlFor="import-file">
-    <IconButton color="primary" component="span">
-        <CloudUploadIcon />
-    </IconButton>
-</label>
+                        accept=".xlsx, .xls"
+                        style={{ display: 'none' }}
+                        id="import-file"
+                        type="file"
+                        onChange={handleFileChange}
+                    />
+                    <label htmlFor="import-file">
+                        <IconButton color="primary" component="span">
+                            <CloudUploadIcon />
+                        </IconButton>
+                    </label>
                 </Box>
             </Box>
 
