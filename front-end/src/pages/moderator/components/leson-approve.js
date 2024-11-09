@@ -91,7 +91,6 @@ const LessonApprove = () => {
 
     return (
         <div>
-            <h2>Lessons for Subject ID: {subjectId}</h2>
             <div style={{ display: 'flex', marginBottom: '20px', alignItems: 'center' }}>
                 <Autocomplete
                     freeSolo
