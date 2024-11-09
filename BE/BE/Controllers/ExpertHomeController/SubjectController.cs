@@ -121,23 +121,84 @@ namespace BE.Controllers.Expert
                 return BadRequest("Invalid status. Allowed values are 'active' and 'inactive'.");
             }
 
-            var subject = new Subject
+            // Validate price packages
+            if (editSubjectDto.PricePackages == null || !editSubjectDto.PricePackages.Any())
             {
-                Name = editSubjectDto.Name,
-                Thumbnail = editSubjectDto.Thumbnail,
-                CategoryId = editSubjectDto.CategoryId,
-                IsFeatured = editSubjectDto.IsFeatured,
-                OwnerId = editSubjectDto.OwnerId,
-                Status = "Draft",
-                Description = editSubjectDto.Description
-            };
+                return BadRequest("At least one price package is required.");
+            }
 
-            _context.Subjects.Add(subject);
-            await _context.SaveChangesAsync();
+            foreach (var package in editSubjectDto.PricePackages)
+            {
+                if (string.IsNullOrWhiteSpace(package.Name))
+                {
+                    return BadRequest("Price package name cannot be null or empty.");
+                }
 
-            return NoContent();
+                if (package.DurationMonths <= 0)
+                {
+                    return BadRequest("Duration months must be greater than 0.");
+                }
+
+                if (package.ListPrice < 0 || package.SalePrice < 0)
+                {
+                    return BadRequest("Prices cannot be negative.");
+                }
+
+                if (package.SalePrice > package.ListPrice)
+                {
+                    return BadRequest("Sale price cannot be greater than list price.");
+                }
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Create the subject
+                var subject = new Subject
+                {
+                    Name = editSubjectDto.Name,
+                    Thumbnail = editSubjectDto.Thumbnail,
+                    CategoryId = editSubjectDto.CategoryId,
+                    IsFeatured = editSubjectDto.IsFeatured,
+                    OwnerId = editSubjectDto.OwnerId,
+                    Status = "Draft",
+                    Description = editSubjectDto.Description
+                };
+
+                _context.Subjects.Add(subject);
+                await _context.SaveChangesAsync();
+
+                // Create price packages
+                foreach (var packageDto in editSubjectDto.PricePackages)
+                {
+                    var pricePackage = new PricePackage
+                    {
+                        SubjectId = subject.Id,
+                        Name = packageDto.Name,
+                        DurationMonths = packageDto.DurationMonths,
+                        ListPrice = packageDto.ListPrice,
+                        SalePrice = packageDto.SalePrice,
+                        Description = packageDto.Description,
+                        Status = packageDto.Status
+                    };
+
+                    _context.PricePackages.Add(pricePackage);
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                // Return the created subject ID
+                return CreatedAtAction(nameof(GetSubjectById), new { id = subject.Id }, null);
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
-       
+
         private bool SubjectExists(int id)
         {
             return _context.Subjects.Any(e => e.Id == id);
