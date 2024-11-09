@@ -199,21 +199,7 @@ const Navbar = () => {
                         </Button>
                     </Box>
 
-                    <TextField
-                        sx={{ width: '30%', maxWidth: '300px', ml: 50 }} // Thêm marginLeft vào search bar
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon />
-                                </InputAdornment>
-                            ),
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <Button sx={{ minWidth: '40px', padding: 0 }}>×</Button>
-                                </InputAdornment>
-                            )
-                        }}
-                    />
+                
 
                     {isLoggedIn ? (
                         <div>
