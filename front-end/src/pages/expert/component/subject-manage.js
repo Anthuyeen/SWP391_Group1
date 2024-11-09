@@ -7,7 +7,7 @@ import { fetchSubjectsByOwner } from '../../../service/subject';
 import { fetchCategories } from '../../../service/subject';
 import { createSubject } from '../../../service/subject';
 import { editSubject } from '../../../service/subject';
-import { deleteSubject, uploadImage } from '../../../service/subject';
+import { deleteSubject, uploadImage, updateSubjectStatus } from '../../../service/subject';
 
 const SubjectManage = () => {
   const [subjects, setSubjects] = useState([]);
@@ -96,28 +96,28 @@ const SubjectManage = () => {
   const handleCreateSubject = async () => {
     // Kiểm tra lỗi
     let validationErrors = {};
-  
+
     if (!newSubject.name.trim()) {
       validationErrors.name = "Name is required.";
     }
-  
+
     if (!imageFile) {
       validationErrors.thumbnail = "Thumbnail is required.";
     }
-  
+
     if (!newSubject.categoryId) {
       validationErrors.categoryId = "Category is required.";
     }
-  
+
     if (!newSubject.description.trim()) {
       validationErrors.description = "Description is required.";
     }
-  
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-  
+
     try {
       // Upload image trước khi tạo subject
       const uploadedImage = await uploadImage(imageFile); // Gọi hàm upload ảnh
@@ -127,22 +127,22 @@ const SubjectManage = () => {
         status: 'Active',
         pricePackages: pricePackages // Thêm pricePackages vào request
       };
-  
+
       const createdSubject = await createSubject(subjectToCreate);
-  
+
       // Cập nhật danh sách subjects bằng cách thêm subject mới
       setSubjects((prevSubjects) => [...prevSubjects, createdSubject]);
-  
+
       // Đóng dialog sau khi tạo thành công
       window.location.reload();
-  
+
       handleCloseCreate();
     } catch (error) {
       console.error('Error creating subject:', error);
       setErrors({ apiError: error.message });
     }
   };
-  
+
 
   const handleEditSubject = async () => {
     if (!newSubject.name || !newSubject.categoryId || !newSubject.description) {
@@ -181,6 +181,25 @@ const SubjectManage = () => {
       console.error('Error deleting subject:', error);
     }
   };
+
+  const handleStatusToggle = async (subject) => {
+    const newStatus = subject.status === 'Active' ? 'Inactive' : 'Active';
+
+    try {
+      const result = await updateSubjectStatus(subject.id, newStatus);
+      if (result.success) {
+        // Cập nhật lại trạng thái của subject trong state
+        setSubjects(prevSubjects =>
+          prevSubjects.map(item =>
+            item.id === subject.id ? { ...item, status: newStatus } : item
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error updating subject status:', error);
+    }
+  };
+
 
   return (
     <div>
@@ -227,13 +246,23 @@ const SubjectManage = () => {
                 <IconButton onClick={() => handleOpenEdit(subject)}>
                   <EditIcon />
                 </IconButton>
-                <IconButton onClick={() => handleOpenDelete(subject)}>
-                  <DeleteIcon />
-                </IconButton>
+
+                {/* Chỉ hiển thị icon Delete nếu status không phải 'draft' */}
+                {subject.status !== 'Draft' && (
+                  <IconButton
+                    onClick={() => handleStatusToggle(subject)}
+                    style={{
+                      color: subject.status === 'Inactive' ? 'red' : 'gray', // Màu đỏ nếu Inactive, xám nếu Active
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                )}
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
+
       </Table>
       {/* Create Subject Dialog */}
       <Dialog fullScreen open={openCreate} onClose={handleCloseCreate}>
@@ -349,7 +378,7 @@ const SubjectManage = () => {
                   setPricePackages(newPackages);
                 }}
               />
-              
+
             </div>
           ))}
           <Button

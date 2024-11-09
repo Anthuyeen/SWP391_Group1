@@ -41,6 +41,7 @@ export const useAuth = () => {
 
                 setIsLoggedIn(true);
                 setOpenLogin(false);
+                window.location.reload();
             } catch (error) {
                 console.error('Đăng nhập thất bại:', error);
             }

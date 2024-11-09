@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -13,8 +13,22 @@ import CloseIcon from '@mui/icons-material/Close';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-export const LoginDialog = ({ open, onClose, onLogin, email, password, setEmail, setPassword, emailError, passwordError }) => {
-    const [showPassword, setShowPassword] = useState(false);
+export const LoginDialog = ({ 
+    open, 
+    onClose, 
+    onLogin, 
+    email,
+    setEmail,
+    password,
+    setPassword,
+    emailError,
+    passwordError 
+}) => {
+    const [showPassword, setShowPassword] = React.useState(false);
+
+    const handleLoginClick = () => {
+        onLogin();  // Không cần truyền email và password vì đã được quản lý ở useAuth
+    };
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -65,7 +79,7 @@ export const LoginDialog = ({ open, onClose, onLogin, email, password, setEmail,
                             color="warning"
                             fullWidth
                             sx={{ marginTop: 2 }}
-                            onClick={onLogin}
+                            onClick={handleLoginClick}
                         >
                             Đăng nhập
                         </Button>
