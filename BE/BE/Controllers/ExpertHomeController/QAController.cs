@@ -25,8 +25,29 @@ namespace BE.Controllers.Expert
                 return NotFound($"Quiz with ID {quizId} not found.");
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            // Validate questions and answers content before starting transaction
+            foreach (var questionDto in questionsWithAnswers)
+            {
+                if (string.IsNullOrEmpty(questionDto.Content))
+                {
+                    return BadRequest("Question content cannot be null or empty.");
+                }
 
+                if (questionDto.Answers == null || !questionDto.Answers.Any())
+                {
+                    return BadRequest($"Question '{questionDto.Content}' must have at least one answer.");
+                }
+
+                foreach (var answerDto in questionDto.Answers)
+                {
+                    if (string.IsNullOrEmpty(answerDto.Content))
+                    {
+                        return BadRequest($"Answer content for question '{questionDto.Content}' cannot be null or empty.");
+                    }
+                }
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 foreach (var questionDto in questionsWithAnswers)
@@ -38,7 +59,6 @@ namespace BE.Controllers.Expert
                         MediaUrl = questionDto.MediaUrl,
                         Status = questionDto.Status
                     };
-
                     _context.Questions.Add(question);
                     await _context.SaveChangesAsync();
 
@@ -51,10 +71,8 @@ namespace BE.Controllers.Expert
                             IsCorrect = answerDto.IsCorrect,
                             Status = answerDto.Status
                         };
-
                         _context.AnswerOptions.Add(answer);
                     }
-
                     await _context.SaveChangesAsync();
                 }
 
@@ -111,6 +129,26 @@ namespace BE.Controllers.Expert
         [HttpPut("EditQuestion/{questionId}")]
         public async Task<IActionResult> EditQuestion(int questionId, [FromBody] EditQuestionDto editQuestionDto)
         {
+            // Validate question content
+            if (string.IsNullOrEmpty(editQuestionDto.Content))
+            {
+                return BadRequest("Question content cannot be null or empty.");
+            }
+
+            // Validate answers
+            if (editQuestionDto.Answers == null || !editQuestionDto.Answers.Any())
+            {
+                return BadRequest("Question must have at least one answer.");
+            }
+
+            foreach (var answerDto in editQuestionDto.Answers)
+            {
+                if (string.IsNullOrEmpty(answerDto.Content))
+                {
+                    return BadRequest("Answer content cannot be null or empty.");
+                }
+            }
+
             var question = await _context.Questions
                 .Include(q => q.AnswerOptions)
                 .FirstOrDefaultAsync(q => q.Id == questionId);
@@ -124,20 +162,28 @@ namespace BE.Controllers.Expert
             try
             {
                 // Update question properties
-                question.Content = editQuestionDto.Content;
+                question.Content = editQuestionDto.Content.Trim();
                 question.MediaUrl = editQuestionDto.MediaUrl;
                 question.Status = editQuestionDto.Status;
 
                 // Get existing answers
                 var existingAnswers = question.AnswerOptions.ToDictionary(a => a.Id);
 
+                // Track if at least one answer is marked as correct
+                bool hasCorrectAnswer = false;
+
                 foreach (var answerDto in editQuestionDto.Answers)
                 {
+                    if (answerDto.IsCorrect)
+                    {
+                        hasCorrectAnswer = true;
+                    }
+
                     if (answerDto.Id.HasValue && existingAnswers.ContainsKey(answerDto.Id.Value))
                     {
                         // Update existing answer
                         var existingAnswer = existingAnswers[answerDto.Id.Value];
-                        existingAnswer.Content = answerDto.Content;
+                        existingAnswer.Content = answerDto.Content.Trim();
                         existingAnswer.IsCorrect = answerDto.IsCorrect;
                         existingAnswer.Status = answerDto.Status;
                         existingAnswers.Remove(answerDto.Id.Value);
@@ -148,12 +194,18 @@ namespace BE.Controllers.Expert
                         var newAnswer = new AnswerOption
                         {
                             QuestionId = questionId,
-                            Content = answerDto.Content,
+                            Content = answerDto.Content.Trim(),
                             IsCorrect = answerDto.IsCorrect,
                             Status = answerDto.Status
                         };
                         _context.AnswerOptions.Add(newAnswer);
                     }
+                }
+
+                // Validate that at least one answer is marked as correct
+                if (!hasCorrectAnswer)
+                {
+                    return BadRequest("At least one answer must be marked as correct.");
                 }
 
                 // Set status = false for answers not in the update list (soft delete)
