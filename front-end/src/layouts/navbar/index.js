@@ -199,7 +199,7 @@ const Navbar = () => {
                         </Button>
                     </Box>
 
-                
+
 
                     {isLoggedIn ? (
                         <div>
@@ -234,15 +234,37 @@ const Navbar = () => {
             <Box sx={{ height: '1px', backgroundColor: 'grey.500' }} />
 
             {/* Modal đăng nhập */}
-            <Dialog open={openLogin} onClose={handleCloseLogin} maxWidth="xs" fullWidth>
-                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    Đăng nhập
-                    <IconButton edge="end" color="inherit" onClick={handleCloseLogin}>
-                        <CloseIcon />
-                    </IconButton>
-                </DialogTitle>
-                <DialogContent>
-                    <Grid container spacing={2} direction="column">
+            <Dialog fullScreen open={openLogin} onClose={handleCloseLogin}>
+                <IconButton
+                    edge="end"
+                    color="inherit"
+                    onClick={handleCloseLogin}
+                    sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+                <DialogContent
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height: '100%',
+                    }}
+                >
+                    <Grid container spacing={2} direction="column" sx={{ maxWidth: 400, width: '100%' }}>
+                        <Grid item>
+                            <Typography
+                                variant="h5"
+                                component="h2"
+                                sx={{ textAlign: 'center', marginBottom: '1rem' }}
+                            >
+                                Đăng nhập
+                            </Typography>
+                        </Grid>
                         <Grid item>
                             <TextField
                                 label="Email, hoặc số điện thoại"
@@ -272,7 +294,7 @@ const Navbar = () => {
                                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
                                         </InputAdornment>
-                                    )
+                                    ),
                                 }}
                             />
                         </Grid>
