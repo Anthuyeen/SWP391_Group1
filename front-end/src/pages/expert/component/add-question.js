@@ -2,22 +2,32 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Container, TextField, Button, Checkbox, Box, Typography, DialogActions } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { addQuestionsToQuiz } from '../../../service/quiz'; // Đường dẫn đến file chứa hàm addQuestionsToQuiz
+import { addQuestionsToQuiz } from '../../../service/quiz';
 
 const AddQuestion = () => {
-    const { quizId } = useParams(); // Lấy quizId từ URL
+    const { quizId } = useParams();
     const navigate = useNavigate();
     const [newQuestion, setNewQuestion] = useState({
         content: '',
         mediaUrl: '',
-        status: 'Active', // Mặc định trạng thái là Active
+        status: 'Active',
         answers: [{ content: '', isCorrect: false }],
+    });
+
+    const [errors, setErrors] = useState({
+        content: '',
+        mediaUrl: '',
+        answers: []
     });
 
     const handleAddAnswer = () => {
         setNewQuestion((prev) => ({
             ...prev,
             answers: [...prev.answers, { content: '', isCorrect: false }],
+        }));
+        setErrors((prev) => ({
+            ...prev,
+            answers: [...prev.answers, '']
         }));
     };
 
@@ -38,10 +48,41 @@ const AddQuestion = () => {
     const handleDeleteAnswer = (index) => {
         const updatedAnswers = newQuestion.answers.filter((_, i) => i !== index);
         setNewQuestion((prev) => ({ ...prev, answers: updatedAnswers }));
+        setErrors((prev) => ({
+            ...prev,
+            answers: prev.answers.filter((_, i) => i !== index)
+        }));
     };
 
     const handleSubmit = async () => {
-        // Tạo mảng mới cho các câu hỏi
+        let hasError = false;
+        const newErrors = { content: '', mediaUrl: '', answers: [] };
+
+        if (!newQuestion.content.trim()) {
+            newErrors.content = 'Nội dung câu hỏi không được để trống';
+            hasError = true;
+        }
+
+        if (!newQuestion.mediaUrl.trim()) {
+            newErrors.mediaUrl = 'Media URL không được để trống';
+            hasError = true;
+        }
+
+        const answerErrors = newQuestion.answers.map(answer => {
+            if (!answer.content.trim()) {
+                hasError = true;
+                return 'Đáp án không được để trống';
+            }
+            return '';
+        });
+
+        newErrors.answers = answerErrors;
+        setErrors(newErrors);
+
+        if (hasError) {
+            return;
+        }
+
         const questionsToAdd = [
             {
                 content: newQuestion.content,
@@ -50,18 +91,17 @@ const AddQuestion = () => {
                 answers: newQuestion.answers.map(answer => ({
                     content: answer.content,
                     isCorrect: answer.isCorrect,
-                    status: answer.isCorrect // Nếu isCorrect là true, status cũng là true
+                    status: answer.isCorrect
                 })),
             },
         ];
 
         try {
-            const response = await addQuestionsToQuiz(quizId, questionsToAdd); // Gọi hàm thêm câu hỏi
+            const response = await addQuestionsToQuiz(quizId, questionsToAdd);
             console.log('Response from API:', response);
-            navigate(-1); // Điều hướng trở lại màn hình câu hỏi
+            navigate(-1);
         } catch (error) {
             console.error('Error adding questions to quiz:', error);
-            // Bạn có thể hiển thị thông báo lỗi cho người dùng ở đây
         }
     };
 
@@ -75,6 +115,9 @@ const AddQuestion = () => {
                 value={newQuestion.content}
                 onChange={(e) => setNewQuestion({ ...newQuestion, content: e.target.value })}
                 sx={{ mb: 2 }}
+                error={!!errors.content}
+                helperText={errors.content}
+                required
             />
             <TextField
                 label="Media URL"
@@ -83,6 +126,9 @@ const AddQuestion = () => {
                 value={newQuestion.mediaUrl}
                 onChange={(e) => setNewQuestion({ ...newQuestion, mediaUrl: e.target.value })}
                 sx={{ mb: 2 }}
+                error={!!errors.mediaUrl}
+                helperText={errors.mediaUrl}
+                required
             />
             <Typography variant="h6">Đáp án</Typography>
             {newQuestion.answers.map((answer, index) => (
@@ -97,6 +143,9 @@ const AddQuestion = () => {
                         value={answer.content}
                         onChange={(e) => handleAnswerChange(index, e.target.value)}
                         sx={{ mb: 2 }}
+                        error={!!errors.answers[index]}
+                        helperText={errors.answers[index]}
+                        required
                     />
                     <Button onClick={() => handleDeleteAnswer(index)} color="error">
                         <DeleteIcon />
