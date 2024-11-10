@@ -227,6 +227,9 @@ const LessonManager = () => {
             newStatus = 'Inactive';
         } else if (currentStatus === 'Inactive') {
             newStatus = 'Active';
+        }
+        else if (currentStatus === 'Denied') {
+            newStatus = 'Draft';
         } else {
             // Nếu trạng thái là 'draft', không làm gì
             return; 
