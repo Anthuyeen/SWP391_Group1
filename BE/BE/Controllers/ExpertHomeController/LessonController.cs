@@ -58,6 +58,11 @@ namespace BE.Controllers.Expert
                 return BadRequest("Name cannot be null or empty.");
             }
 
+            if (string.IsNullOrWhiteSpace(editLessonDto.Content))
+            {
+                return BadRequest("Content cannot be null or empty.");
+            }
+
             if (!validStatuses.Contains(editLessonDto.Status))
             {
                 return BadRequest("Invalid status. Allowed values are 'Active' , 'Inactive' and 'Draft'.");
@@ -100,6 +105,11 @@ namespace BE.Controllers.Expert
             if (string.IsNullOrWhiteSpace(editLessonDto.Name))
             {
                 return BadRequest("Name cannot be null or empty.");
+            }
+
+            if (string.IsNullOrWhiteSpace(editLessonDto.Content))
+            {
+                return BadRequest("Content cannot be null or empty.");
             }
 
             if (!validStatuses.Contains(editLessonDto.Status))
